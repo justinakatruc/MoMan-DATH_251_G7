@@ -28,9 +28,9 @@ export default function Sidebar() {
 
     return (
         <>
-            <div className='lg:hidden w-full h-[70px] flex items-center justify-between'>
-                <div className='w-1/5 h-[70px] bg-orange-950'>
-                    
+            <div className='lg:hidden w-full flex items-center justify-between flex-wrap py-2 px-1'>
+                <div className='h-full flex items-center'>
+                    <Image src="/logo.png" alt="Logo Icon" width={120} height={56} className='w-auto h-auto' />
                 </div>
                 <ul className='flex gap-x-[10px] md:gap-x-[20px] items-center pr-4'>
                     <li 
@@ -118,56 +118,56 @@ export default function Sidebar() {
                     </div>
                 </ul>
             </div>
-            <div className="hidden lg:flex lg:w-[260px] h-full md:bg-[#FBFDFF] flex-col items-center absolute left-0 top-0 overflow-y-auto">
-                <div className='w-full h-[70px] bg-orange-950 mb-4'>
-                    
+            <div className="hidden lg:flex lg:w-[260px] h-full md:bg-[#FBFDFF] flex-col items-center absolute left-0 top-0">
+                <div className='w-full h-[70px] flex items-center'>
+                    <Image src="/logo.png" alt="Menu Icon" width={155.7} height={70} className='w-[155.7px] h-full mx-auto' />
                 </div>
-                <div className='w-full flex flex-col flex-1'>
-                    <ul className='max-h-[300px] flex flex-col gap-y-[25px] pl-4 mb-8'>
+                <div className='w-full flex flex-col overflow-y-auto'>
+                    <ul className='flex flex-col gap-y-[8px] 2xl:gap-y-[20px] px-4 mb-3 2xl:mb-4 overflow-y-auto'>
                         <li className='w-full pl-[8px] pr-[4px] py-[4px] flex items-center cursor-pointer hover:bg-[#CFF0E7] hover:rounded-[10px]'>
-                            <Image src="/home.png" alt="Home Icon" width={36} height={36} className='mr-2' />
-                            <div className='text-[19px] font-bold dark:text-[rgb(23,23,23)]'>Home</div>
+                            <Image src="/home.png" alt="Home Icon" width={36} height={36} className='size-5 2xl:size-7 mr-2' />
+                            <div className='text-[15px] 2xl:text-[17px] font-bold dark:text-[rgb(23,23,23)]'>Home</div>
                         </li>
                         <li className='w-full pl-[8px] pr-[4px] py-[4px] flex items-center cursor-pointer hover:bg-[#CFF0E7] hover:rounded-[10px]'>
-                            <Image src="/category.png" alt="Category Icon" width={36} height={36} className='mr-2' />
-                            <div className='text-[19px] font-bold dark:text-[rgb(23,23,23)]'>Category</div>
+                            <Image src="/category.png" alt="Category Icon" width={36} height={36} className='size-5 2xl:size-7 mr-2' />
+                            <div className='text-[15px] 2xl:text-[17px] font-bold dark:text-[rgb(23,23,23)]'>Category</div>
                         </li>
                         <li className='w-full pl-[8px] pr-[4px] py-[4px] flex items-center cursor-pointer hover:bg-[#CFF0E7] hover:rounded-[10px]'>
-                            <Image src="/calendar.png" alt="Scheduler Icon" width={36} height={36} className='mr-2' />
-                            <div className='text-[19px] font-bold dark:text-[rgb(23,23,23)]'>Scheduler</div>
+                            <Image src="/calendar.png" alt="Scheduler Icon" width={36} height={36} className='size-5 xl:size-7 mr-2' />
+                            <div className='text-[15px] 2xl:text-[17px] font-bold dark:text-[rgb(23,23,23)]'>Scheduler</div>
                         </li>
                         <li className='w-full pl-[8px] pr-[4px] py-[4px] flex items-center cursor-pointer hover:bg-[#CFF0E7] hover:rounded-[10px]'>
-                            <Image src="/chart.png" alt="Report Icon" width={36} height={36} className='mr-2' />
-                            <div className='text-[19px] font-bold dark:text-[rgb(23,23,23)]'>Report</div>
+                            <Image src="/chart.png" alt="Report Icon" width={36} height={36} className='size-5 2xl:size-7 mr-2' />
+                            <div className='text-[15px] 2xl:text-[17px] font-bold dark:text-[rgb(23,23,23)]'>Report</div>
                         </li>
                     </ul>
-                    <div className='max-h-[265px] flex flex-col gap-y-2.5 pl-4 mb-8'>
-                        <div className='text-[26px] font-bold pl-2 dark:text-[rgb(23,23,23)]'>Expense</div>
-                        <ul className='flex flex-col gap-y-[25px] overflow-y-auto'>
+                    <div className='max-h-[120px] xl:max-h-[155px] flex flex-col gap-y-1.5 2xl:gap-y-2.5 pl-4 mb-3 2xl:mb-4'>
+                        <div className='text-[20px] xl:text-[22px] 2xl:text-[24px] font-bold pl-2 dark:text-[rgb(23,23,23)]'>Expense</div>
+                        <ul className='flex flex-col gap-y-[8px] 2xl:gap-y-[20px] overflow-y-auto'>
                             {expenses.map((category) => (
                                 <li key={category.id} className='w-full pl-[8px] pr-[4px] py-[4px] flex items-center cursor-pointer hover:bg-[#CFF0E7] hover:rounded-[10px]'>
-                                    <Image src={category.icon} alt="Money Icon" width={36} height={36} className='mr-2' />
-                                    <div className='text-[19px] font-bold dark:text-[rgb(23,23,23)]'>{category.name}</div>
+                                    <Image src={category.icon} alt="Money Icon" width={36} height={36} className='size-5 2xl:size-7 mr-2' />
+                                    <div className='text-[15px] 2xl:text-[17px] font-bold dark:text-[rgb(23,23,23)]'>{category.name}</div>
                                 </li>
                             ))}
                         </ul>
                     </div>
-                    <div className='max-h-[265px] flex flex-col gap-y-2.5 pl-4 mb-8'>
-                        <div className='text-[26px] font-bold pl-2 dark:text-[rgb(23,23,23)]'>Income</div>
-                        <ul className='flex flex-col gap-y-[25px] overflow-y-auto'>
+                    <div className='max-h-[120px] xl:max-h-[155px] flex flex-col gap-y-1.5 2xl:gap-y-2.5 pl-4 mb-3 2xl:mb-4'>
+                        <div className='text-[20px] xl:text-[22px] 2xl:text-[24px] font-bold pl-2 dark:text-[rgb(23,23,23)]'>Income</div>
+                        <ul className='flex flex-col gap-y-[8px] 2xl:gap-y-[20px] overflow-y-auto'>
                             {incomes.map((category) => (
                                 <li key={category.id} className='w-full pl-[8px] pr-[4px] py-[4px] flex items-center cursor-pointer hover:bg-[#CFF0E7] hover:rounded-[10px]'>
-                                    <Image src={category.icon} alt="Money Icon" width={36} height={36} className='mr-2' />
-                                    <div className='text-[19px] font-bold dark:text-[rgb(23,23,23)]'>{category.name}</div>
+                                    <Image src={category.icon} alt="Money Icon" width={36} height={36} className='size-5 2xl:size-7 mr-2' />
+                                    <div className='text-[15px] 2xl:text-[17px] font-bold dark:text-[rgb(23,23,23)]'>{category.name}</div>
                                 </li>
                             ))}
                         </ul>
                     </div>
-                    <div className='flex flex-1 justify-center items-end mb-8'>
-                        <button className='w-[150px] h-[60px] bg-[rgba(235,106,99,0.91)] hover:bg-[rgba(235,106,99,1)] cursor-pointer rounded-[20px] text-white font-semibold text-[20px]'>
-                            Log Out
-                        </button>
-                    </div>
+                </div>
+                <div className='flex flex-1 justify-center items-end mb-4'>
+                    <button className='w-[100px] xl:w-[120px] 2xl:w-[150px] h-[40px] xl:h-[45px] 2xl:h-[60px] bg-[rgba(235,106,99,0.91)] hover:bg-[rgba(235,106,99,1)] cursor-pointer rounded-[20px] text-white font-semibold text-[15px] xl:text-[17px] 2xl:text-[19px]'>
+                        Log Out
+                    </button>
                 </div>
             </div>
         </>
