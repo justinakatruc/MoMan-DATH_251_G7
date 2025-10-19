@@ -7,12 +7,13 @@ export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-
   return (
-    <div className="flex-1 flex justify-center items-center h-screen bg-[#F4F7FD]">
-      <div className="bg-white shadow-md rounded-2xl p-10 w-full max-w-lg">
-        <h1 className="text-3xl font-bold text-center text-black">Sign Up</h1>
-        <p className="text-gray-500 text-center mt-2">
+    <div className="flex-1 flex justify-center items-center min-h-screen bg-[#F4F7FD] px-4">
+      <div className="bg-white shadow-md rounded-2xl p-6 sm:p-8 md:p-10 w-full max-w-lg">
+        <h1 className="text-2xl sm:text-3xl font-bold text-center text-black">
+          Sign Up
+        </h1>
+        <p className="text-gray-500 text-center mt-2 text-sm sm:text-base">
           Create an account to unlock exclusive features.
         </p>
 
@@ -73,7 +74,7 @@ export default function SignupPage() {
           {/* Sign Up Button */}
           <button
             type="submit"
-            className="w-full bg-emerald-500 text-[#FBFDFF] py-3 rounded-lg font-semibold hover:bg-[#07B681] transition duration-200"
+            className="w-full bg-emerald-500 text-[#FBFDFF] py-2.5 sm:py-3 rounded-lg font-semibold hover:bg-[#07B681] transition duration-200"
           >
             Sign Up
           </button>
@@ -88,14 +89,16 @@ export default function SignupPage() {
           {/* Google Sign Up */}
           <button
             type="button"
-            className="w-full border border-gray-300 py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-100 transition duration-200"
+            className="w-full border border-gray-300 py-2.5 sm:py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-100 transition duration-200"
           >
             <img
               src="https://www.svgrepo.com/show/475656/google-color.svg"
               alt="Google"
               className="w-5 h-5"
             />
-            <span className="text-gray-700 font-medium">Sign Up with Google</span>
+            <span className="text-gray-700 font-medium text-sm sm:text-base">
+              Sign Up with Google
+            </span>
           </button>
         </form>
 
