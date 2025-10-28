@@ -1,5 +1,7 @@
 'use client';
 
+import Topbar from "@/app/components/Topbar";
+import { NativeSelect, NativeSelectOption } from "@/app/components/ui/native-select";
 import { useState } from "react";
 
 export default function Scheduler() {
@@ -118,20 +120,13 @@ export default function Scheduler() {
     return(
         <>
         {/* PC */}
-        <div className="hidden lg:block ml-64 min-h-screen bg-[#F4F7FD]">
-            <div className="space-y-4">
-
+        <div className="hidden lg:block min-h-screen bg-[#F4F7FD]">
+            <div className="space-y-4 flex flex-col">
                 {/* Header */}
-                <div className="flex flex-row justify-between items-top ml-16 mt-10 mr-6">
-                        <h1 className="text-4xl font-bold text-gray-800">Scheduler</h1> 
-                        <div className="flex flex-row space-x-4">
-                            <button className="w-16 h-16 bg-[#07B681] text-4xl text-white font-bold rounded-2xl ">+</button>
-                            <div className="w-14 h-14 rounded-full bg-[#cdfaec] border border-gray-400"></div>
-                        </div>
-                </div>
+                <Topbar />
 
                 {/* Body */}
-                <div className="flex flex-row justify-between items-top mt-4 mr-6 ml-22">
+                <div className="flex flex-row gap-x-10 items-top mt-4 px-6">
 
                     <div className="flex flex-col justify-between items-center">
 
@@ -140,28 +135,28 @@ export default function Scheduler() {
 
                             {/* Month and Year*/}
                             <div className="flex space-x-4 justify-start mb-5">
-                                <select
-                                value={currentMonth}
-                                onChange={handleMonthChange}
-                                className="h-12 w-32 rounded-lg bg-white shadow-md/20 text-gray-800 font-inter text-lg text-center hover:bg-gray-100 focus:outline-none"
+                                <NativeSelect 
+                                    className="h-12 w-32 rounded-lg bg-white shadow-md/20 text-gray-800 font-inter text-lg hover:bg-gray-100 focus:outline-none"
+                                    value={currentMonth}
+                                    onChange={handleMonthChange}
                                 >
-                                {monthNames.map((month, i) => (
-                                    <option key={i} value={i}>
-                                    {month}
-                                    </option>
-                                ))}
-                                </select>
-                                <select
-                                value={currentYear}
-                                onChange={handleYearChange}
-                                className="h-12 w-32 rounded-lg bg-white shadow-md/20 text-gray-800 font-inter text-lg text-center hover:bg-gray-100 focus:outline-none"
+                                    {monthNames.map((month, i) => (
+                                        <NativeSelectOption key={i} value={i}>
+                                            {month}
+                                        </NativeSelectOption>
+                                    ))}
+                                </NativeSelect>
+                                <NativeSelect 
+                                    className="h-12 w-32 rounded-lg bg-white shadow-md/20 text-gray-800 font-inter text-lg hover:bg-gray-100 focus:outline-none"
+                                    value={currentYear}
+                                    onChange={handleYearChange}
                                 >
                                     {Array.from({ length: 11 }, (_, i) => currentYear - 5 + i).map((year) => (
-                                        <option key={year} value={year}>
+                                        <NativeSelectOption key={year} value={year}>
                                             {year}
-                                        </option>
+                                        </NativeSelectOption>
                                     ))}
-                                </select>
+                                </NativeSelect>
                             </div>
 
                             {/* Calendar Body */}
@@ -179,7 +174,7 @@ export default function Scheduler() {
                                         <button
                                             key={i}
                                             onClick={() => item.type === "current" && setSelectedDate(item.day)}
-                                            className={`h-10 w-10 rounded-full flex items-center justify-center transition-colors duration-150 ml-12
+                                            className={`h-10 w-10 rounded-full flex items-center justify-center transition-colors duration-150 ml-12 cursor-pointer
                                                 ${
                                                     item.type === "prev" || item.type === "next"
                                                     ? "text-gray-400"
@@ -220,8 +215,15 @@ export default function Scheduler() {
                                         <input
                                         type="checkbox"
                                         checked={selectedEvent?.title === e.title && selectedEvent?.date.getTime() === e.date.getTime()}
-                                        onChange={() => setSelectedEvent(e)}
-                                        className="w-5 h-5"
+                                        onChange={() => {
+                                            if (e === selectedEvent) setSelectedEvent(null);
+                                            else {
+                                                setSelectedEvent(e);
+                                                setEventName(e.title);
+                                                setEventTime(e.time);
+                                            }
+                                        }}
+                                        className="w-5 h-5 cursor-pointer"
                                         />
                                         <div>
                                         <span className="font-medium text-gray-800 text-xl">{e.title}</span>
@@ -253,16 +255,16 @@ export default function Scheduler() {
                                 />
                                 <div className="flex space-x-4">
                                     <button
-                                    onClick={addEvent}
-                                    className="bg-[#07B681] text-white px-6 py-2 rounded-lg font-semibold hover:bg-[#059b6f]"
+                                        onClick={addEvent}
+                                        className="bg-[#07B681] text-white px-6 py-2 rounded-lg font-semibold hover:bg-[#059b6f] cursor-pointer"
                                     >
-                                    Add
+                                        {selectedEvent ? "Update" : "Add"}
                                     </button>
                                     <button
-                                    onClick={deleteEvent}
-                                    className="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg font-semibold hover:bg-gray-400"
+                                        onClick={deleteEvent}
+                                        className="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg font-semibold hover:bg-gray-400 cursor-pointer"
                                     >
-                                    Delete
+                                        Delete
                                     </button>
                                 </div>
                             </div>
@@ -324,10 +326,7 @@ export default function Scheduler() {
             <div className="space-y-4 p-5">
 
                 {/* Header */}
-                <div className="flex flex-row justify-between items-top">
-                        <h1 className="text-3xl font-bold text-gray-800">Scheduler</h1> 
-                        <button className="w-12 h-12 bg-[#07B681] text-2xl text-white font-bold rounded-3xl ">+</button>
-                </div>
+                <Topbar />
                 
                 {/* Body */}
                 <div className="flex flex-col justify-between ">
@@ -337,28 +336,28 @@ export default function Scheduler() {
 
                         {/* Month and Year*/}
                         <div className="flex space-x-4 justify-start mb-5">
-                            <select
+                            <NativeSelect 
+                                className="h-12 w-32 rounded-lg bg-white shadow-md/20 text-gray-800 font-inter text-lg hover:bg-gray-100 focus:outline-none"
                                 value={currentMonth}
                                 onChange={handleMonthChange}
-                                className="h-12 w-32 rounded-lg bg-white shadow-md/20 text-gray-800 font-inter text-lg text-center hover:bg-gray-100 focus:outline-none"
-                                >
+                            >
                                 {monthNames.map((month, i) => (
-                                <option key={i} value={i}>
-                                {month}
-                                </option>
+                                    <NativeSelectOption key={i} value={i}>
+                                        {month}
+                                    </NativeSelectOption>
                                 ))}
-                            </select>
-                            <select
+                            </NativeSelect>
+                            <NativeSelect 
+                                className="h-12 w-32 rounded-lg bg-white shadow-md/20 text-gray-800 font-inter text-lg hover:bg-gray-100 focus:outline-none"
                                 value={currentYear}
                                 onChange={handleYearChange}
-                                className="h-12 w-32 rounded-lg bg-white shadow-md/20 text-gray-800 font-inter text-lg text-center hover:bg-gray-100 focus:outline-none"
-                                >
-                                    {Array.from({ length: 11 }, (_, i) => currentYear - 5 + i).map((year) => (
-                                        <option key={year} value={year}>
-                                                {year}
-                                        </option>
-                                    ))}
-                            </select>
+                            >
+                                {Array.from({ length: 11 }, (_, i) => currentYear - 5 + i).map((year) => (
+                                    <NativeSelectOption key={year} value={year}>
+                                        {year}
+                                    </NativeSelectOption>
+                                ))}
+                            </NativeSelect>
                         </div>
 
                         {/* Calendar Body */}
@@ -376,7 +375,7 @@ export default function Scheduler() {
                                     <button
                                         key={i}
                                         onClick={() => item.type === "current" && setSelectedDate(item.day)}
-                                        className={`h-6 w-6 rounded-full flex items-center justify-center transition-colors duration-150 ml-3 
+                                        className={`h-6 w-6 rounded-full flex items-center justify-center transition-colors duration-150 ml-3 cursor-pointer 
                                             ${
                                                 item.type === "prev" || item.type === "next"
                                                 ? "text-gray-400"
@@ -460,10 +459,17 @@ export default function Scheduler() {
                                     .map((e, i) => (
                                     <label key={i} className="flex items-center space-x-3">
                                         <input
+                                        className="cursor-pointer w-4 h-4"
                                         type="checkbox"
                                         checked={selectedEvent?.title === e.title && selectedEvent?.date.getTime() === e.date.getTime()}
-                                        onChange={() => setSelectedEvent(e)}
-                                        className=""
+                                        onChange={() => {
+                                            if (e === selectedEvent) setSelectedEvent(null);
+                                            else {
+                                                setSelectedEvent(e);
+                                                setEventName(e.title);
+                                                setEventTime(e.time);
+                                            }
+                                        }}
                                         />
                                         <div>
                                         <span className="font-medium text-gray-800 text-md">{e.title}</span>
@@ -498,7 +504,9 @@ export default function Scheduler() {
                                     onClick={addEvent}
                                     className="bg-[#07B681] text-white px-6 py-2 rounded-lg font-semibold hover:bg-[#059b6f] text-xs"
                                     >
-                                    Add
+                                    {
+                                        selectedEvent ? "Update" : "Add"
+                                    }
                                     </button>
                                     <button
                                     onClick={deleteEvent}
@@ -508,9 +516,7 @@ export default function Scheduler() {
                                     </button>
                                 </div>
                             </div>
-                        </div>     
-
-
+                        </div>
                 </div>
             </div>
         </div>

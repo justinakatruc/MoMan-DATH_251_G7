@@ -2,8 +2,10 @@
 import { useState, useRef } from "react";
 import Image from "next/image";
 import { Category } from "@/app/model";
+import { X } from 'lucide-react';
 import TransactionButton from "@/app/components/TransactionButton";
 import { useCategories } from "@/app/context/CategoryContext";
+import Topbar from "@/app/components/Topbar";
 
 interface CategoryItemProps {
   category: Category;
@@ -34,9 +36,11 @@ function CategoryItem({ category, removeMode, onRemove }: CategoryItemProps) {
           } ${
             isDefault
               ? "bg-gray-300 border-2 border-gray-400"
-              : "bg-red-500 border-2 border-red-700 cursor-pointer"
+              : "bg-red-500 border-2 border-red-700 cursor-pointer text-white"
           }`}
-        ></button>
+        >
+          {!isDefault && <X size={16} className="m-auto" />}
+        </button>
       </div>
       <span className="text-lg lg:text-2xl font-medium">{category.name}</span>
     </div>
@@ -111,7 +115,7 @@ function AddCustomCategoryModal({
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-gray-500 hover:text-gray-700 cursor-pointer"
           >
             <svg
               className="w-6 h-6"
@@ -197,8 +201,10 @@ function AddCustomCategoryModal({
 
 export default function CategoryPage() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [isRemoveMode, setIsRemoveMode] = useState(false);
+  const [isEditExpenseMode, setIsEditExpenseMode] = useState(false);
+  const [isEditIncomeMode, setIsEditIncomeMode] = useState(false);
+  const [isRemoveExpenseMode, setIsRemoveExpenseMode] = useState(false);
+  const [isRemoveIncomeMode, setIsRemoveIncomeMode] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const handleInputClick = () => {
     if (inputRef.current) {
@@ -220,53 +226,9 @@ export default function CategoryPage() {
 
   return (
     <>
-      <div className="flex lg:ml-[260px] w-full h-full items-center justify-center">
-        <div className="flex flex-col items-center min-h-screen gap-8 p-4 w-full lg:max-w-[95%]">
-          <div className="flex flex-col w-full gap-4 select-none">
-            <div className="flex lg:hidden items-center justify-between">
-              <h1 className="text-3xl font-bold text-black">Category</h1>
-              <div className="flex items-center">
-                <TransactionButton />
-                {/* Logo goes here */}
-              </div>
-            </div>
-            {/* Header */}
-            <div className="flex items-center gap-4 lg:justify-between">
-              <h1 className="hidden lg:block text-4xl font-bold text-black lg:flex-shrink-0">
-                Category
-              </h1>
-
-              <div
-                onClick={handleInputClick}
-                className="flex items-center gap-3 bg-[#FBFDFF] flex-1 lg:max-w-md lg:mx-auto px-4 py-3 drop-shadow-xl rounded-[12px] text-black"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
-                <input
-                  ref={inputRef}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full bg-transparent cursor-text text-lg lg:text-2xl focus:outline-none"
-                  placeholder="Search Category"
-                />
-              </div>
-
-              <div className="hidden lg:flex">
-                <TransactionButton />
-              </div>
-            </div>
-          </div>
+      <div className="flex">
+        <div className="p-5 lg:p-0 flex flex-col items-center min-h-screen gap-8 w-full">
+          <Topbar />
           {/* Main Content */}
           <div className="lg:max-w-[90%] w-full">
             {/* Expense Section*/}
@@ -274,9 +236,9 @@ export default function CategoryPage() {
               <div className="flex items-center justify-between mb-2">
                 <h1 className="text-xl lg:text-2xl font-bold m-2">Expense</h1>
 
-                {!isEditMode ? (
+                {!isEditExpenseMode ? (
                   <button
-                    onClick={() => setIsEditMode(!isEditMode)}
+                    onClick={() => setIsEditExpenseMode(!isEditExpenseMode)}
                     className="flex text-[#666666] px-2 lg:text-2xl cursor-pointer"
                   >
                     Edit
@@ -303,7 +265,7 @@ export default function CategoryPage() {
                     </button>
                     <button
                       onClick={() => {
-                        setIsRemoveMode(true);
+                        setIsRemoveExpenseMode(true);
                       }}
                       className="flex w-8 h-8 bg-transparent rounded-[12px] cursor-pointer"
                     >
@@ -324,12 +286,12 @@ export default function CategoryPage() {
                   </div>
                 )}
               </div>
-              <div className="grid grid-cols-2 gap-2 overflow-y-auto flex-1">
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 overflow-y-auto flex-1">
                 {userExpenseCategories.map((category) => (
                   <CategoryItem
                     key={category.id}
                     category={category}
-                    removeMode={isRemoveMode}
+                    removeMode={isRemoveExpenseMode}
                     onRemove={removeCategory}
                   />
                 ))}
@@ -343,9 +305,9 @@ export default function CategoryPage() {
               <div className="flex items-center justify-between mb-2">
                 <h1 className="text-xl lg:text-2xl font-bold m-2">Income</h1>
 
-                {!isEditMode ? (
+                {!isEditIncomeMode ? (
                   <button
-                    onClick={() => setIsEditMode(!isEditMode)}
+                    onClick={() => setIsEditIncomeMode(!isEditIncomeMode)}
                     className="flex text-[#666666] px-2 lg:text-2xl cursor-pointer"
                   >
                     Edit
@@ -372,7 +334,7 @@ export default function CategoryPage() {
                     </button>
                     <button
                       onClick={() => {
-                        setIsRemoveMode(true);
+                        setIsRemoveIncomeMode(true);
                       }}
                       className="flex w-8 h-8 bg-transparent rounded-[12px] cursor-pointer"
                     >
@@ -394,12 +356,12 @@ export default function CategoryPage() {
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-2 overflow-y-auto">
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 overflow-y-auto">
                 {userIncomeCategories.map((category) => (
                   <CategoryItem
                     key={category.id}
                     category={category}
-                    removeMode={isRemoveMode}
+                    removeMode={isRemoveIncomeMode}
                     onRemove={removeCategory}
                   />
                 ))}

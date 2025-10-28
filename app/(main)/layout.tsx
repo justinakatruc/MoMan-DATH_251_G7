@@ -25,7 +25,9 @@ export default function MainLayout({
         <CategoryProvider>
           <div className="w-full flex flex-col lg:flex-row bg-[#F4F7FD]">
             <Sidebar />
-            {children}
+            <div className="flex-1 w-full px-10 xl:px-15 2xl:px-20">
+              {children}
+            </div>
           </div>
         </CategoryProvider>
       </body>

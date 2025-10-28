@@ -1,5 +1,6 @@
 "use client";
 
+import Topbar from '@/app/components/Topbar';
 import Image from 'next/image'
 import { useState } from 'react';
 
@@ -19,26 +20,27 @@ export default function Report() {
     return(
         <>
             {/* PC */}
-            <div className="hidden lg:block ml-64 min-h-screen bg-[#F4F7FD]">
+            <div className="hidden lg:flex flex-col min-h-screen bg-[#F4F7FD]">
                 <div className="space-y-4">
                     {/*Header*/}
-                    <div className="flex flex-row justify-between items-center ml-16 mt-8 mr-6">
-                        <h1 className="text-4xl font-bold text-gray-800">Report</h1>
-                        <div className="flex flex-row space-x-4">
-                            <button className="w-16 h-16 bg-[#07B681] text-4xl text-white font-bold rounded-2xl ">+</button>
-                            <div className="w-14 h-14 rounded-full bg-[#cdfaec] border border-gray-400"></div>
-                        </div>
-                    </div>
+                    <Topbar />
                     {/*Body*/}
-                    <div className="flex flex-row justify-between items-top mt-8 mr-6 ml-6">
+                    <div className="flex flex-row gap-x-10 items-top mt-8 px-6">
 
                         {/*Message*/}
-                        <div className="space-y-8 ml-10">
+                        <div className="space-y-8">
                             <div className="bg-white rounded-2xl shadow-md/20 p-4 h-156 w-300"></div>
                             <div className="bg-white rounded-2xl shadow-md/20 p-4 h-16 w-300">
-                                <div className="flex flex-row justify-between items-center">
-                                    <p className="text-gray-400 text-lg fond-inter">Ask anything about budgeting</p>
-                                    <Image src="/send.png" alt="Send Icon" width={25} height={8}/>
+                                <div className="flex flex-row justify-between items-center gap-x-4">
+                                    <input type="text"
+                                        placeholder='Ask anything about budgeting' 
+                                        value={messages}
+                                        onChange={(e) => setMessages(e.target.value)}
+                                        className="flex flex-1 text-gray-400 text-sm font-inter placeholder:italic focus:outline-none"
+                                        onKeyDown={(e) => e.key === 'Enter' && handleSend()}/>
+                                    <button onClick={handleSend} className="p-1 hover:opacity-80">
+                                        <Image src="/send.png" alt="Send Icon" width={25} height={8} className='cursor-pointer' />
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -70,10 +72,7 @@ export default function Report() {
                 <div className="space-y-4 p-5">
 
                     {/*Header*/}
-                    <div className="flex flex-row justify-between items-top">
-                        <h1 className="text-3xl font-bold text-gray-800">Report</h1> 
-                        <button className="w-12 h-12 bg-[#07B681] text-2xl text-white font-bold rounded-2xl ">+</button>
-                    </div>
+                    <Topbar />
 
                     {/*Message*/}
                     <div className="space-y-8 mt-12">
@@ -114,10 +113,10 @@ export default function Report() {
                                         placeholder='Ask anything about budgeting' 
                                         value={messages}
                                         onChange={(e) => setMessages(e.target.value)}
-                                        className="text-gray-400 text-sm fond-inter placeholder:italic"
+                                        className="text-gray-400 text-sm font-inter placeholder:italic focus:outline-none"
                                         onKeyDown={(e) => e.key === 'Enter' && handleSend()}/>
                                 <button onClick={handleSend} className="p-1 hover:opacity-80">
-                                    <Image src="/send.png" alt="Send Icon" width={25} height={8} />
+                                    <Image src="/send.png" alt="Send Icon" width={25} height={8} className='cursor-pointer' />
                                 </button>
                             </div>
                         </div>

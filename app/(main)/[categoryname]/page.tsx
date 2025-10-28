@@ -2,8 +2,24 @@
 import { useState, useRef, useEffect } from "react";
 import TransactionButton from "@/app/components/TransactionButton";
 import { useCategories } from "@/app/context/CategoryContext";
+import { usePathname } from "next/navigation";
+import Topbar from "@/app/components/Topbar";
 
 export default function FoodnDrink() {
+  const pathname = usePathname();
+  function reverseCategory(slug: string): string {
+    let name = slug.split("/")[1];
+    name = name.replace(/-/g, ' ');
+
+    name = name.replace(/&/g, ' & ');
+
+    name = name.trim().replace(/\s+/g, ' ');
+
+    return name.replace(/\b\w/g, char => char.toUpperCase());
+  }
+
+  const categoryName = reverseCategory(pathname);
+
   const months = [
     "January",
     "February",
@@ -98,22 +114,12 @@ export default function FoodnDrink() {
   }, [isEditMode, transactions]);
 
   return (
-    <div className="flex lg:ml-[260px] w-full items-center justify-center">
-      <div className="flex flex-col items-center min-h-screen gap-8 p-4 w-full lg:max-w-[95%]">
+    <div className="flex w-full items-center justify-center">
+      <div className="flex flex-col min-h-screen gap-8 w-full">
         {/* Header */}
-        <div className="flex flex-col w-full gap-4 select-none">
-          <div className="flex items-center justify-between">
-            <h1 className="text-3xl lg:text-4xl font-bold text-black">
-              Food & Drink
-            </h1>
-            <div className="flex items-center">
-              <TransactionButton />
-              {/* Logo goes here */}
-            </div>
-          </div>
-        </div>
+        <Topbar />
 
-        <div className="flex flex-col w-full items-start gap-4 justify-between text-black">
+        <div className="flex flex-col w-full items-start gap-4 justify-between text-black px-6">
           <div className="flex w-full items-center justify-between gap-4">
             <div className="flex gap-2">
               <span className="font-medium text-xl lg:text-2xl">From</span>
