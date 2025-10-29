@@ -6,14 +6,14 @@ import Profile from "./Profile";
 export default function Topbar() {
     const pathname = usePathname();
     function getName(slug: string): string {
-        let name = slug.split("/")[1];
-        name = name.replace(/-/g, ' ');
+        const lastPart = slug.split("/").filter(Boolean).pop() || "";
 
-        name = name.replace(/&/g, ' & ');
-
-        name = name.trim().replace(/\s+/g, ' ');
-
-        return name.replace(/\b\w/g, char => char.toUpperCase());
+        return lastPart
+            .replace(/-/g, " ")
+            .replace(/&/g, " & ")
+            .trim()
+            .replace(/\s+/g, " ")
+            .replace(/\b\w/g, char => char.toUpperCase());
     }
     const pageName = getName(pathname);
 

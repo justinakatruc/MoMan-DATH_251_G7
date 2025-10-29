@@ -1,24 +1,9 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
-import TransactionButton from "@/app/components/TransactionButton";
 import { useCategories } from "@/app/context/CategoryContext";
-import { usePathname } from "next/navigation";
 import Topbar from "@/app/components/Topbar";
 
 export default function FoodnDrink() {
-  const pathname = usePathname();
-  function reverseCategory(slug: string): string {
-    let name = slug.split("/")[1];
-    name = name.replace(/-/g, ' ');
-
-    name = name.replace(/&/g, ' & ');
-
-    name = name.trim().replace(/\s+/g, ' ');
-
-    return name.replace(/\b\w/g, char => char.toUpperCase());
-  }
-
-  const categoryName = reverseCategory(pathname);
 
   const months = [
     "January",

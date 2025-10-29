@@ -260,7 +260,7 @@ export default function Sidebar() {
                                 <div className='text-[20px] xl:text-[22px] 2xl:text-[24px] font-bold pl-2 dark:text-[rgb(23,23,23)]'>Expense</div>
                                 <ul className='flex flex-col gap-y-[8px] 2xl:gap-y-[20px] overflow-y-auto'>
                                     {expenses.map((category) => (
-                                        <Link href={`/${formatLink(category.name)}`} key={category.id} className={`w-full pl-[8px] pr-[4px] py-[4px] flex items-center cursor-pointer hover:bg-[#CFF0E7] hover:rounded-[10px] ${pathname === `/${formatLink(category.name)}` ? "bg-[#CFF0E7] rounded-[10px]" : ""}`}>
+                                        <Link href={`/category/${formatLink(category.name)}`} key={category.id} className={`w-full pl-[8px] pr-[4px] py-[4px] flex items-center cursor-pointer hover:bg-[#CFF0E7] hover:rounded-[10px] ${pathname === `/${formatLink(category.name)}` ? "bg-[#CFF0E7] rounded-[10px]" : ""}`}>
                                             <Image src={category.icon} alt="Money Icon" width={36} height={36} className='size-5 2xl:size-7 mr-2' />
                                             <div className='text-[15px] 2xl:text-[17px] font-bold dark:text-[rgb(23,23,23)]'>{category.name}</div>
                                         </Link>
@@ -271,7 +271,7 @@ export default function Sidebar() {
                                 <div className='text-[20px] xl:text-[22px] 2xl:text-[24px] font-bold pl-2 dark:text-[rgb(23,23,23)]'>Income</div>
                                 <ul className='flex flex-col gap-y-[8px] 2xl:gap-y-[20px] overflow-y-auto'>
                                     {incomes.map((category) => (
-                                        <Link href={`/${formatLink(category.name)}`} key={category.id} className={`w-full pl-[8px] pr-[4px] py-[4px] flex items-center cursor-pointer hover:bg-[#CFF0E7] hover:rounded-[10px] ${pathname === `/${formatLink(category.name)}` ? "bg-[#CFF0E7] rounded-[10px]" : ""}`}>
+                                        <Link href={`/category/${formatLink(category.name)}`} key={category.id} className={`w-full pl-[8px] pr-[4px] py-[4px] flex items-center cursor-pointer hover:bg-[#CFF0E7] hover:rounded-[10px] ${pathname === `/${formatLink(category.name)}` ? "bg-[#CFF0E7] rounded-[10px]" : ""}`}>
                                             <Image src={category.icon} alt="Money Icon" width={36} height={36} className='size-5 2xl:size-7 mr-2' />
                                             <div className='text-[15px] 2xl:text-[17px] font-bold dark:text-[rgb(23,23,23)]'>{category.name}</div>
                                         </Link>

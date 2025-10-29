@@ -57,7 +57,7 @@ function CategoryItem({ category, removeMode, isEditMode, onRemove }: CategoryIt
         </button>
       </div>
       <Link 
-        href={`/${formatLink(category.name)}`} 
+        href={`/category/${formatLink(category.name)}`} 
         className={`text-lg lg:text-2xl font-medium ${isEditMode ? 'cursor-default' : 'cursor-pointer underline'}`}
         onClick={(e) => isEditMode && e.preventDefault()}
       >
