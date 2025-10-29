@@ -1,22 +1,36 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { Category } from "@/app/model";
 import { X } from 'lucide-react';
-import TransactionButton from "@/app/components/TransactionButton";
 import { useCategories } from "@/app/context/CategoryContext";
 import Topbar from "@/app/components/Topbar";
+import Link from "next/link";
 
 interface CategoryItemProps {
   category: Category;
   removeMode: boolean;
+  isEditMode: boolean;
   onRemove: (categoryId: number, type: "expense" | "income") => void;
 }
 
-function CategoryItem({ category, removeMode, onRemove }: CategoryItemProps) {
+function CategoryItem({ category, removeMode, isEditMode, onRemove }: CategoryItemProps) {
   const isDefault = category.isDefault;
+  const formatLink = (name: string) => {
+    let lower = name.toLowerCase().trim();
+
+    if (lower.includes('&')) {
+        lower = lower.replace(/\s*&\s*/g, '&');
+        return lower.replace(/\s+/g, '-');
+    }
+
+    return lower.replace(/\s+/g, '-');
+  }
+
   return (
-    <div className="flex items-center gap-3 p-3 select-none relative ">
+    <div 
+      className={`flex items-center gap-3 p-3 select-none relative`}
+    >
       <div
         onClick={() => onRemove(category.id, category.type)}
         className="w-8 h-8 flex items-center"
@@ -42,7 +56,13 @@ function CategoryItem({ category, removeMode, onRemove }: CategoryItemProps) {
           {!isDefault && <X size={16} className="m-auto" />}
         </button>
       </div>
-      <span className="text-lg lg:text-2xl font-medium">{category.name}</span>
+      <Link 
+        href={`/${formatLink(category.name)}`} 
+        className={`text-lg lg:text-2xl font-medium ${isEditMode ? 'cursor-default' : 'cursor-pointer underline'}`}
+        onClick={(e) => isEditMode && e.preventDefault()}
+      >
+        {category.name}
+      </Link>
     </div>
   );
 }
@@ -200,17 +220,10 @@ function AddCustomCategoryModal({
 }
 
 export default function CategoryPage() {
-  const [searchTerm, setSearchTerm] = useState("");
   const [isEditExpenseMode, setIsEditExpenseMode] = useState(false);
   const [isEditIncomeMode, setIsEditIncomeMode] = useState(false);
   const [isRemoveExpenseMode, setIsRemoveExpenseMode] = useState(false);
   const [isRemoveIncomeMode, setIsRemoveIncomeMode] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const handleInputClick = () => {
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
-  };
 
   const [showAddModal, setShowAddModal] = useState<{
     type: "expense" | "income" | null;
@@ -235,56 +248,63 @@ export default function CategoryPage() {
             <div className="flex flex-col my-auto lg:my-6 bg-[#FBFDFF] w-full h-80 lg:h-[20rem] px-2 py-1 md:px-6 md:py-3 drop-shadow-xl rounded-[12px] text-black">
               <div className="flex items-center justify-between mb-2">
                 <h1 className="text-xl lg:text-2xl font-bold m-2">Expense</h1>
-
-                {!isEditExpenseMode ? (
+                <div className="flex flex-row gap-x-3">
                   <button
-                    onClick={() => setIsEditExpenseMode(!isEditExpenseMode)}
+                    onClick={() => {
+                      setIsEditExpenseMode(!isEditExpenseMode);
+                      if (isRemoveExpenseMode) {
+                        setIsRemoveExpenseMode(false);
+                      }
+                    }}
                     className="flex text-[#666666] px-2 lg:text-2xl cursor-pointer"
                   >
-                    Edit
+                    {!isEditExpenseMode ? "Edit" : "Done"}
                   </button>
-                ) : (
-                  <div className="flex flex-row px-1 justify-end items-center">
-                    <button
-                      onClick={() => setShowAddModal({ type: "expense" })}
-                      className="flex w-8 h-8 bg-transparent rounded-[12px] cursor-pointer"
-                    >
-                      <svg
-                        className="w-full h-full text-gray-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="square"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                        />
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() => {
-                        setIsRemoveExpenseMode(true);
-                      }}
-                      className="flex w-8 h-8 bg-transparent rounded-[12px] cursor-pointer"
-                    >
-                      <svg
-                        className="w-full h-full text-gray-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="square"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M18 12H6"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                )}
+                  {
+                    isEditExpenseMode && (
+                      <div className="flex flex-row px-1 justify-end items-center">
+                        <button
+                          onClick={() => setShowAddModal({ type: "expense" })}
+                          className="flex w-8 h-8 bg-transparent rounded-[12px] cursor-pointer"
+                        >
+                          <svg
+                            className="w-full h-full text-gray-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="square"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                            />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => {
+                            setIsRemoveExpenseMode(true);
+                          }}
+                          className="flex w-8 h-8 bg-transparent rounded-[12px] cursor-pointer"
+                        >
+                          <svg
+                            className="w-full h-full text-gray-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="square"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M18 12H6"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    )
+                  }
+                </div>
               </div>
               <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 overflow-y-auto flex-1">
                 {userExpenseCategories.map((category) => (
@@ -293,6 +313,7 @@ export default function CategoryPage() {
                     category={category}
                     removeMode={isRemoveExpenseMode}
                     onRemove={removeCategory}
+                    isEditMode={isEditExpenseMode}
                   />
                 ))}
               </div>
@@ -304,56 +325,63 @@ export default function CategoryPage() {
             <div className="flex flex-col my-auto lg:my-6 bg-[#FBFDFF] w-full h-80 lg:h-[20rem] px-2 py-1 md:px-6 md:py-3 drop-shadow-xl rounded-[12px] text-black">
               <div className="flex items-center justify-between mb-2">
                 <h1 className="text-xl lg:text-2xl font-bold m-2">Income</h1>
-
-                {!isEditIncomeMode ? (
+                <div className="flex flex-row gap-x-3">
                   <button
-                    onClick={() => setIsEditIncomeMode(!isEditIncomeMode)}
+                    onClick={() => {
+                      setIsEditIncomeMode(!isEditIncomeMode);
+                      if (isRemoveIncomeMode) {
+                        setIsRemoveIncomeMode(false);
+                      }
+                    }}
                     className="flex text-[#666666] px-2 lg:text-2xl cursor-pointer"
                   >
-                    Edit
+                    {!isEditIncomeMode ? "Edit" : "Done"}
                   </button>
-                ) : (
-                  <div className="flex flex-row px-1 justify-end items-center">
-                    <button
-                      onClick={() => setShowAddModal({ type: "income" })}
-                      className="flex w-8 h-8 bg-transparent rounded-[12px] cursor-pointer"
-                    >
-                      <svg
-                        className="w-full h-full text-gray-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="square"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                        />
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() => {
-                        setIsRemoveIncomeMode(true);
-                      }}
-                      className="flex w-8 h-8 bg-transparent rounded-[12px] cursor-pointer"
-                    >
-                      <svg
-                        className="w-full h-full text-gray-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="square"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M18 12H6"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                )}
+                  {
+                    isEditIncomeMode && (
+                      <div className="flex flex-row px-1 justify-end items-center">
+                        <button
+                          onClick={() => setShowAddModal({ type: "income" })}
+                          className="flex w-8 h-8 bg-transparent rounded-[12px] cursor-pointer"
+                        >
+                          <svg
+                            className="w-full h-full text-gray-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="square"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                            />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => {
+                            setIsRemoveIncomeMode(true);
+                          }}
+                          className="flex w-8 h-8 bg-transparent rounded-[12px] cursor-pointer"
+                        >
+                          <svg
+                            className="w-full h-full text-gray-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="square"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M18 12H6"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    )
+                  }
+                </div>
               </div>
 
               <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 overflow-y-auto">
@@ -363,6 +391,7 @@ export default function CategoryPage() {
                     category={category}
                     removeMode={isRemoveIncomeMode}
                     onRemove={removeCategory}
+                    isEditMode={isEditIncomeMode}
                   />
                 ))}
               </div>

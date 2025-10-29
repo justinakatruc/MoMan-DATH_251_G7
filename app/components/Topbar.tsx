@@ -1,6 +1,7 @@
 "use client";
 import { usePathname } from "next/navigation";
 import TransactionButton from "./TransactionButton";
+import Profile from "./Profile";
 
 export default function Topbar() {
     const pathname = usePathname();
@@ -23,6 +24,7 @@ export default function Topbar() {
                 {pageName === "Home" ? <h1 className="text-3xl font-bold text-gray-800">username</h1> : <></>}
                 <div className="flex flex-row space-x-4">
                     <TransactionButton />
+                    <Profile />
                 </div>
             </div>
             <div className="w-full lg:hidden flex flex-row justify-between items-top">
@@ -30,7 +32,10 @@ export default function Topbar() {
                     <h1 className="text-3xl font-bold text-gray-800">{pageName}</h1> 
                     {pageName === "Home" ? <h1 className="text-xl font-bold text-gray-800">username</h1> : <></>}
                 </div>
-                <TransactionButton />
+                <div className="flex flex-row space-x-4">
+                    <TransactionButton />
+                    <Profile />
+                </div>
             </div>
         </>
     )

@@ -15,3 +15,12 @@ export type Transaction = {
   date: Date;
   description?: string;
 }
+
+export type UserType = {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  memberSince: string;
+  accountType: string;
+}

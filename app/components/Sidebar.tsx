@@ -6,7 +6,8 @@ import { Category } from '@/app/model'
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Users, BadgeDollarSign, LayoutDashboardIcon } from 'lucide-react'
+import { Users, BadgeDollarSign, LayoutDashboardIcon, ArrowRight, RefreshCcw } from 'lucide-react'
+import Profile from './Profile'
 
 export default function Sidebar() {
     const expenses: Category[]  = expenseCategories
@@ -15,6 +16,7 @@ export default function Sidebar() {
     const [showProfileMenu, setShowProfileMenu] = useState(false)
     const menuRef = useRef<HTMLDivElement>(null)
     const pathname = usePathname()
+
 
     const formatLink = (name: string) => {
         let lower = name.toLowerCase().trim();
@@ -65,7 +67,7 @@ export default function Sidebar() {
                             >
                                 <LayoutDashboardIcon className='size-[24px] md:size-[28px]' />
                                 {showLabel === 1 && (
-                                    <div className='absolute top-[65px] w-[65px] flex items-center justify-center text-[11px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px]'>
+                                    <div className='absolute top-[65px] w-[80px] flex items-center justify-center text-[9px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px]'>
                                         Dashboard
                                     </div>
                                 )}
@@ -82,7 +84,7 @@ export default function Sidebar() {
                             >
                                 <Users className='size-[24px] md:size-[28px]' />
                                 {showLabel === 2 && (
-                                    <div className='absolute top-[65px] w-[65px] flex items-center justify-center text-[11px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px]'>
+                                    <div className='absolute top-[65px] w-[80px] flex items-center justify-center text-[9px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px]'>
                                         Users
                                     </div>
                                 )}
@@ -99,11 +101,44 @@ export default function Sidebar() {
                             >
                                 <BadgeDollarSign className='size-[24px] md:size-[28px]' />
                                 {showLabel === 3 && (
-                                    <div className='absolute top-[65px] w-[65px] flex items-center justify-center text-[11px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px]'>
+                                    <div className='absolute top-[65px] w-[80px] flex items-center justify-center text-[9px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px]'>
                                         Transactions
                                     </div>
                                 )}
                             </Link>
+                            <Link
+                                href={`/home`}
+                                key={5} className='size-[40px] md:size-[50px] flex items-center justify-center cursor-pointer bg-[rgba(226,229,233,0.5)] hover:bg-[rgba(226,229,233,0.8)] rounded-full relative'
+                                onMouseEnter={() => {
+                                    setTimeout(() => setShowLabel(5), 100)
+                                }}
+                                onMouseLeave={() => {
+                                    setTimeout(() => setShowLabel(null), 100)
+                                }}
+                            >
+                                <RefreshCcw className='size-[24px] md:size-[28px]' />
+                                {showLabel === 5 && (
+                                    <div className='absolute top-[65px] w-[80px] flex items-center justify-center text-[9px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px]'>
+                                        Change View
+                                    </div>
+                                )}
+                            </Link>
+                            <div
+                                key={6} className='size-[40px] md:size-[50px] flex items-center justify-center cursor-pointer bg-[rgba(226,229,233,0.5)] hover:bg-[rgba(226,229,233,0.8)] rounded-full relative'
+                                onMouseEnter={() => {
+                                    setTimeout(() => setShowLabel(6), 100)
+                                }}
+                                onMouseLeave={() => {
+                                    setTimeout(() => setShowLabel(null), 100)
+                                }}
+                            >
+                                <Profile />
+                                {showLabel === 6 && (
+                                    <div className='absolute top-[65px] w-[80px] flex items-center justify-center text-[9px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px]'>
+                                        Profile
+                                    </div>
+                                )}
+                            </div>
                         </> : <>
                             <Link
                                 href={`/category`}
@@ -117,7 +152,7 @@ export default function Sidebar() {
                             >
                                 <Image src="/category.png" alt="Category Icon" width={24} height={24} className='size-[24px] md:size-[28px]' />
                                 {showLabel === 1 && (
-                                    <div className='absolute top-[65px] w-[65px] flex items-center justify-center text-[11px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px]'>
+                                    <div className='absolute top-[65px] w-[80px] flex items-center justify-center text-[9px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px]'>
                                         Category
                                     </div>
                                 )}
@@ -134,7 +169,7 @@ export default function Sidebar() {
                             >
                                 <Image src="/calendar.png" alt="Scheduler Icon" width={24} height={24} className='size-[24px] md:size-[28px]' />
                                 {showLabel === 2 && (
-                                    <div className='absolute top-[65px] w-[65px] flex items-center justify-center text-[11px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px]'>
+                                    <div className='absolute top-[65px] w-[80px] flex items-center justify-center text-[9px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px]'>
                                         Scheduler
                                     </div>
                                 )}
@@ -151,7 +186,7 @@ export default function Sidebar() {
                             >
                                 <Image src="/chart.png" alt="Report Icon" width={24} height={24} className='size-[24px] md:size-[28px]' />
                                 {showLabel === 3 && (
-                                    <div className='absolute top-[65px] w-[65px] flex items-center justify-center text-[11px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px]'>
+                                    <div className='absolute top-[65px] w-[80px] flex items-center justify-center text-[9px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px]'>
                                         Report
                                     </div>
                                 )}
@@ -173,14 +208,15 @@ export default function Sidebar() {
                             }}
                         >
                             {showLabel === 4 && (
-                                <div className='absolute top-[65px] w-[65px] flex items-center justify-center text-[11px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px] z-[11]'>
+                                <div className='absolute top-[65px] w-[80px] flex items-center justify-center text-[9px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px] z-[11]'>
                                     Account
                                 </div>
                             )}
                         </li>
                         {showProfileMenu && (
-                            <div className='absolute top-[60px] right-0 w-[320px] md:w-[360px] h-[100px] bg-[#ffffff] shadow-md rounded-[15px] z-10'>
-                                <div className='p-4'>
+                            <div className='absolute top-[60px] right-0 w-[320px] md:w-[360px] h-[80px] bg-[#ffffff] shadow-md rounded-[15px] z-10'>
+                                <div className='p-4 flex flex-col gap-y-3'>
+    
                                     <div className='flex items-center cursor-pointer hover:bg-[rgba(226,229,233,0.3)] rounded-[10px] p-2'>
                                         <div className='size-[36px] flex items-center justify-center bg-[#e2e5e9] rounded-full'>
                                             <Image src="/logout.png" alt="User Icon" width={20} height={20} className='size-[20px]' />
@@ -212,7 +248,7 @@ export default function Sidebar() {
                                     <div className='text-[15px] 2xl:text-[17px] font-bold dark:text-[rgb(23,23,23)]'>Category</div>
                                 </Link>
                                 <Link href={"/scheduler"} className={`w-full pl-[8px] pr-[4px] py-[4px] flex items-center cursor-pointer hover:bg-[#CFF0E7] hover:rounded-[10px] ${pathname === "/scheduler" ? "bg-[#CFF0E7] rounded-[10px]" : ""}`}>
-                                    <Image src="/calendar.png" alt="Scheduler Icon" width={36} height={36} className='size-5 xl:size-7 mr-2' />
+                                    <Image src="/calendar.png" alt="Scheduler Icon" width={36} height={36} className='size-5 2xl:size-7 mr-2' />
                                     <div className='text-[15px] 2xl:text-[17px] font-bold dark:text-[rgb(23,23,23)]'>Scheduler</div>
                                 </Link>
                                 <Link href={"/report"} className={`w-full pl-[8px] pr-[4px] py-[4px] flex items-center cursor-pointer hover:bg-[#CFF0E7] hover:rounded-[10px] ${pathname === "/report" ? "bg-[#CFF0E7] rounded-[10px]" : ""}`}>
@@ -242,9 +278,10 @@ export default function Sidebar() {
                                     ))}
                                 </ul>
                             </div>
-                        </div> : <>
+                        </div> : 
+                        <>
                             <div className='text-[15px] 2xl:text-[17px] font-bold dark:text-[rgb(23,23,23)] mb-4 2xl:mb-6'>Admin Dashboard</div>
-                            <ul className='w-full flex flex-col gap-y-[8px] 2xl:gap-y-[20px] px-4 mb-3 2xl:mb-4 overflow-y-auto'>
+                            <ul className='w-full flex flex-col gap-y-[10px] 2xl:gap-y-[20px] px-4 overflow-y-auto'>
                                 <Link href={"/admin/dashboard"} className={`w-full pl-[8px] pr-[4px] py-[4px] flex items-center cursor-pointer hover:bg-[#CFF0E7] hover:rounded-[10px] ${pathname === "/admin/dashboard" ? "bg-[#CFF0E7] rounded-[10px]" : ""}`}>
                                     <LayoutDashboardIcon className='size-5 2xl:size-7 mr-2' />
                                     <div className='text-[15px] 2xl:text-[17px] font-bold dark:text-[rgb(23,23,23)]'>Dashboard</div>
@@ -254,16 +291,37 @@ export default function Sidebar() {
                                     <div className='text-[15px] 2xl:text-[17px] font-bold dark:text-[rgb(23,23,23)]'>Users</div>
                                 </Link>
                                 <Link href={"/admin/transactions"} className={`w-full pl-[8px] pr-[4px] py-[4px] flex items-center cursor-pointer hover:bg-[#CFF0E7] hover:rounded-[10px] ${pathname === "/admin/transactions" ? "bg-[#CFF0E7] rounded-[10px]" : ""}`}>
-                                    <BadgeDollarSign className='size-5 xl:size-7 mr-2' />
+                                    <BadgeDollarSign className='size-5 2xl:size-7 mr-2' />
                                     <div className='text-[15px] 2xl:text-[17px] font-bold dark:text-[rgb(23,23,23)]'>Transactions</div>
                                 </Link>
                             </ul>
                         </>
                 }
-                <div className='flex flex-1 justify-center items-end mb-4'>
-                    <button className='w-[100px] xl:w-[120px] 2xl:w-[150px] h-[40px] xl:h-[45px] 2xl:h-[60px] bg-[rgba(235,106,99,0.91)] hover:bg-[rgba(235,106,99,1)] cursor-pointer rounded-[20px] text-white font-semibold text-[15px] xl:text-[17px] 2xl:text-[19px]'>
-                        Log Out
-                    </button>
+                <div className='w-full flex flex-1 px-4 items-end mb-4'>
+                    <div className='w-full flex flex-col gap-y-4'>
+                        {
+                            pathname.includes('admin') && (
+                                <>
+                                    <div className='h-[40px] xl:h-[45px] 2xl:h-[60px] bg-[#F4F7FD] rounded-[20px] px-4 flex gap-x-3 items-center'>
+                                        <Profile />
+                                        <div>
+                                            <div className='text-[14px] font-semibold'>Admin User</div>
+                                            <div className='text-[12px] font-medium text-[rgba(0,0,0,0.6)]'>admin@financeapp.com</div>
+                                        </div>
+                                    </div>
+                                    <Link href={'/home'} className='flex items-center justify-center h-[40px] xl:h-[45px] 2xl:h-[60px] bg-[#F4F7FD] hover:bg-[#E0E4EA] cursor-pointer rounded-[20px] font-semibold text-[15px] xl:text-[17px] 2xl:text-[19px]'>
+                                        <div className='flex flex-row gap-x-2 items-center justify-center'>
+                                            <ArrowRight className='rotate-180 size-5 2xl:size-6' />
+                                            <div>Switch View</div>
+                                        </div>
+                                    </Link>
+                                </>
+                            )
+                        }
+                        <button className='h-[40px] xl:h-[45px] 2xl:h-[60px] bg-[rgba(235,106,99,0.91)] hover:bg-[rgba(235,106,99,1)] cursor-pointer rounded-[20px] text-white font-semibold text-[15px] xl:text-[17px] 2xl:text-[19px]'>
+                            Log Out
+                        </button>
+                    </div>
                 </div>
             </div>
         </>

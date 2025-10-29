@@ -113,7 +113,7 @@ export default function Home() {
             {/* Expense */}
             <div className="space-y-2 w-1/3">
               <h1 className="text-2xl font-inter font-semibold text-gray-800 ">Expense</h1>
-              <ul className="flex flex-col gap-y-[10px] overflow-y-auto max-h-[400px]">
+              <ul className="flex flex-col gap-y-[10px] overflow-y-auto max-h-[450px] pb-2">
                 {expenses.map((item, index) => (
                   <li
                     key={index}
@@ -141,7 +141,7 @@ export default function Home() {
             {/* Income */}
             <div className="space-y-2 w-1/3">
               <h1 className="text-2xl font-inter font-semibold text-gray-800">Income</h1>
-              <ul className='flex flex-col gap-y-[10px] overflow-y-auto max-h-[400px]'>
+              <ul className='flex flex-col gap-y-[10px] overflow-y-auto max-h-[450px] pb-2'>
                 {incomes.map((item, index) => (
                   <li
                     key={index}
