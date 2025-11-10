@@ -3,9 +3,14 @@
 import Topbar from '@/app/components/Topbar';
 import Image from 'next/image'
 import { useState } from 'react';
+import { useUserStore } from '../store/useUserStore';
+import { redirect } from 'next/navigation';
 
 
 export default function Report() {
+    const { user } = useUserStore();
+    if (!user) redirect("/login");
+
     type Msg = { text: string; sender: 'user' | 'bot'; time: string};
     const [messages, setMessages] = useState("")
     const [chatHistory, setChatHistory] = useState<Msg[]>([]);

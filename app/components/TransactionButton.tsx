@@ -127,7 +127,7 @@ export default function TransactionButton() {
                   }}
                   className={`flex-1 py-2 sm:py-3 px-3 sm:px-4 rounded-md text-sm sm:text-base font-medium transition-colors cursor-pointer ${
                     transactionType === "income"
-                      ? "bg-green-500 text-white"
+                      ? "bg-[#07B681] text-white"
                       : "text-gray-700 hover:bg-gray-200"
                   }`}
                 >
@@ -140,7 +140,7 @@ export default function TransactionButton() {
                   }}
                   className={`flex-1 py-2 sm:py-3 px-3 sm:px-4 rounded-md text-sm sm:text-base font-medium transition-colors cursor-pointer ${
                     transactionType === "expense"
-                      ? "bg-green-500 text-white"
+                      ? "bg-[#07B681] text-white"
                       : "text-gray-700 hover:bg-gray-200"
                   }`}
                 >

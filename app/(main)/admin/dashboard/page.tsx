@@ -1,8 +1,14 @@
 "use client"
 
 import { Users, Activity, DollarSign, TrendingUp } from 'lucide-react'
+import { useUserStore } from '../../store/useUserStore';
+import { redirect } from 'next/navigation';
 
-export default function page() {
+export default function DashboardPage() {
+  const { user } = useUserStore();
+  if (!user) redirect("/login");
+
+
   const itemsList = [
     {
       title: 'Total Users',
@@ -110,7 +116,7 @@ export default function page() {
         </div>
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'>
           {itemsList.map((item, index) => (
-            <div key={index} className='bg-white h-[188px] px-8 pt-6 rounded-[20px] flex flex-col gap-y-6'>
+            <div key={index} className='bg-white h-[200px] px-8 pt-6 rounded-[20px] flex flex-col gap-y-6'>
               <div className='flex items-center justify-between'>
                 <div className='flex items-center justify-center size-12 bg-[rgba(7,182,129,0.125)] rounded-[10px]'>
                   {

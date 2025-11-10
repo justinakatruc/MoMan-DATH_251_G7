@@ -3,6 +3,8 @@
 import { NativeSelect, NativeSelectOption } from '@/app/components/ui/native-select';
 import { Search, Download, TrendingUp, TrendingDown } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { useUserStore } from '../../store/useUserStore';
+import { redirect } from 'next/navigation';
 
 type Transaction = {
     transaction_id: string;
@@ -66,87 +68,90 @@ function TransactionInformation({transaction, setOpen}: TransactionProps) {
     )
 }
 
-export default function Page() {
-  const [transactionsList, setTransactionsList] = useState([
-    {
-      transaction_id: 'TRX001',
-      id: 1,
-      name: 'John Doe',
-      category: 'Food & Drink',
-      date: '2025-10-27',
-      time: '14:32',
-      type: 'Expense',
-      status: 'Completed',
-      amount: '25.50',
-    },
-    {
-      transaction_id: 'TRX002',
-      id: 2,
-      name: 'Jane Smith',
-      category: 'Utilities',
-      date: '2025-10-28',
-      time: '09:15',
-      type: 'Expense',
-      status: 'Completed',
-      amount: '100.00',
-    },
-    {
-      transaction_id: 'TRX003',
-      id: 3,
-      name: 'Bob Johnson',
-      category: 'Entertainment',
-      date: '2025-10-29',
-      time: '18:45',
-      type: 'Expense',
-      status: 'Completed',
-      amount: '75.00', 
-    },
-    {
-      transaction_id: 'TRX004',
-      id: 4,
-      name: 'Alice Williams',
-      category: 'Groceries',
-      date: '2025-10-30',
-      time: '12:00',
-      type: 'Expense',
-      status: 'Completed',
-      amount: '50.00',
-    },
-    {
-      transaction_id: 'TRX005',
-      id: 5,
-      name: 'Michael Brown',
-      category: 'Salary',
-      date: '2025-10-31',
-      time: '10:00',
-      type: 'Income',
-      status: 'Completed',
-      amount: '100.00',
-    },
-    {
-        transaction_id: 'TRX006',
-        id: 6,
-        name: 'Emily Davis',
-        category: 'Utilities',
-        date: '2025-11-01',
-        time: '09:00',
+export default function TransactionsPage() {
+    const { user } = useUserStore();
+    if (!user) redirect("/login");
+
+    const [transactionsList, setTransactionsList] = useState([
+        {
+        transaction_id: 'TRX001',
+        id: 1,
+        name: 'John Doe',
+        category: 'Food & Drink',
+        date: '2025-10-27',
+        time: '14:32',
         type: 'Expense',
-        status: 'Pending',
-        amount: '80.00',
-    },
-    {
-        transaction_id: 'TRX007',
-        id: 7,
-        name: 'David Wilson',
-        category: 'Stock',
-        date: '2025-11-02',
-        time: '15:30',
+        status: 'Completed',
+        amount: '25.50',
+        },
+        {
+        transaction_id: 'TRX002',
+        id: 2,
+        name: 'Jane Smith',
+        category: 'Utilities',
+        date: '2025-10-28',
+        time: '09:15',
+        type: 'Expense',
+        status: 'Completed',
+        amount: '100.00',
+        },
+        {
+        transaction_id: 'TRX003',
+        id: 3,
+        name: 'Bob Johnson',
+        category: 'Entertainment',
+        date: '2025-10-29',
+        time: '18:45',
+        type: 'Expense',
+        status: 'Completed',
+        amount: '75.00', 
+        },
+        {
+        transaction_id: 'TRX004',
+        id: 4,
+        name: 'Alice Williams',
+        category: 'Groceries',
+        date: '2025-10-30',
+        time: '12:00',
+        type: 'Expense',
+        status: 'Completed',
+        amount: '50.00',
+        },
+        {
+        transaction_id: 'TRX005',
+        id: 5,
+        name: 'Michael Brown',
+        category: 'Salary',
+        date: '2025-10-31',
+        time: '10:00',
         type: 'Income',
         status: 'Completed',
-        amount: '60.00',
-    }
-  ]);
-  const [filteredTransactions, setFilteredTransactions] = useState(transactionsList);
+        amount: '100.00',
+        },
+        {
+            transaction_id: 'TRX006',
+            id: 6,
+            name: 'Emily Davis',
+            category: 'Utilities',
+            date: '2025-11-01',
+            time: '09:00',
+            type: 'Expense',
+            status: 'Pending',
+            amount: '80.00',
+        },
+        {
+            transaction_id: 'TRX007',
+            id: 7,
+            name: 'David Wilson',
+            category: 'Stock',
+            date: '2025-11-02',
+            time: '15:30',
+            type: 'Income',
+            status: 'Completed',
+            amount: '60.00',
+        }
+    ]);
+    const [filteredTransactions, setFilteredTransactions] = useState(transactionsList);
 
     const [itemsList, setItemsList] = useState([
         {

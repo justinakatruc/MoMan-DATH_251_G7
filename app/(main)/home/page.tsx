@@ -1,12 +1,34 @@
 "use client";
 
 import Topbar from "@/app/components/Topbar";
+import { EventType } from "@/app/model";
 import { useState } from "react";
+import { useUserStore } from "../store/useUserStore";
+import { redirect } from "next/navigation";
 
 export default function Home() {
+  const { user } = useUserStore();
+  if (!user) redirect("/login");
+
   const [activeTab, setActiveTab] = useState("Expense");
   const [displayIncome, setDisplayIncome] = useState(false);
   const [displayExpense, setDisplayExpense] = useState(false);
+
+  const reports = [
+    { title: 'Monthly Expenses', value: '$1,234', trend: '+12%', trendUp: false },
+    { title: 'Monthly Income', value: '$5,678', trend: '+8%', trendUp: true },
+    { title: 'Savings Rate', value: '45%', trend: '+5%', trendUp: true },
+  ];
+
+  const today = new Date();
+
+  const [events, setEvents] = useState<EventType[]>([
+    { date: new Date(today.getFullYear(), today.getMonth(), today.getDate()), title: "Team Meeting", time: "10:00 AM"},
+    { date: new Date(today.getFullYear(), today.getMonth(), today.getDate()), title: "Deadline", time: "10:00 AM"},
+    { date: new Date(today.getFullYear(), today.getMonth(), today.getDate()), title: "Lunch with friends", time: "10:00 AM"},
+    { date: new Date(today.getFullYear(), today.getMonth(), today.getDate()), title: "Doctor Appointment", time: "10:00 AM"},
+    { date: new Date(today.getFullYear(), today.getMonth(), today.getDate()), title: "Company Workshop", time: "10:00 AM"},
+  ]);
 
   const [expenses, setExpenses] = useState([
     { name: "Banana", category: "Food & Drink", price: "$2", color: "#eb6a63" },
@@ -38,7 +60,7 @@ export default function Home() {
   ]);
 
   const [itemsExpense, setItemsExpense] = useState([
-    { name: "Bitcoin", category: "Investment", price: "$30", color: "#37C39A" },
+    { name: "Watching Movie", category: "Entertainment", price: "$30", color: "#37C39A" },
     { name: "Banana", category: "Food & Drink", price: "$2", color: "#eb6a63" },
     { name: "Pepsi", category: "Food & Drink", price: "$5", color: "#eb6a63" },
   ]);
@@ -60,7 +82,7 @@ export default function Home() {
         <div className="flex flex-row justify-around items-center mt-8 w-full gap-x-4 px-6">
 
           {/* Overview */}
-          <div className="bg-white rounded-2xl shadow-md/20 p-4 h-64 w-1/3 flex flex-col gap-y-1">
+          <div className="bg-white rounded-2xl shadow-md/20 p-4 h-74 w-1/3 flex flex-col gap-y-1">
 
             <div className="flex flex-row justify-between items-center">
               <h1 className="text-2xl font-inter font-semibold text-gray-800">Overview</h1>
@@ -91,19 +113,55 @@ export default function Home() {
           </div>
 
           {/* Report */}
-          <div className="bg-white rounded-2xl shadow-md/20 p-4 h-64 w-1/3 flex flex-col gap-y-1">
+          <div className="bg-white rounded-2xl shadow-md/20 p-4 h-74 w-1/3 flex flex-col gap-y-1">
             <div className="flex flex-row justify-between items-center">
-              <h1 className="text-2xl font-inter font-semibold text-gray-800">Reports</h1>
+              <a href="/report" className="text-2xl font-inter font-semibold text-gray-800 hover:underline">Reports</a>
+            </div>
+            <div className="flex flex-col px-2 gap-y-2">
+              {reports.map((report, index) => (
+                <div key={index} className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">{report.title}</span>
+                    <span className={`text-xs ${report.trendUp ? 'text-emerald-500' : 'text-red-500'}`}>
+                      {report.trend}
+                    </span>
+                  </div>
+                  <div className="text-gray-900">{report.value}</div>
+                  <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                    <div 
+                      className={`h-full ${report.trendUp ? 'bg-emerald-400' : 'bg-red-400'}`}
+                      style={{ width: '70%' }}
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
           {/* Scheduler */}
-          <div className="bg-white rounded-2xl shadow-md/20 p-4 h-64 w-1/3 flex flex-col gap-y-1">
+          <div className="bg-white rounded-2xl shadow-md/20 p-4 h-74 w-1/3 flex flex-col gap-y-1">
             <div className="flex flex-row justify-between items-center">
-              <h1 className="text-2xl font-inter font-semibold text-gray-800">Scheduler</h1>
+              <a href="/scheduler" className="text-2xl font-inter font-semibold text-gray-800 hover:underline">Scheduler</a>
+            </div>
+            <div className="flex flex-col px-2 gap-y-2 overflow-y-auto">
+              {events.map((event, index) => (
+                <div key={index} className="flex gap-3">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-emerald-100 flex flex-col items-center justify-center">
+                    <div className="text-gray-900">
+                      {event.date.getDate()}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {event.date.toLocaleString('en-US', { month: 'short' })}
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-gray-900">{event.title}</div>
+                    <div className="text-sm text-gray-400">{event.time}</div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-
         </div>
 
         <div className="flex flex-row justify-around items-center gap-x-4 mt-8 px-6">
@@ -186,7 +244,7 @@ export default function Home() {
 
                 {
                   displayIncome && (
-                    <div className="flex flex-col gap-y-3 mt-2 w-full max-h-[120px] overflow-y-auto">
+                    <div className="flex flex-col gap-y-3 mt-2 w-full max-h-[140px] overflow-y-auto">
                       {itemsIncome.map((item, index) => (
                         <div
                           key={index}
@@ -227,7 +285,7 @@ export default function Home() {
               
                 {
                   displayExpense && (
-                    <div className="flex flex-col gap-y-3 mt-2 w-full max-h-[120px] overflow-y-auto">
+                    <div className="flex flex-col gap-y-3 mt-2 w-full max-h-[140px] overflow-y-auto">
                       {itemsExpense.map((item, index) => (
                         <div
                           key={index}
@@ -294,17 +352,53 @@ export default function Home() {
           </div>
 
           {/* Report */}
-          <div className="bg-white rounded-2xl shadow-md/20 p-4 h-40 w-full">
-          <div className="flex flex-row justify-between items-center">
-            <h1 className="text-xl font-inter font-semibold text-gray-800">Reports</h1>
-            <button className="text-3xl text-gray-200">+</button>
+          <div className="bg-white rounded-2xl shadow-md/20 p-4 h-70 w-full">
+            <div className="flex flex-row justify-between items-center">
+              <a href="/report" className="text-xl font-inter font-semibold text-gray-800 hover:underline">Reports</a>
+            </div>
+            <div className="flex flex-col px-2 gap-y-3 mt-4">
+              {reports.map((report, index) => (
+                <div key={index} className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">{report.title}</span>
+                    <span className={`text-xs ${report.trendUp ? 'text-emerald-500' : 'text-red-500'}`}>
+                      {report.trend}
+                    </span>
+                  </div>
+                  <div className="text-gray-900">{report.value}</div>
+                  <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                    <div 
+                      className={`h-full ${report.trendUp ? 'bg-emerald-400' : 'bg-red-400'}`}
+                      style={{ width: '70%' }}
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
           
           {/* Scheduler */}
-          <div className="bg-white rounded-2xl shadow-md/20 p-4 h-40 w-full">
+          <div className="bg-white rounded-2xl shadow-md/20 p-4 h-70 w-full">
             <div className="flex flex-row justify-between items-center">
-              <h1 className="text-xl font-inter font-semibold text-gray-800">Scheduler</h1>
+              <a href="/scheduler" className="text-xl font-inter font-semibold text-gray-800 hover:underline">Scheduler</a>
+            </div>
+            <div className="flex flex-col px-2 gap-y-3 mt-4 h-50 overflow-y-auto">
+              {events.map((event, index) => (
+                <div key={index} className="flex gap-3">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-emerald-100 flex flex-col items-center justify-center">
+                    <div className="text-gray-900">
+                      {event.date.getDate()}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {event.date.toLocaleString('en-US', { month: 'short' })}
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-gray-900">{event.title}</div>
+                    <div className="text-sm text-gray-400">{event.time}</div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>          
           
@@ -342,7 +436,7 @@ export default function Home() {
               </div>
 
               {/* Danh sách item */}
-              <div className="space-y-2 overflow-y-auto h-25">
+              <div className="space-y-2 overflow-y-auto h-40">
                 {currentItems.map((item, index) => (
                   <div
                     key={index}
@@ -370,7 +464,7 @@ export default function Home() {
             {/* Expense Column */}
             <div className="flex-1">
               <h2 className="text-xl font-inter font-semibold text-gray-800 text-center">Expense</h2>
-              <div className="space-y-3 overflow-y-auto h-38 mt-3">
+              <div className="space-y-3 overflow-y-auto h-40 mt-3">
                 {expenses.map((item, index) => (
                   <div
                     key={index}
@@ -394,7 +488,7 @@ export default function Home() {
           {/* Income Column */}
           <div className="flex-1">
             <h2 className="text-xl font-inter font-semibold text-gray-800 text-center">Income</h2>
-            <div className="space-y-3 overflow-y-auto h-38 mt-3">
+            <div className="space-y-3 overflow-y-auto h-40 mt-3">
               {incomes.map((item, index) => (
                 <div
                   key={index}

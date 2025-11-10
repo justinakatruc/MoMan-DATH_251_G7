@@ -2,8 +2,12 @@
 import { useState, useRef, useEffect } from "react";
 import { useCategories } from "@/app/context/CategoryContext";
 import Topbar from "@/app/components/Topbar";
+import { useUserStore } from "../../store/useUserStore";
+import { redirect } from "next/navigation";
 
-export default function FoodnDrink() {
+export default function CategoryPage() {
+  const { user } = useUserStore();
+  if (!user) redirect("/login");
 
   const months = [
     "January",

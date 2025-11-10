@@ -2,10 +2,10 @@
 
 import { Calendar, CircleUser } from 'lucide-react'
 import { useState } from 'react';
-import { UserType } from '../model';
+import { User } from '../model';
 
 interface ProfileCardProps {
-    user: UserType;
+    user: User;
     setIsOpen: (isOpen: boolean) => void;
 }
 

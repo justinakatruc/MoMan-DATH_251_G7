@@ -16,7 +16,13 @@ export type Transaction = {
   description?: string;
 }
 
-export type UserType = {
+export type EventType = {
+  date: Date;
+  title: string;
+  time: string;
+}
+
+export type User = {
   id: number;
   firstName: string;
   lastName: string;

@@ -1,15 +1,96 @@
 "use client"
 
+import { accountsList, usersList } from "@/app/(main)/store/UserStore";
+import { useUserStore } from "@/app/(main)/store/useUserStore";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
+
+type FormErrors = {
+  [key: string]: string;
+};
 
 export default function LoginPage() {
+  const baseData: { email: string; password: string } = { email: "", password: "" };
+  const [formData, setFormData] = useState(baseData);
+  const [errors, setErrors] = useState<FormErrors>({});
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { setUser } = useUserStore();
+  const router = useRouter();
+
+  const validateForm = () : boolean => {
+    const newErrors: FormErrors = {};
+
+    if (!formData.email) {
+      newErrors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = "Email is invalid";
+    }
+    if (!formData.password) {
+      newErrors.password = "Password is required";
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }
+
+  const handleLogin = async () => {
+    setErrors({});
+
+    if (!validateForm()) {
+      return;
+    }
+
+    const newErrors: FormErrors = {};
+    setIsLoading(true);
+
+    setTimeout(() => {
+      const account = accountsList.find(
+        (acc) => acc.email === formData.email && acc.password === formData.password
+      )
+
+      if (account) {
+        const foundUser = usersList.find(
+          (user) => user.email === account.email
+        )
+        if (foundUser) {
+          console.log("Found user, setting to store:", foundUser);
+          setUser(foundUser);
+          
+          // Debug: Check if store is updated
+          setTimeout(() => {
+            const storeValue = localStorage.getItem('user-storage');
+            console.log("LocalStorage after setUser:", storeValue);
+          }, 100);
+          
+          setIsLoading(false);
+          toast.success("Login successful!");
+          if (foundUser.accountType === "Admin") {
+            router.push("/admin/dashboard");
+          }
+          else {
+            router.push("/home");
+          }
+        }
+        else {
+          toast.error("User not found.");
+        }
+      } else {
+        newErrors.general = "Invalid email or password.";
+        setErrors(newErrors);
+        toast.error("Invalid email or password.");
+      }
+      setIsLoading(false);
+    }, 1000);
+  }
+
+
   return (
     <div className="min-h-screen w-full flex items-center justify-center p-6 text-[#000000]">
       <div className="w-full max-w-md bg-[#FBFDFF] shadow rounded-xl p-6 space-y-6">
         <div className="space-y-1 text-center">
           <h1 className="text-2xl font-semibold">Login</h1>
-          <p className="text-sm text-[#DEDEE0]">Wellcome back! Please login to access your account</p>
+          <p className="text-sm text-gray-500">Wellcome back! Please login to access your account</p>
         </div>
 
         <div className="space-y-4">
@@ -21,9 +102,14 @@ export default function LoginPage() {
               id="email"
               name="email"
               type="email"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               placeholder="Enter your email"
-              className="w-full rounded-md border border-[#DEDEE0] bg-[#FBFDFF] px-3 py-2 text-sm shadow-sm placeholder-[#DEDEE0] focus:outline-none focus:ring-2 focus:ring-[#37C39A]"
+              className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-emerald-500 focus:outline-none text-gray-900"
             />
+            {errors.email && (
+              <p className="text-sm text-red-500 mt-1">{errors.email}</p>
+            )}
           </div>
           <div className="space-y-2">
             <label htmlFor="password" className="block text-sm font-medium text-[#000000]">
@@ -34,14 +120,16 @@ export default function LoginPage() {
                 id="password"
                 name="password"
                 type={showPassword ? "text" : "password"}
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 placeholder="Enter your password"
-                className="w-full rounded-md border border-[#DEDEE0] bg-[#FBFDFF] px-3 py-2 pr-10 text-sm shadow-sm placeholder-[#DEDEE0] focus:outline-none focus:ring-2 focus:ring-[#37C39A]"
+                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-emerald-500 focus:outline-none text-gray-900"
               />
               <button
                 type="button"
                 aria-label={showPassword ? "Hide password" : "Show password"}
                 onClick={() => setShowPassword((v) => !v)}
-                className="absolute inset-y-0 right-0 flex items-center pr-3 text-[#DEDEE0] hover:text-[#000000]"
+                className="cursor-pointer absolute inset-y-0 right-0 flex items-center pr-3 text-[#DEDEE0] hover:text-[#000000]"
               >
                 {showPassword ? (
                   // Eye-off icon
@@ -59,15 +147,20 @@ export default function LoginPage() {
                 )}
               </button>
             </div>
+            {errors.password && (
+              <p className="text-sm text-red-500 mt-1">{errors.password}</p>
+            )}
             <div className="flex justify-end">
               <a href="#" className="text-sm font-semibold text-[#000000] hover:underline">Forgot Password?</a>
             </div>
           </div>
           <button
-            type="button"
-            className="w-full rounded-[20px] bg-[#37C39A] px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#07B681]"
+            type="submit"
+            className="cursor-pointer w-full bg-emerald-500 text-[#FBFDFF] py-2.5 sm:py-3 rounded-lg font-semibold hover:bg-[#07B681] transition duration-200"
+            onClick={handleLogin}
+            disabled={isLoading}
           >
-            Sign in
+            Log In
           </button>
         </div>
 
@@ -76,13 +169,13 @@ export default function LoginPage() {
             <span className="w-full border-t border-[#DEDEE0]" />
           </div>
           <div className="relative flex justify-center">
-            <span className="bg-[#FBFDFF] px-2 text-xs text-[#DEDEE0]">OR</span>
+            <span className="bg-[#FBFDFF] px-2 text-gray-400 text-sm">OR</span>
           </div>
         </div>
 
         <button
           type="button"
-          className="w-full inline-flex items-center justify-center gap-2 rounded-md border border-[#DEDEE0] bg-[#FBFDFF] px-4 py-2 text-sm font-medium text-[#000000] shadow-sm hover:bg-white"
+          className="cursor-pointer w-full inline-flex items-center justify-center gap-2 rounded-md border border-[#DEDEE0] bg-[#FBFDFF] px-4 py-2 text-sm font-medium text-[#000000] shadow-sm hover:bg-white"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -100,8 +193,8 @@ export default function LoginPage() {
           Continue with Google
         </button>
 
-        <p className="text-center text-sm text-[#DEDEE0]">
-          Don&apos;t have an account? <a href="#" className="text-[#000000] hover:underline font-semibold">Sign up</a>
+        <p className="text-center text-sm text-gray-600">
+          Don&apos;t have an account? <a href="/signup" className="text-[#000000] hover:underline font-semibold">Sign up</a>
         </p>
       </div>
     </div>

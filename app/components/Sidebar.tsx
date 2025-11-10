@@ -6,16 +6,19 @@ import { Category } from '@/app/model'
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Users, BadgeDollarSign, LayoutDashboardIcon, ArrowRight, RefreshCcw } from 'lucide-react'
+import { Users, BadgeDollarSign, LayoutDashboardIcon, ArrowRight, RefreshCcw, Menu } from 'lucide-react'
 import Profile from './Profile'
+import { useUserStore } from '../(main)/store/useUserStore'
 
 export default function Sidebar() {
+    const { user } = useUserStore()
     const expenses: Category[]  = expenseCategories
     const incomes: Category[] = incomeCategories
     const [showLabel, setShowLabel] = useState<number | null>(null)
     const [showProfileMenu, setShowProfileMenu] = useState(false)
     const menuRef = useRef<HTMLDivElement>(null)
     const pathname = usePathname()
+    const { clear } = useUserStore()
 
 
     const formatLink = (name: string) => {
@@ -106,39 +109,33 @@ export default function Sidebar() {
                                     </div>
                                 )}
                             </Link>
-                            <Link
-                                href={`/home`}
-                                key={5} className='size-[40px] md:size-[50px] flex items-center justify-center cursor-pointer bg-[rgba(226,229,233,0.5)] hover:bg-[rgba(226,229,233,0.8)] rounded-full relative'
-                                onMouseEnter={() => {
-                                    setTimeout(() => setShowLabel(5), 100)
-                                }}
-                                onMouseLeave={() => {
-                                    setTimeout(() => setShowLabel(null), 100)
-                                }}
-                            >
-                                <RefreshCcw className='size-[24px] md:size-[28px]' />
-                                {showLabel === 5 && (
-                                    <div className='absolute top-[65px] w-[80px] flex items-center justify-center text-[9px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px]'>
-                                        Change View
-                                    </div>
-                                )}
-                            </Link>
-                            <div
-                                key={6} className='size-[40px] md:size-[50px] flex items-center justify-center cursor-pointer bg-[rgba(226,229,233,0.5)] hover:bg-[rgba(226,229,233,0.8)] rounded-full relative'
-                                onMouseEnter={() => {
-                                    setTimeout(() => setShowLabel(6), 100)
-                                }}
-                                onMouseLeave={() => {
-                                    setTimeout(() => setShowLabel(null), 100)
-                                }}
-                            >
-                                <Profile />
-                                {showLabel === 6 && (
-                                    <div className='absolute top-[65px] w-[80px] flex items-center justify-center text-[9px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px]'>
-                                        Profile
-                                    </div>
-                                )}
-                            </div>
+                            {
+                                user ? 
+                                    <div
+                                        key={6} className='size-[40px] md:size-[50px] flex items-center justify-center cursor-pointer bg-[rgba(226,229,233,0.5)] hover:bg-[rgba(226,229,233,0.8)] rounded-full relative'
+                                        onMouseEnter={() => {
+                                            setTimeout(() => setShowLabel(6), 100)
+                                        }}
+                                        onMouseLeave={() => {
+                                            setTimeout(() => setShowLabel(null), 100)
+                                        }}
+                                    >
+                                        <Profile
+                                            id={user!.id}
+                                            firstName={user!.firstName}
+                                            lastName={user!.lastName}
+                                            email={user!.email}
+                                            memberSince={user!.memberSince}
+                                            accountType={user!.accountType}
+                                        />
+                                        {showLabel === 6 && (
+                                            <div className='absolute top-[65px] w-[80px] flex items-center justify-center text-[9px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px]'>
+                                                Profile
+                                            </div>
+                                        )}
+                                    </div> 
+                                : <></>
+                            }
                         </> : <>
                             <Link
                                 href={`/category`}
@@ -193,6 +190,27 @@ export default function Sidebar() {
                             </Link>
                         </>
                     }
+                    {
+                        user?.accountType === "Admin" && (
+                            <Link
+                                href={pathname.includes("admin") ? "/home" : "/admin/dashboard"}
+                                key={5} className='size-[40px] md:size-[50px] flex items-center justify-center cursor-pointer bg-[rgba(226,229,233,0.5)] hover:bg-[rgba(226,229,233,0.8)] rounded-full relative'
+                                onMouseEnter={() => {
+                                    setTimeout(() => setShowLabel(5), 100)
+                                }}
+                                onMouseLeave={() => {
+                                    setTimeout(() => setShowLabel(null), 100)
+                                }}
+                            >
+                                <RefreshCcw className='size-[24px] md:size-[28px]' />
+                                {showLabel === 5 && (
+                                    <div className='absolute top-[65px] w-[80px] flex items-center justify-center text-[9px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px]'>
+                                        Change View
+                                    </div>
+                                )}
+                            </Link>
+                        )
+                    }
                     <div ref={menuRef} className='relative'>
                         <li
                             key={4} className='size-[40px] md:size-[50px] flex items-center justify-center cursor-pointer bg-[rgba(226,229,233,0.5)] rounded-full border relative'
@@ -207,9 +225,10 @@ export default function Sidebar() {
                                 setShowProfileMenu(!showProfileMenu)
                             }}
                         >
+                            <Menu className='size-[24px] md:size-[28px]' />
                             {showLabel === 4 && (
                                 <div className='absolute top-[65px] w-[80px] flex items-center justify-center text-[9px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px] z-[11]'>
-                                    Account
+                                    Menu
                                 </div>
                             )}
                         </li>
@@ -217,7 +236,7 @@ export default function Sidebar() {
                             <div className='absolute top-[60px] right-0 w-[320px] md:w-[360px] h-[80px] bg-[#ffffff] shadow-md rounded-[15px] z-10'>
                                 <div className='p-4 flex flex-col gap-y-3'>
     
-                                    <div className='flex items-center cursor-pointer hover:bg-[rgba(226,229,233,0.3)] rounded-[10px] p-2'>
+                                    <div className='flex items-center cursor-pointer hover:bg-[rgba(226,229,233,0.3)] rounded-[10px] p-2' onClick={clear}>
                                         <div className='size-[36px] flex items-center justify-center bg-[#e2e5e9] rounded-full'>
                                             <Image src="/logout.png" alt="User Icon" width={20} height={20} className='size-[20px]' />
                                         </div>
@@ -300,16 +319,23 @@ export default function Sidebar() {
                 <div className='w-full flex flex-1 px-4 items-end mb-4'>
                     <div className='w-full flex flex-col gap-y-4'>
                         {
-                            pathname.includes('admin') && (
+                            user?.accountType === "Admin" && (
                                 <>
                                     <div className='h-[40px] xl:h-[45px] 2xl:h-[60px] bg-[#F4F7FD] rounded-[20px] px-4 flex gap-x-3 items-center'>
-                                        <Profile />
+                                        <Profile
+                                            id={user!.id}
+                                            firstName={user!.firstName}
+                                            lastName={user!.lastName}
+                                            email={user!.email}
+                                            memberSince={user!.memberSince}
+                                            accountType={user!.accountType}
+                                        />
                                         <div>
-                                            <div className='text-[14px] font-semibold'>Admin User</div>
-                                            <div className='text-[12px] font-medium text-[rgba(0,0,0,0.6)]'>admin@financeapp.com</div>
+                                            <div className='text-[14px] font-semibold'>{user!.firstName} {user!.lastName}</div>
+                                            <div className='text-[12px] font-medium text-[rgba(0,0,0,0.6)]'>{user!.email}</div>
                                         </div>
                                     </div>
-                                    <Link href={'/home'} className='flex items-center justify-center h-[40px] xl:h-[45px] 2xl:h-[60px] bg-[#F4F7FD] hover:bg-[#E0E4EA] cursor-pointer rounded-[20px] font-semibold text-[15px] xl:text-[17px] 2xl:text-[19px]'>
+                                    <Link href={pathname.includes("admin") ? "/home" : "/admin/dashboard"} className='flex items-center justify-center h-[40px] xl:h-[45px] 2xl:h-[60px] bg-[#F4F7FD] hover:bg-[#E0E4EA] cursor-pointer rounded-[20px] font-semibold text-[15px] xl:text-[17px] 2xl:text-[19px]'>
                                         <div className='flex flex-row gap-x-2 items-center justify-center'>
                                             <ArrowRight className='rotate-180 size-5 2xl:size-6' />
                                             <div>Switch View</div>
@@ -318,7 +344,10 @@ export default function Sidebar() {
                                 </>
                             )
                         }
-                        <button className='h-[40px] xl:h-[45px] 2xl:h-[60px] bg-[rgba(235,106,99,0.91)] hover:bg-[rgba(235,106,99,1)] cursor-pointer rounded-[20px] text-white font-semibold text-[15px] xl:text-[17px] 2xl:text-[19px]'>
+                        <button 
+                            className='h-[40px] xl:h-[45px] 2xl:h-[60px] bg-[rgba(235,106,99,0.91)] hover:bg-[rgba(235,106,99,1)] cursor-pointer rounded-[20px] text-white font-semibold text-[15px] xl:text-[17px] 2xl:text-[19px]'
+                            onClick={clear}
+                        >
                             Log Out
                         </button>
                     </div>

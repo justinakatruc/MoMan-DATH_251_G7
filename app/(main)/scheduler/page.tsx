@@ -2,14 +2,14 @@
 
 import Topbar from "@/app/components/Topbar";
 import { NativeSelect, NativeSelectOption } from "@/app/components/ui/native-select";
+import { EventType } from "@/app/model";
 import { useState } from "react";
+import { useUserStore } from "../store/useUserStore";
+import { redirect } from "next/navigation";
 
 export default function Scheduler() {
-    interface EventType {
-        date: Date;
-        title: string;
-        time: string;
-    }
+    const { user } = useUserStore();
+    if (!user) redirect("/login");
 
     const today = new Date();
     const [currentMonth, setCurrentMonth] = useState(today.getMonth());

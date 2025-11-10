@@ -7,16 +7,16 @@ import { usePathname } from 'next/navigation';
 
 
 interface ProfileProps {
-    id?: number;
-    firstName?: string;
-    lastName?: string;
-    email?: string;
-    memberSince?: string;
-    accountType?: string;
+    id: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+    memberSince: string;
+    accountType: string;
 }
 
 export default function Profile({ 
-    id = 1, firstName = 'John', lastName = 'Doe', email = 'john.doe@example.com', memberSince = '2022-01-15', accountType = 'Student' }: ProfileProps) 
+    id, firstName , lastName, email, memberSince, accountType }: ProfileProps) 
 {
     const [isOpen, setIsOpen] = useState(false);
     const pathname = usePathname();
