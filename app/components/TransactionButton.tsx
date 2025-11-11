@@ -65,8 +65,8 @@ export default function TransactionButton() {
     <>
       {/* Responsive Button */}
       <button
-        onClick={() => setIsOpen(true)}
-        className="flex w-12 h-12 bg-[#07B681] rounded-[12px] items-center justify-center shadow-md hover:bg-green-600 transition-colors cursor-pointer"
+              onClick={() => setIsOpen(true)}
+              className="flex w-12 h-12 bg-[#07B681] rounded-[12px] items-center justify-center shadow-md hover:bg-[rgba(7,182,129,0.8)] transition-colors cursor-pointer"
       >
         <svg
           className="w-8 h-8 text-white"

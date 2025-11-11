@@ -345,7 +345,7 @@ export default function Sidebar() {
                             )
                         }
                         <button 
-                            className='h-[40px] xl:h-[45px] 2xl:h-[60px] bg-[rgba(235,106,99,0.91)] hover:bg-[rgba(235,106,99,1)] cursor-pointer rounded-[20px] text-white font-semibold text-[15px] xl:text-[17px] 2xl:text-[19px]'
+                            className='h-[40px] xl:h-[45px] 2xl:h-[60px] bg-[rgba(235,106,99,0.91)] hover:bg-[rgba(235,106,99,1)] cursor-pointer rounded-[12px] text-white font-semibold text-[15px] xl:text-[17px] 2xl:text-[19px]'
                             onClick={clear}
                         >
                             Log Out

@@ -3,13 +3,9 @@
 import Topbar from '@/app/components/Topbar';
 import Image from 'next/image'
 import { useState } from 'react';
-import { useUserStore } from '../store/useUserStore';
-import { redirect } from 'next/navigation';
 
 
 export default function Report() {
-    const { user } = useUserStore();
-    if (!user) redirect("/login");
 
     type Msg = { text: string; sender: 'user' | 'bot'; time: string};
     const [messages, setMessages] = useState("")
@@ -30,12 +26,42 @@ export default function Report() {
                     {/*Header*/}
                     <Topbar />
                     {/*Body*/}
-                    <div className="flex flex-row gap-x-10 items-top mt-8 px-6">
+                    <div className="grid grid-cols-7 gap-x-10 items-top mt-8 px-6">
 
                         {/*Message*/}
-                        <div className="space-y-8">
-                            <div className="bg-white rounded-2xl shadow-md/20 p-4 h-156 w-300"></div>
-                            <div className="bg-white rounded-2xl shadow-md/20 p-4 h-16 w-300">
+                        <div className="col-span-5 space-y-8">
+                            <div className="bg-white rounded-2xl shadow-md/20 p-4 h-156 overflow-y-auto">
+                                {chatHistory.length === 0 ? (
+                                    <p className="text-gray-400 text-sm text-center mt-8">No messages yet</p>
+                                    ) : (
+                                    chatHistory.map((msg, index) => (
+                                        <div
+                                        key={index}
+                                        className={`flex ${
+                                            msg.sender === "user" ? "justify-end" : "justify-start"
+                                        } mb-3`}
+                                        >
+                                        <div
+                                            className={`px-4 py-2 rounded-xl max-w-[75%] break-words whitespace-pre-wrap flex flex-col ${
+                                            msg.sender === "user"
+                                                ? "bg-[#cdfaec] text-gray-800"
+                                                : "bg-gray-100 text-gray-700"
+                                            }`}
+                                        >
+                                            <span className="text-sm">{msg.text}</span>
+                                            <span
+                                            className={`text-[10px] text-gray-500 mt-1 ${
+                                                msg.sender === "user" ? "text-right" : "text-left"
+                                            }`}
+                                            >
+                                            {msg.time}
+                                            </span>
+                                        </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                            <div className="bg-white rounded-2xl shadow-md/20 p-4 h-16">
                                 <div className="flex flex-row justify-between items-center gap-x-4">
                                     <input type="text"
                                         placeholder='Ask anything about budgeting' 
@@ -51,14 +77,14 @@ export default function Report() {
                         </div>
 
                         {/*Income/Expense*/}
-                        <div className="space-y-8 ml-10">
-                            <div className="bg-white rounded-2xl shadow-md/20 p-4 h-64 w-64">
+                        <div className="col-span-2 space-y-8">
+                            <div className="bg-white rounded-2xl shadow-md/20 p-4 h-64">
                                 <div className='flex flex-col space-y-12 items-center mt-4'>
                                     <h1 className="text-2xl font-inter font-semibold text-gray-800 ">Income</h1>
                                     <p className="font-inter text-2xl font-thin text-gray-900">$90000</p>
                                 </div>
                             </div>
-                            <div className="bg-white rounded-2xl shadow-md/20 p-4 h-64 w-64">
+                            <div className="bg-white rounded-2xl shadow-md/20 p-4 h-64">
                                 <div className='flex flex-col space-y-12 items-center mt-4'>
                                     <h1 className="text-2xl font-inter font-semibold text-gray-800 ">Expense</h1>
                                     <p className="font-inter text-2xl font-thin text-gray-900">$90000</p>

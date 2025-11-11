@@ -3,13 +3,8 @@
 import Topbar from "@/app/components/Topbar";
 import { EventType } from "@/app/model";
 import { useState } from "react";
-import { useUserStore } from "../store/useUserStore";
-import { redirect } from "next/navigation";
 
 export default function Home() {
-  const { user } = useUserStore();
-  if (!user) redirect("/login");
-
   const [activeTab, setActiveTab] = useState("Expense");
   const [displayIncome, setDisplayIncome] = useState(false);
   const [displayExpense, setDisplayExpense] = useState(false);

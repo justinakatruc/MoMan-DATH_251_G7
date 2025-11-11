@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "@/app/globals.css";
 import Sidebar from "@/app/components/Sidebar";
 import { CategoryProvider } from "@/app/context/CategoryContext";
+import AuthGate from "../components/AuthGate";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -15,12 +16,14 @@ export default function MainLayout({
 }>) {
   return (
     <CategoryProvider>
-      <div className="w-full flex flex-col lg:flex-row bg-[#F4F7FD]">
-        <Sidebar />
-        <div className="flex-1 w-full px-10 lg:px-0 xl:px-15 2xl:px-20">
-          {children}
+      <AuthGate>
+        <div className="w-full flex flex-col lg:flex-row bg-[#F4F7FD]">
+          <Sidebar />
+          <div className="flex-1 w-full px-10 lg:px-0 xl:px-15 2xl:px-20">
+            {children}
+          </div>
         </div>
-      </div>
+      </AuthGate>
     </CategoryProvider>
   );
 }

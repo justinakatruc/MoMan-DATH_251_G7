@@ -6,8 +6,6 @@ import { X } from 'lucide-react';
 import { useCategories } from "@/app/context/CategoryContext";
 import Topbar from "@/app/components/Topbar";
 import Link from "next/link";
-import { useUserStore } from "../store/useUserStore";
-import { redirect } from "next/navigation";
 
 interface CategoryItemProps {
   category: Category;
@@ -222,9 +220,6 @@ function AddCustomCategoryModal({
 }
 
 export default function CategoriesPage() {
-  const { user } = useUserStore();
-  if (!user) redirect("/login");
-
   const [isEditExpenseMode, setIsEditExpenseMode] = useState(false);
   const [isEditIncomeMode, setIsEditIncomeMode] = useState(false);
   const [isRemoveExpenseMode, setIsRemoveExpenseMode] = useState(false);

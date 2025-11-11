@@ -4,13 +4,8 @@ import Topbar from "@/app/components/Topbar";
 import { NativeSelect, NativeSelectOption } from "@/app/components/ui/native-select";
 import { EventType } from "@/app/model";
 import { useState } from "react";
-import { useUserStore } from "../store/useUserStore";
-import { redirect } from "next/navigation";
 
 export default function Scheduler() {
-    const { user } = useUserStore();
-    if (!user) redirect("/login");
-
     const today = new Date();
     const [currentMonth, setCurrentMonth] = useState(today.getMonth());
     const [currentYear, setCurrentYear] = useState(today.getFullYear());
@@ -126,17 +121,17 @@ export default function Scheduler() {
                 <Topbar />
 
                 {/* Body */}
-                <div className="flex flex-row gap-x-10 items-top mt-4 px-6">
+                <div className="grid grid-cols-5 gap-x-10 items-top mt-4 px-6">
 
-                    <div className="flex flex-col justify-between items-center">
+                    <div className="col-span-3 flex flex-col gap-y-8">
 
                         {/* Calendar */}
-                        <div className="">
+                        <div>
 
                             {/* Month and Year*/}
                             <div className="flex space-x-4 justify-start mb-5">
                                 <NativeSelect 
-                                    className="h-12 w-32 rounded-lg bg-white shadow-md/20 text-gray-800 font-inter text-lg hover:bg-gray-100 focus:outline-none"
+                                    className="h-12 w-32 rounded-lg bg-white shadow-md/20 text-gray-800 font-inter text-lg hover:bg-gray-100 focus:outline-none cursor-pointer"
                                     value={currentMonth}
                                     onChange={handleMonthChange}
                                 >
@@ -147,7 +142,7 @@ export default function Scheduler() {
                                     ))}
                                 </NativeSelect>
                                 <NativeSelect 
-                                    className="h-12 w-32 rounded-lg bg-white shadow-md/20 text-gray-800 font-inter text-lg hover:bg-gray-100 focus:outline-none"
+                                    className="h-12 w-32 rounded-lg bg-white shadow-md/20 text-gray-800 font-inter text-lg hover:bg-gray-100 focus:outline-none cursor-pointer"
                                     value={currentYear}
                                     onChange={handleYearChange}
                                 >
@@ -160,42 +155,43 @@ export default function Scheduler() {
                             </div>
 
                             {/* Calendar Body */}
-                            <div className="bg-white rounded-2xl shadow-md/20 p-4 h-100 w-240">
+                            <div className="flex flex-col bg-white rounded-2xl shadow-md/20 px-4 pb-4 pt-2 h-100">
                                 {/* Day of the week */}
-                                <div className="grid grid-cols-7 gap-x-9 text-center text-gray-900 font-bold p-4">
+                                <div className="grid grid-cols-7 xl:gap-x-4 2xl:gap-x-9 text-center text-gray-900 font-bold p-4">
                                     {daysOfWeek.map((d) => (
-                                        <div key={d}>{d}</div>
+                                        <div key={d} className="flex items-center justify-center">{d}</div>
                                     ))}
                                 </div>
 
                                 {/* Day of month */}
-                                <div className="grid grid-cols-7 gap-y-3 text-center">
+                                <div className="grid grid-cols-7 gap-y-3 xl:gap-x-4 2xl:gap-x-9 text-center px-4">
                                     {days.map((item, i) => (
-                                        <button
-                                            key={i}
-                                            onClick={() => item.type === "current" && setSelectedDate(item.day)}
-                                            className={`h-10 w-10 rounded-full flex items-center justify-center transition-colors duration-150 ml-12 cursor-pointer
-                                                ${
-                                                    item.type === "prev" || item.type === "next"
-                                                    ? "text-gray-400"
-                                                    : item.day === today.getDate() &&
-                                                        currentMonth === today.getMonth() &&
-                                                        currentYear === today.getFullYear()
-                                                    ? "bg-black text-white font-semibold"
-                                                    : selectedDate === item.day && item.type === "current"
-                                                    ? "bg-emerald-400 text-white font-semibold"
-                                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                                }`}
+                                        <div key={i} className="flex items-center justify-center">
+                                            <div
+                                                onClick={() => item.type === "current" && setSelectedDate(item.day)}
+                                                className={`h-10 w-10 rounded-full flex items-center justify-center transition-colors duration-150 cursor-pointer
+                                                    ${
+                                                        item.type === "prev" || item.type === "next"
+                                                        ? "text-gray-400"
+                                                        : item.day === today.getDate() &&
+                                                            currentMonth === today.getMonth() &&
+                                                            currentYear === today.getFullYear()
+                                                        ? "bg-black text-white font-semibold"
+                                                        : selectedDate === item.day && item.type === "current"
+                                                        ? "bg-emerald-400 text-white font-semibold"
+                                                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                                    }`}
                                                 >
                                                     {item.day}
-                                            </button>
+                                            </div>
+                                        </div>
                                     ))}
                                 </div>
                             </div>
                         </div>
                         
                         {/* Add/Delete Event */}
-                        <div className="bg-white rounded-2xl p-6 shadow-md/20 flex w-240">
+                        <div className="bg-white rounded-2xl p-6 shadow-md/20 flex">
                             
                             {/* Event Check */}
                             <div className="w-1/2 pr-4 border-r border-black ">
@@ -272,10 +268,10 @@ export default function Scheduler() {
                     </div>
 
                     {/* Event */}
-                    <div className="flex flex-col space-y-10">
+                    <div className="col-span-2 flex flex-col space-y-10">
 
                         {/* Day Event */}
-                        <div className="w-120 h-80 bg-white rounded-2xl shadow-md/20 p-6 mt-17 ml-10">
+                        <div className="h-80 bg-white rounded-2xl shadow-md/20 p-6 mt-17">
                             <h2 className="text-2xl font-bold text-gray-800 mb-4">
                                 {displayDate} {monthNames[currentMonth]}
                             </h2>
@@ -294,7 +290,7 @@ export default function Scheduler() {
                         </div>
 
                         {/* Month Event */}
-                        <div className="w-120 h-80 bg-white rounded-2xl shadow-md/20 p-6 ml-10">
+                        <div className="h-80 bg-white rounded-2xl shadow-md/20 p-6">
                             <h2 className="text-2xl font-bold text-gray-800 mb-4">
                                 {monthNames[currentMonth]}
                             </h2>
@@ -329,7 +325,7 @@ export default function Scheduler() {
                 <Topbar />
                 
                 {/* Body */}
-                <div className="flex flex-col justify-between ">
+                <div className="flex flex-col gap-y-2">
 
                     {/* Calendar */}
                     <div className="">
@@ -365,31 +361,32 @@ export default function Scheduler() {
                             {/* Day of the week */}
                             <div className="grid grid-cols-7 gap-x-4  text-center text-gray-900 text-sm font-bold p-2">
                                 {daysOfWeek.map((d) => (
-                                    <div key={d}>{d}</div>
+                                    <div key={d} className="flex items-center justify-center">{d}</div>
                                 ))}
                             </div>
 
                             {/* Day of month */}
                             <div className="grid grid-cols-7 gap-y-3 text-center mt-2">
                                 {days.map((item, i) => (
-                                    <button
-                                        key={i}
-                                        onClick={() => item.type === "current" && setSelectedDate(item.day)}
-                                        className={`h-6 w-6 rounded-full flex items-center justify-center transition-colors duration-150 ml-3 cursor-pointer 
-                                            ${
-                                                item.type === "prev" || item.type === "next"
-                                                ? "text-gray-400"
-                                                : item.day === today.getDate() &&
-                                                currentMonth === today.getMonth() &&
-                                                currentYear === today.getFullYear()
-                                                ? "bg-black text-white font-semibold text-sm"
-                                                : selectedDate === item.day && item.type === "current"
-                                                ? "bg-emerald-400 text-white font-semibold text-sm"
-                                                : "bg-gray-100 text-gray-700 hover:bg-gray-200 text-sm"
-                                            }`}
-                                    >
-                                        {item.day}
-                                    </button>
+                                    <div key={i} className="flex items-center justify-center">
+                                        <div
+                                            onClick={() => item.type === "current" && setSelectedDate(item.day)}
+                                            className={`h-6 w-6 rounded-full flex items-center justify-center transition-colors duration-150 cursor-pointer 
+                                                ${
+                                                    item.type === "prev" || item.type === "next"
+                                                    ? "text-gray-400"
+                                                    : item.day === today.getDate() &&
+                                                    currentMonth === today.getMonth() &&
+                                                    currentYear === today.getFullYear()
+                                                    ? "bg-black text-white font-semibold text-sm"
+                                                    : selectedDate === item.day && item.type === "current"
+                                                    ? "bg-emerald-400 text-white font-semibold text-sm"
+                                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200 text-sm"
+                                                }`}
+                                        >
+                                            {item.day}
+                                        </div>
+                                    </div>
                                 ))}
                             </div>
                         </div>

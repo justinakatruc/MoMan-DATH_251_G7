@@ -3,8 +3,6 @@
 import { NativeSelect, NativeSelectOption } from '@/app/components/ui/native-select';
 import { Search, Download, TrendingUp, TrendingDown } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { useUserStore } from '../../store/useUserStore';
-import { redirect } from 'next/navigation';
 
 type Transaction = {
     transaction_id: string;
@@ -69,9 +67,6 @@ function TransactionInformation({transaction, setOpen}: TransactionProps) {
 }
 
 export default function TransactionsPage() {
-    const { user } = useUserStore();
-    if (!user) redirect("/login");
-
     const [transactionsList, setTransactionsList] = useState([
         {
         transaction_id: 'TRX001',

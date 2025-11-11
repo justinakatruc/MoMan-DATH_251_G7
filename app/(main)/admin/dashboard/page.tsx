@@ -1,14 +1,8 @@
 "use client"
 
 import { Users, Activity, DollarSign, TrendingUp } from 'lucide-react'
-import { useUserStore } from '../../store/useUserStore';
-import { redirect } from 'next/navigation';
 
 export default function DashboardPage() {
-  const { user } = useUserStore();
-  if (!user) redirect("/login");
-
-
   const itemsList = [
     {
       title: 'Total Users',

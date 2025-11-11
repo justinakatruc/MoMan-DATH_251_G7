@@ -4,13 +4,8 @@ import { ProfileCard } from '@/app/components/ProfileCard';
 import { User } from '@/app/model';
 import { Search, Mail, EllipsisVertical } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { useUserStore } from '../../store/useUserStore';
-import { redirect } from 'next/navigation';
 
 export default function UserPage() {
-  const { user } = useUserStore();
-  if (!user) redirect("/login");
-
   const [usersList, setUsersList] = useState([
     {
       id: 1,
