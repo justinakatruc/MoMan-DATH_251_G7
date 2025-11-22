@@ -154,6 +154,10 @@ export default function UserPage() {
   }, [inputValue, fullUserList]);
 
   useEffect(() => {
+    setFilteredUsers(usersList);
+  }, [usersList]);
+
+  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
         optionsRef.current &&

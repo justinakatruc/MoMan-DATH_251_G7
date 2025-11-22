@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { Category } from "@/app/model";
-import { X } from 'lucide-react';
+import { X } from "lucide-react";
 import { useCategories } from "@/app/context/CategoryContext";
 import Topbar from "@/app/components/Topbar";
 import Link from "next/link";
@@ -11,26 +11,29 @@ interface CategoryItemProps {
   category: Category;
   removeMode: boolean;
   isEditMode: boolean;
-  onRemove: (categoryId: number, type: "expense" | "income") => void;
+  onRemove: (categoryId: string, type: "expense" | "income") => void;
 }
 
-function CategoryItem({ category, removeMode, isEditMode, onRemove }: CategoryItemProps) {
+function CategoryItem({
+  category,
+  removeMode,
+  isEditMode,
+  onRemove,
+}: CategoryItemProps) {
   const isDefault = category.isDefault;
   const formatLink = (name: string) => {
     let lower = name.toLowerCase().trim();
 
-    if (lower.includes('&')) {
-        lower = lower.replace(/\s*&\s*/g, '&');
-        return lower.replace(/\s+/g, '-');
+    if (lower.includes("&")) {
+      lower = lower.replace(/\s*&\s*/g, "&");
+      return lower.replace(/\s+/g, "-");
     }
 
-    return lower.replace(/\s+/g, '-');
-  }
+    return lower.replace(/\s+/g, "-");
+  };
 
   return (
-    <div 
-      className={`flex items-center gap-3 p-3 select-none relative`}
-    >
+    <div className={`flex items-center gap-3 p-3 select-none relative`}>
       <div
         onClick={() => onRemove(category.id, category.type)}
         className="w-8 h-8 flex items-center"
@@ -45,7 +48,7 @@ function CategoryItem({ category, removeMode, isEditMode, onRemove }: CategoryIt
           }`}
         />
         <button
-          className={`w-6 h-6 rounded-[8px] border-2absolute transition-opacity duration-1000 ${
+          className={`w-6 h-6 rounded-[8px] border-2 absolute transition-opacity duration-1000 ${
             removeMode ? "opacity-100 z-50 shadow-md" : "opacity-0"
           } ${
             isDefault
@@ -56,9 +59,11 @@ function CategoryItem({ category, removeMode, isEditMode, onRemove }: CategoryIt
           {!isDefault && <X size={16} className="m-auto" />}
         </button>
       </div>
-      <Link 
-        href={`/category/${formatLink(category.name)}`} 
-        className={`text-lg lg:text-2xl font-medium ${isEditMode ? 'cursor-default' : 'cursor-pointer underline'}`}
+      <Link
+        href={`/category/${formatLink(category.name)}`}
+        className={`text-lg lg:text-2xl font-medium ${
+          isEditMode ? "cursor-default" : "cursor-pointer underline"
+        }`}
         onClick={(e) => isEditMode && e.preventDefault()}
       >
         {category.name}
@@ -70,7 +75,7 @@ function CategoryItem({ category, removeMode, isEditMode, onRemove }: CategoryIt
 interface AddCustomCategoryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddCategory: (category: Category) => boolean;
+  onAddCategory: (category: Category) => Promise<boolean>;
   type: "expense" | "income";
   setErrorState: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -101,23 +106,21 @@ function AddCustomCategoryModal({
     "/home.png",
   ];
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (categoryName.trim()) {
-      const newId = Date.now() + Math.floor(Math.random() * 1000);
-
       const newCategory: Category = {
-        id: newId,
+        id: "",
         type: type,
         name: categoryName.trim(),
         icon: selectedIcon,
         isDefault: false,
       };
 
-      if (!onAddCategory(newCategory)) {
+      const success = await onAddCategory(newCategory);
+      if (!success) {
         setErrorState(true);
         return;
       }
-
       setCategoryName("");
       setSelectedIcon("/category.png");
       onClose();
@@ -229,10 +232,10 @@ export default function CategoriesPage() {
     type: "expense" | "income" | null;
   }>({ type: null });
   const {
-    userExpenseCategories,
-    userIncomeCategories,
     addCategory,
     removeCategory,
+    userExpenseCategories,
+    userIncomeCategories,
   } = useCategories();
 
   const [errorState, setErrorState] = useState(false);
@@ -260,50 +263,48 @@ export default function CategoriesPage() {
                   >
                     {!isEditExpenseMode ? "Edit" : "Done"}
                   </button>
-                  {
-                    isEditExpenseMode && (
-                      <div className="flex flex-row px-1 justify-end items-center">
-                        <button
-                          onClick={() => setShowAddModal({ type: "expense" })}
-                          className="flex w-8 h-8 bg-transparent rounded-[12px] cursor-pointer"
+                  {isEditExpenseMode && (
+                    <div className="flex flex-row px-1 justify-end items-center">
+                      <button
+                        onClick={() => setShowAddModal({ type: "expense" })}
+                        className="flex w-8 h-8 bg-transparent rounded-[12px] cursor-pointer"
+                      >
+                        <svg
+                          className="w-full h-full text-gray-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
                         >
-                          <svg
-                            className="w-full h-full text-gray-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="square"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                            />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={() => {
-                            setIsRemoveExpenseMode(true);
-                          }}
-                          className="flex w-8 h-8 bg-transparent rounded-[12px] cursor-pointer"
+                          <path
+                            strokeLinecap="square"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                          />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setIsRemoveExpenseMode(true);
+                        }}
+                        className="flex w-8 h-8 bg-transparent rounded-[12px] cursor-pointer"
+                      >
+                        <svg
+                          className="w-full h-full text-gray-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
                         >
-                          <svg
-                            className="w-full h-full text-gray-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="square"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M18 12H6"
-                            />
-                          </svg>
-                        </button>
-                      </div>
-                    )
-                  }
+                          <path
+                            strokeLinecap="square"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M18 12H6"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 overflow-y-auto flex-1">
@@ -337,50 +338,48 @@ export default function CategoriesPage() {
                   >
                     {!isEditIncomeMode ? "Edit" : "Done"}
                   </button>
-                  {
-                    isEditIncomeMode && (
-                      <div className="flex flex-row px-1 justify-end items-center">
-                        <button
-                          onClick={() => setShowAddModal({ type: "income" })}
-                          className="flex w-8 h-8 bg-transparent rounded-[12px] cursor-pointer"
+                  {isEditIncomeMode && (
+                    <div className="flex flex-row px-1 justify-end items-center">
+                      <button
+                        onClick={() => setShowAddModal({ type: "income" })}
+                        className="flex w-8 h-8 bg-transparent rounded-[12px] cursor-pointer"
+                      >
+                        <svg
+                          className="w-full h-full text-gray-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
                         >
-                          <svg
-                            className="w-full h-full text-gray-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="square"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                            />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={() => {
-                            setIsRemoveIncomeMode(true);
-                          }}
-                          className="flex w-8 h-8 bg-transparent rounded-[12px] cursor-pointer"
+                          <path
+                            strokeLinecap="square"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                          />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setIsRemoveIncomeMode(true);
+                        }}
+                        className="flex w-8 h-8 bg-transparent rounded-[12px] cursor-pointer"
+                      >
+                        <svg
+                          className="w-full h-full text-gray-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
                         >
-                          <svg
-                            className="w-full h-full text-gray-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="square"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M18 12H6"
-                            />
-                          </svg>
-                        </button>
-                      </div>
-                    )
-                  }
+                          <path
+                            strokeLinecap="square"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M18 12H6"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
 

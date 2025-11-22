@@ -13,6 +13,7 @@ export function ProfileCard({ user, setIsOpen }: ProfileCardProps) {
     const [firstName, setFirstName] = useState(user.firstName);
     const [lastName, setLastName] = useState(user.lastName);
     const [email, setEmail] = useState(user.email);
+    console.log(user);
 
     return (
         <div 

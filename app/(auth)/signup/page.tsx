@@ -2,27 +2,52 @@
 
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import Image from "next/image";
-import { accountsList, usersList } from "@/app/(main)/store/UserStore";
 import { toast } from "sonner";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { authAPI } from "@/lib/api";
 
 type FormErrors = {
   [key: string]: string;
 };
 
 export default function SignupPage() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
-  const baseData: { email: string; password: string } = { email: "", password: "" };
+  const baseData: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+  } = {
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+  };
   const [formData, setFormData] = useState(baseData);
   const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const validateForm = () : boolean => {
+  const validateName = (name: string): boolean => {
+    const nameRegex = /^[a-zA-Z]+$/;
+    return nameRegex.test(name);
+  };
+
+  const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
 
+    if (!formData.firstName) {
+      newErrors.firstName = "First name is required";
+    } else if (!validateName(formData.firstName)) {
+      newErrors.firstName = "First name is invalid";
+    }
+    if (!formData.lastName) {
+      newErrors.lastName = "Last name is required";
+    } else if (!validateName(formData.lastName)) {
+      newErrors.lastName = "Last name is invalid";
+    }
     if (!formData.email) {
       newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
@@ -37,7 +62,7 @@ export default function SignupPage() {
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }
+  };
 
   const handleSignUp = async () => {
     setErrors({});
@@ -47,34 +72,27 @@ export default function SignupPage() {
 
     setIsLoading(true);
 
-    setTimeout(() => {
-      const existingAccount = accountsList.find(
-        (acc) => acc.email === formData.email
-      );
-      if (existingAccount) {
-        setIsLoading(false);
-        toast.error("An account with this email already exists.");
-      } else {
-        // Simulate account creation
-        accountsList.push({
-          id: accountsList.length + 1,
-          email: formData.email, 
-          password: formData.password
-        });
-        usersList.push({
-          id: usersList.length + 1,
-          firstName: "New",
-          lastName: "User",
-          email: formData.email,
-          memberSince: new Date().toISOString().split('T')[0],
-          accountType: "Student",
-        });
-        setIsLoading(false);
+    try {
+      const result = await authAPI.signup({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (result.success) {
         toast.success("Account created successfully! Please log in.");
-        redirect("/login");
+        router.push("/login");
+      } else {
+        toast.error(result.message || "Signup failed. Please try again.");
       }
-    }, 1000);
-  }
+    } catch (error) {
+      console.error("Signup error:", error);
+      toast.error("An unexpected error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="flex-1 flex justify-center items-center min-h-screen bg-[#F4F7FD] px-4">
@@ -87,6 +105,45 @@ export default function SignupPage() {
         </p>
 
         <div className="mt-8 space-y-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* First Name */}
+            <div>
+              <label className="block text-sm font-medium text-[#000000]">
+                First Name
+              </label>
+              <input
+                type="text"
+                placeholder="Enter your First Name"
+                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-emerald-500 focus:outline-none text-gray-900"
+                value={formData.firstName}
+                onChange={(e) =>
+                  setFormData({ ...formData, firstName: e.target.value })
+                }
+              />
+              {errors.firstName && (
+                <p className="text-sm text-red-500 mt-1">{errors.firstName}</p>
+              )}
+            </div>
+            {/* Last Name */}
+            <div>
+              <label className="block text-sm font-medium text-[#000000]">
+                Last Name
+              </label>
+              <input
+                type="text"
+                placeholder="Enter your Last Name"
+                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-emerald-500 focus:outline-none text-gray-900"
+                value={formData.lastName}
+                onChange={(e) =>
+                  setFormData({ ...formData, lastName: e.target.value })
+                }
+              />
+              {errors.lastName && (
+                <p className="text-sm text-red-500 mt-1">{errors.lastName}</p>
+              )}
+            </div>
+          </div>
+
           {/* Email */}
           <div>
             <label className="block text-sm font-medium text-[#000000]">
@@ -97,7 +154,9 @@ export default function SignupPage() {
               placeholder="Enter your Email"
               className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-emerald-500 focus:outline-none text-gray-900"
               value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
             />
             {errors.email && (
               <p className="text-sm text-red-500 mt-1">{errors.email}</p>
@@ -113,7 +172,9 @@ export default function SignupPage() {
               type={showPassword ? "text" : "password"}
               placeholder="Enter your Password"
               value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, password: e.target.value })
+              }
               title="Password must contain at least one uppercase letter, one lowercase letter, and one number."
               className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-emerald-500 focus:outline-none pr-10 text-gray-900"
             />
@@ -149,7 +210,9 @@ export default function SignupPage() {
               {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
             {errors.confirmPassword && (
-              <p className="text-sm text-red-500 mt-1">{errors.confirmPassword}</p>
+              <p className="text-sm text-red-500 mt-1">
+                {errors.confirmPassword}
+              </p>
             )}
           </div>
 
@@ -160,30 +223,6 @@ export default function SignupPage() {
             disabled={isLoading}
           >
             Sign Up
-          </button>
-
-          {/* Divider */}
-          <div className="flex items-center justify-center gap-2">
-            <hr className="w-1/3 border-gray-300" />
-            <span className="text-gray-400 text-sm">OR</span>
-            <hr className="w-1/3 border-gray-300" />
-          </div>
-
-          {/* Google Sign Up */}
-          <button
-            type="button"
-            className="cursor-pointer w-full border border-gray-300 py-2.5 sm:py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-100 transition duration-200"
-          >
-            <Image
-              src="https://www.svgrepo.com/show/475656/google-color.svg"
-              alt="Google"
-              className="w-5 h-5"
-              width={20}
-              height={20}
-            />
-            <span className="text-gray-700 font-medium text-sm sm:text-base">
-              Sign Up with Google
-            </span>
           </button>
         </div>
 

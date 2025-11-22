@@ -8,18 +8,19 @@ import {
   ReactNode,
 } from "react";
 import { Category, Transaction } from "@/app/model";
-import { expenseCategories, incomeCategories } from "@/app/(main)/store/CategoryStore";
-
+import { useCategoryStore } from "../store/useCategoryStore";
+import { categoryAPI } from "@/lib/api";
+import { toast } from "sonner";
 interface CategoryContextType {
   userExpenseCategories: Category[];
   userIncomeCategories: Category[];
   transactions: Transaction[];
-  addCategory: (category: Category) => boolean;
-  removeCategory: (categoryId: number, type: "expense" | "income") => void;
+  addCategory: (category: Category) => Promise<boolean>;
+  removeCategory: (categoryId: string, type: "expense" | "income") => void;
   addTransaction: (transaction: Transaction) => void;
   removeTransaction: (transactionId: number) => void;
   updateTransaction: (id: number, updated: Partial<Transaction>) => void;
-  getTransactionsByCategory: (categoryId: number) => Transaction[];
+  getTransactionsByCategory: (categoryId: string) => Transaction[];
 }
 
 const CategoryContext = createContext<CategoryContextType | undefined>(
@@ -27,19 +28,13 @@ const CategoryContext = createContext<CategoryContextType | undefined>(
 );
 
 export function CategoryProvider({ children }: { children: ReactNode }) {
-  const [userExpenseCategories, setUserExpenseCategories] =
-    useState<Category[]>(expenseCategories);
-  const [userIncomeCategories, setUserIncomeCategories] =
-    useState<Category[]>(incomeCategories);
+  const { expensesCategory, incomesCategory, fetchCategories } =
+    useCategoryStore();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   useEffect(() => {
-    const storedExpense = localStorage.getItem("userExpenseCategories");
-    const storedIncome = localStorage.getItem("userIncomeCategories");
     const storedTransactions = localStorage.getItem("transactions");
 
-    if (storedExpense) setUserExpenseCategories(JSON.parse(storedExpense));
-    if (storedIncome) setUserIncomeCategories(JSON.parse(storedIncome));
     if (storedTransactions) {
       const parsed = JSON.parse(storedTransactions);
       const fixed = (parsed as Transaction[]).map((transaction) => ({
@@ -51,60 +46,60 @@ export function CategoryProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem(
-      "userExpenseCategories",
-      JSON.stringify(userExpenseCategories)
-    );
-  }, [userExpenseCategories]);
-
-  useEffect(() => {
-    localStorage.setItem(
-      "userIncomeCategories",
-      JSON.stringify(userIncomeCategories)
-    );
-  }, [userIncomeCategories]);
-
-  useEffect(() => {
     localStorage.setItem("transactions", JSON.stringify(transactions));
   }, [transactions]);
 
-  const addCategory = (category: Category) => {
-    const exist = [...userExpenseCategories, ...userIncomeCategories].some(
-      (cat) =>
-        cat.name.trim().toLowerCase() === category.name.trim().toLowerCase()
-    );
-    if (exist) {
+  const addCategory = async (category: Category) => {
+    try {
+      const result = await categoryAPI.addCategory({
+        type: category.type,
+        name: category.name,
+        icon: category.icon,
+        isDefault: category.isDefault,
+      });
+
+      if (!result.success) {
+        if (result.status === 400) {
+          toast.error("Category already exists.");
+        } else {
+          toast.error("Failed to add category.");
+        }
+        return false;
+      }
+
+      if (result.success) {
+        toast.success("Category added successfully!");
+        await fetchCategories();
+        return true;
+      } else {
+        toast.error("Failed to add category.");
+        return false;
+      }
+    } catch (error) {
+      console.error("Error adding category:", error);
       return false;
     }
-    if (category.type === "expense") {
-      const exist = userExpenseCategories.some((cat) => cat.id === category.id);
-      if (!exist) {
-        setUserExpenseCategories([...userExpenseCategories, category]);
-        return true;
-      }
-    } else {
-      const exist = userIncomeCategories.some((cat) => cat.id === category.id);
-      if (!exist) {
-        setUserIncomeCategories([...userIncomeCategories, category]);
-        return true;
-      }
-    }
-    return true;
   };
 
-  const removeCategory = (categoryId: number, type: "expense" | "income") => {
-    setTransactions((prev) =>
-      prev.filter((transaction) => transaction.categoryId !== categoryId)
-    );
+  const removeCategory = async (
+    categoryId: string,
+    type: "expense" | "income"
+  ) => {
+    try {
+      const result = await categoryAPI.removeCategory(categoryId, type);
 
-    if (type === "expense") {
-      setUserExpenseCategories((prev) =>
-        prev.filter((cat) => cat.id !== categoryId || cat.isDefault)
-      );
-    } else {
-      setUserIncomeCategories((prev) =>
-        prev.filter((cat) => cat.id !== categoryId || cat.isDefault)
-      );
+      if (result.success) {
+        await fetchCategories();
+
+        setTransactions((prev) =>
+          prev.filter((transaction) => transaction.categoryId !== categoryId)
+        );
+
+        toast.success("Category removed successfully!");
+      }
+    } catch (error) {
+      console.error("Error removing category:", error);
+      toast.error("Failed to remove category.");
     }
   };
 
@@ -122,15 +117,15 @@ export function CategoryProvider({ children }: { children: ReactNode }) {
     );
   }
 
-  const getTransactionsByCategory = (categoryId: number) => {
+  const getTransactionsByCategory = (categoryId: string) => {
     return transactions.filter((t) => t.categoryId === categoryId);
   };
 
   return (
     <CategoryContext.Provider
       value={{
-        userExpenseCategories,
-        userIncomeCategories,
+        userExpenseCategories: expensesCategory,
+        userIncomeCategories: incomesCategory,
         transactions,
         addCategory,
         removeCategory,

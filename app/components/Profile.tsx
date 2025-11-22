@@ -3,7 +3,6 @@
 import { User } from 'lucide-react'
 import { useState } from 'react';
 import { ProfileCard } from './ProfileCard';
-import { usePathname } from 'next/navigation';
 
 
 interface ProfileProps {
@@ -19,15 +18,14 @@ export default function Profile({
     id, firstName , lastName, email, memberSince, accountType }: ProfileProps) 
 {
     const [isOpen, setIsOpen] = useState(false);
-    const pathname = usePathname();
 
     return (
         <>
             <div 
-                className={`rounded-full border-2 flex items-center justify-center cursor-pointer  ${pathname.includes('/admin') ? 'size-[40px] bg-[#07B681] text-white font-bold' : 'size-[48px] bg-[#CFF0E7]'}`}
+                className={`rounded-full border-2 flex items-center justify-center cursor-pointer size-[40px] bg-[#CFF0E7]`}
                 onClick={() => setIsOpen(true)}
             >
-                <User className="size-[24px]" />
+                <User className="size-[20px]" />
             </div>
             {
                 isOpen && (

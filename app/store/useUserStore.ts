@@ -4,7 +4,7 @@ import { persist } from "zustand/middleware";
 
 interface UserState {
   user: User | null;
-  hasHydrated: boolean; 
+  hasHydrated: boolean;
   setHasHydrated: (state: boolean) => void;
   setUser: (user: User) => void;
   clear: () => void;
@@ -23,7 +23,7 @@ export const useUserStore = create<UserState>()(
       name: "user-storage",
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
-      }
+      },
     }
   )
 );
