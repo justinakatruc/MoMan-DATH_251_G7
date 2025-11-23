@@ -42,6 +42,8 @@ export default function Topbar() {
             email={user!.email}
             memberSince={user!.memberSince}
             accountType={user!.accountType}
+            size1={"size-12"}
+            size2={"size-6"}
           />
         </div>
       </div>
@@ -56,7 +58,7 @@ export default function Topbar() {
             <></>
           )}
         </div>
-        <div className="flex flex-row space-x-4">
+        <div className="flex flex-row space-x-4 items-center">
           <TransactionButton />
           <Profile
             id={user!.id}
@@ -65,6 +67,8 @@ export default function Topbar() {
             email={user!.email}
             memberSince={user!.memberSince}
             accountType={user!.accountType}
+            size1={"size-12"}
+            size2={"size-6"}
           />
         </div>
       </div>

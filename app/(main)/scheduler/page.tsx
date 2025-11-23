@@ -6,40 +6,18 @@ import {
   NativeSelectOption,
 } from "@/app/components/ui/native-select";
 import { EventType } from "@/app/model";
-import { useState } from "react";
+import { eventAPI } from "@/lib/api";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function Scheduler() {
   const today = new Date();
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
   const [selectedDate, setSelectedDate] = useState(today.getDate());
-  const [events, setEvents] = useState<EventType[]>([
-    {
-      date: new Date(currentYear, currentMonth, today.getDate()),
-      title: "Team Meeting",
-      time: "10:00 AM",
-    },
-    {
-      date: new Date(currentYear, currentMonth, today.getDate()),
-      title: "Deadline",
-      time: "10:00 AM",
-    },
-    {
-      date: new Date(currentYear, currentMonth, today.getDate()),
-      title: "Lunch with friends",
-      time: "10:00 AM",
-    },
-    {
-      date: new Date(currentYear, currentMonth, today.getDate()),
-      title: "Doctor Appointment",
-      time: "10:00 AM",
-    },
-    {
-      date: new Date(currentYear, currentMonth, today.getDate()),
-      title: "Company Workshop",
-      time: "10:00 AM",
-    },
-  ]);
+  const [recurring, setRecurring] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [events, setEvents] = useState<EventType[]>([]);
   const [eventName, setEventName] = useState("");
   const [eventTime, setEventTime] = useState("");
   const [selectedEvent, setSelectedEvent] = useState<EventType | null>(null);
@@ -100,47 +78,175 @@ export default function Scheduler() {
   };
 
   const displayDate = selectedDate || today.getDate();
+  const [selectedEvents, setSelectedEvents] = useState<EventType[]>([]);
+  const [monthlyEvents, setMonthlyEvents] = useState<EventType[]>([]);
 
-  const selectedEvents = events.filter(
-    (event) =>
-      event.date.getDate() === displayDate &&
-      event.date.getMonth() === currentMonth &&
-      event.date.getFullYear() === currentYear
-  );
+  const fetchEvents = async () => {
+    const result = await eventAPI.getEvents();
+    if (result.success && result.events) {
+      setEvents(result.events);
+    } else {
+      toast.error("Failed to fetch events. Please try again.");
+    }
+  };
 
-  const monthlyEvents = events.filter(
-    (event) =>
-      event.date.getMonth() === currentMonth &&
-      event.date.getFullYear() === currentYear
-  );
+  const addEvent = async () => {
+    const strictTimeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
+    if (!eventName.trim()) {
+      toast.error("Please provide a valid event name.");
+      return;
+    } else if (eventName.length > 15) {
+      toast.error("Event name should not exceed 15 characters.");
+      return;
+    }
+    if (!eventTime.trim() || !strictTimeRegex.test(eventTime)) {
+      toast.error(
+        "Please provide a valid event name and time in HH:MM format."
+      );
+      return;
+    }
 
-  const addEvent = () => {
-    if (!eventName.trim() || !eventTime.trim()) return;
+    setIsLoading(true);
     const newEvent = {
-      date: new Date(currentYear, currentMonth, displayDate),
+      date: new Date(currentYear, currentMonth, displayDate, 12, 0, 0),
       title: eventName,
       time: eventTime,
+      isRecurring: recurring,
     };
-    setEvents([...events, newEvent]);
-    setEventName("");
-    setEventTime("");
+
+    const result = await eventAPI.addEvent({
+      date: newEvent.date,
+      title: newEvent.title,
+      time: newEvent.time,
+      recurring: recurring,
+    });
+
+    if (result.success) {
+      toast.success("Event added successfully!");
+      await fetchEvents();
+      // setEvents([...events, newEvent]);
+      setEventName("");
+      setEventTime("");
+      setRecurring(false);
+    } else {
+      toast.error("Failed to add event. Please try again.");
+    }
+    setIsLoading(false);
   };
-  const deleteEvent = () => {
+
+  const updateEvent = async () => {
     if (!selectedEvent) return;
 
-    setEvents(
-      events.filter(
-        (e) =>
-          !(
-            e.title === selectedEvent.title &&
-            e.time === selectedEvent.time &&
-            e.date.getTime() === selectedEvent.date.getTime()
-          )
-      )
-    );
+    const strictTimeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
+    if (!eventName.trim()) {
+      toast.error("Please provide a valid event name.");
+      return;
+    } else if (eventName.length > 15) {
+      toast.error("Event name should not exceed 15 characters.");
+      return;
+    }
+    if (!eventTime.trim() || !strictTimeRegex.test(eventTime)) {
+      toast.error(
+        "Please provide a valid event name and time in HH:MM format."
+      );
+      return;
+    }
 
+    setIsLoading(true);
+    const updatedEvent = {
+      id: selectedEvent.id,
+      date: new Date(currentYear, currentMonth, displayDate, 12, 0, 0),
+      title: eventName,
+      time: eventTime,
+      isRecurring: recurring,
+    };
+
+    const result = await eventAPI.updateEvent({
+      id: updatedEvent.id,
+      date: updatedEvent.date,
+      title: updatedEvent.title,
+      time: updatedEvent.time,
+      recurring: recurring,
+    });
+
+    if (result.success) {
+      toast.success("Event updated successfully!");
+      await fetchEvents();
+    } else {
+      toast.error("Failed to update event. Please try again.");
+    }
+
+    setIsLoading(false);
+  };
+
+  const deleteEvent = async () => {
+    if (!selectedEvent) return;
+
+    setIsLoading(true);
+    const result = await eventAPI.deleteEvent(selectedEvent.id);
+    if (result.success) {
+      toast.success("Event deleted successfully!");
+      await fetchEvents();
+    } else {
+      toast.error("Failed to delete event. Please try again.");
+    }
+    setIsLoading(false);
     setSelectedEvent(null);
   };
+
+  useEffect(() => {
+    if (!selectedEvent) {
+      setEventName("");
+      setEventTime("");
+      setRecurring(false);
+    }
+
+    if (selectedEvent) {
+      setEventName(selectedEvent.title);
+      setEventTime(selectedEvent.time);
+      setRecurring(selectedEvent.isRecurring);
+    }
+  }, [selectedEvent]);
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  useEffect(() => {
+    setSelectedEvents(
+      events.filter((event) => {
+        const eventDate = new Date(event.date);
+        return (
+          eventDate.getDate() === displayDate &&
+          eventDate.getMonth() === currentMonth &&
+          eventDate.getFullYear() === currentYear
+        );
+      })
+    );
+    setMonthlyEvents(
+      events
+        .filter((event) => {
+          const eventDate = new Date(event.date);
+          return (
+            eventDate.getMonth() === currentMonth &&
+            eventDate.getFullYear() === currentYear
+          );
+        })
+        .sort((a, b) => {
+          if (a.time < b.time) return -1;
+          if (a.time > b.time) return 1;
+
+          if (a.title < b.title) return -1;
+          if (a.title > b.title) return 1;
+
+          return 0;
+        })
+    );
+  }, [events, currentMonth, currentYear, displayDate]);
+
+  useEffect(() => {
+    setSelectedEvent(null);
+  }, [selectedDate]);
 
   return (
     <>
@@ -234,12 +340,12 @@ export default function Scheduler() {
               {/* Add/Delete Event */}
               <div className="bg-white rounded-2xl p-6 shadow-md/20 flex">
                 {/* Event Check */}
-                <div className="w-1/2 pr-4 border-r border-black ">
+                <div className="w-1/2 pr-2 border-r border-black ">
                   <h2 className="text-2xl font-bold text-gray-800 mb-4">
                     Events
                   </h2>
                   <div className="space-y-3 overflow-y-auto max-h-[150px]">
-                    {events
+                    {selectedEvents
                       .filter((e) => {
                         const eventDate = new Date(e.date);
                         return (
@@ -248,34 +354,39 @@ export default function Scheduler() {
                           eventDate.getFullYear() === currentYear
                         );
                       })
-                      .map((e, i) => (
-                        <label key={i} className="flex items-center space-x-3">
-                          <input
-                            type="checkbox"
-                            checked={
-                              selectedEvent?.title === e.title &&
-                              selectedEvent?.date.getTime() === e.date.getTime()
-                            }
-                            onChange={() => {
-                              if (e === selectedEvent) setSelectedEvent(null);
-                              else {
-                                setSelectedEvent(e);
-                                setEventName(e.title);
-                                setEventTime(e.time);
+                      .map((e, i) => {
+                        return (
+                          <label
+                            key={i}
+                            className="flex items-center space-x-3"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={
+                                selectedEvent?.title === e.title &&
+                                selectedEvent?.time === e.time
                               }
-                            }}
-                            className="w-5 h-5 cursor-pointer"
-                          />
-                          <div>
-                            <span className="font-medium text-gray-800 text-xl">
-                              {e.title}
-                            </span>
-                            <span className="text-gray-400 text-sm ml-1">
-                              – {e.time}
-                            </span>
-                          </div>
-                        </label>
-                      ))}
+                              onChange={() => {
+                                if (e === selectedEvent) setSelectedEvent(null);
+                                else {
+                                  setSelectedEvent(e);
+                                  setEventName(e.title);
+                                  setEventTime(e.time);
+                                }
+                              }}
+                              className="w-5 h-5 cursor-pointer"
+                            />
+                            <div>
+                              <span className="font-medium text-gray-800 text-xl">
+                                {e.title}
+                              </span>
+                              <span className="text-gray-400 text-sm ml-1">
+                                - {e.time}
+                              </span>
+                            </div>
+                          </label>
+                        );
+                      })}
                   </div>
                 </div>
 
@@ -293,24 +404,38 @@ export default function Scheduler() {
                   />
                   <input
                     type="text"
-                    placeholder="Timestamp (e.g. 10:00 AM)"
+                    placeholder="Timestamp (e.g. 10:00)"
                     value={eventTime}
                     onChange={(e) => setEventTime(e.target.value)}
                     className="w-full border border-gray-500 rounded-xl p-2 mb-4 focus:outline-none focus:ring-2 focus:ring-emerald-300 bg-gray-100 text-gray-500"
                   />
-                  <div className="flex space-x-4">
+                  <div className="flex space-x-3 gap-y-2 flex-wrap">
                     <button
-                      onClick={addEvent}
+                      onClick={selectedEvent ? updateEvent : addEvent}
+                      disabled={isLoading}
                       className="bg-[#07B681] text-white px-6 py-2 rounded-lg font-semibold hover:bg-[#059b6f] cursor-pointer"
                     >
                       {selectedEvent ? "Update" : "Add"}
                     </button>
                     <button
                       onClick={deleteEvent}
+                      disabled={isLoading}
                       className="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg font-semibold hover:bg-gray-400 cursor-pointer"
                     >
                       Delete
                     </button>
+                    <div className="flex gap-x-2 items-center">
+                      <label className="flex gap-x-2 items-center cursor-pointer">
+                        <input
+                          type={"checkbox"}
+                          className="border cursor-pointer size-5"
+                          placeholder="Send"
+                          checked={recurring}
+                          onChange={() => setRecurring(!recurring)}
+                        />
+                        <span>Recurring</span>
+                      </label>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -355,8 +480,8 @@ export default function Scheduler() {
                         className="border border-gray-200 rounded-xl p-4 hover:bg-gray-50"
                       >
                         <p className="text-gray-500 text-sm mb-1">
-                          {event.date.getDate()}{" "}
-                          {monthNames[event.date.getMonth()]}
+                          {new Date(event.date).getDate()}{" "}
+                          {monthNames[new Date(event.date).getMonth()]}
                         </p>
                         <h3 className="font-semibold text-lg text-[#07B681]">
                           {event.title}
@@ -497,8 +622,8 @@ export default function Scheduler() {
                         className="border border-gray-200 rounded-xl p-4 hover:bg-gray-50"
                       >
                         <p className="text-gray-500 text-xs mb-1">
-                          {event.date.getDate()}{" "}
-                          {monthNames[event.date.getMonth()]}
+                          {new Date(event.date).getDate()}{" "}
+                          {monthNames[new Date(event.date).getMonth()]}
                         </p>
                         <h3 className="font-semibold text-sm text-[#07B681]">
                           {event.title}
@@ -515,10 +640,10 @@ export default function Scheduler() {
             {/* Add/Delete Event */}
             <div className="bg-white rounded-2xl p-6 shadow-md/20 flex w-full mt-12">
               {/* Event Check */}
-              <div className="w-1/2 pr-4 border-r border-black ">
+              <div className="w-1/2 pr-2 border-r border-black ">
                 <h2 className="text-xl font-bold text-gray-800 mb-4">Events</h2>
                 <div className="space-y-3 overflow-y-auto max-h-[150px]">
-                  {events
+                  {selectedEvents
                     .filter((e) => {
                       const eventDate = new Date(e.date);
                       return (
@@ -534,7 +659,7 @@ export default function Scheduler() {
                           type="checkbox"
                           checked={
                             selectedEvent?.title === e.title &&
-                            selectedEvent?.date.getTime() === e.date.getTime()
+                            selectedEvent?.time === e.time
                           }
                           onChange={() => {
                             if (e === selectedEvent) setSelectedEvent(null);
@@ -572,24 +697,38 @@ export default function Scheduler() {
                 />
                 <input
                   type="text"
-                  placeholder="Timestamp (e.g. 10:00 AM)"
+                  placeholder="Timestamp (e.g. 10:00)"
                   value={eventTime}
                   onChange={(e) => setEventTime(e.target.value)}
                   className="w-full border border-gray-500 rounded-4xl p-2 mb-4 focus:outline-none focus:ring-2 focus:ring-emerald-300 bg-gray-100 text-gray-500"
                 />
-                <div className="flex space-x-4">
+                <div className="flex space-x-4 gap-y-2 flex-wrap">
                   <button
-                    onClick={addEvent}
-                    className="bg-[#07B681] text-white px-6 py-2 rounded-lg font-semibold hover:bg-[#059b6f] text-xs"
+                    onClick={selectedEvent ? updateEvent : addEvent}
+                    disabled={isLoading}
+                    className="bg-[#07B681] text-white px-6 py-2 rounded-lg font-semibold hover:bg-[#059b6f] text-xs cursor-pointer"
                   >
                     {selectedEvent ? "Update" : "Add"}
                   </button>
                   <button
                     onClick={deleteEvent}
-                    className="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg font-semibold hover:bg-gray-400 text-xs"
+                    disabled={isLoading}
+                    className="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg font-semibold hover:bg-gray-400 text-xs cursor-pointer"
                   >
                     Delete
                   </button>
+                  <div className="flex gap-x-2 items-center">
+                    <label className="flex gap-x-2 items-center cursor-pointer">
+                      <input
+                        type={"checkbox"}
+                        className="border cursor-pointer size-5"
+                        placeholder="Send"
+                        checked={recurring}
+                        onChange={() => setRecurring(!recurring)}
+                      />
+                      <span>Recurring</span>
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>

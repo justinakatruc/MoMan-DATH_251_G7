@@ -165,6 +165,8 @@ export default function Sidebar() {
                     email={user!.email}
                     memberSince={user!.memberSince}
                     accountType={user!.accountType}
+                    size1={"size-10"}
+                    size2={"size-5"}
                   />
                   {showLabel === 6 && (
                     <div className="absolute top-[65px] w-20 flex items-center justify-center text-[9px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px]">
@@ -546,6 +548,8 @@ export default function Sidebar() {
                     email={user!.email}
                     memberSince={user!.memberSince}
                     accountType={user!.accountType}
+                    size1={"size-10"}
+                    size2={"size-5"}
                   />
                   <div>
                     <div className="text-[14px] font-semibold">

@@ -5,6 +5,7 @@ import { EventType, TransactionAPIResponse } from "@/app/model";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useTransactionStore } from "@/app/store/useTransactionStore";
+import { eventAPI } from "@/lib/api";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("Expense");
@@ -28,41 +29,9 @@ export default function Home() {
   ]);
 
   const [savingsRate, setSavingsRate] = useState(0);
-
-  const today = new Date();
-
-  const [events, setEvents] = useState<EventType[]>([
-    {
-      date: new Date(today.getFullYear(), today.getMonth(), today.getDate()),
-      title: "Team Meeting",
-      time: "10:00 AM",
-    },
-    {
-      date: new Date(today.getFullYear(), today.getMonth(), today.getDate()),
-      title: "Deadline",
-      time: "10:00 AM",
-    },
-    {
-      date: new Date(today.getFullYear(), today.getMonth(), today.getDate()),
-      title: "Lunch with friends",
-      time: "10:00 AM",
-    },
-    {
-      date: new Date(today.getFullYear(), today.getMonth(), today.getDate()),
-      title: "Doctor Appointment",
-      time: "10:00 AM",
-    },
-    {
-      date: new Date(today.getFullYear(), today.getMonth(), today.getDate()),
-      title: "Company Workshop",
-      time: "10:00 AM",
-    },
-  ]);
-
+  const [events, setEvents] = useState<EventType[]>([]);
   const [expenses, setExpenses] = useState<TransactionAPIResponse[]>([]);
-
   const [incomes, setIncomes] = useState<TransactionAPIResponse[]>([]);
-
   const currentItems = activeTab === "Income" ? incomes : expenses;
   const [items, setItems] = useState<TransactionAPIResponse[]>([]);
 
@@ -116,6 +85,27 @@ export default function Home() {
         100
     );
   }, [transactions]);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      const result = await eventAPI.getEvents();
+      if (result.success) {
+        const events = result.events;
+        setEvents(
+          events.sort((a: EventType, b: EventType) => {
+            if (a.time < b.time) return -1;
+            if (a.time > b.time) return 1;
+
+            if (a.title < b.title) return -1;
+            if (a.title > b.title) return 1;
+
+            return 0;
+          })
+        );
+      }
+    };
+    fetchEvents();
+  }, []);
 
   return (
     <>
@@ -183,9 +173,9 @@ export default function Home() {
             <div className="flex flex-col px-2 gap-y-2">
               {reports.map((report, index) => (
                 <div key={index} className="space-y-1">
-                  <div className="text-sm text-gray-600">{report.title}</div>
+                  <div className="text-lg text-gray-600">{report.title}</div>
                   <div
-                    className={`${
+                    className={`text-lg ${
                       report.title === "Monthly Income"
                         ? "text-emerald-500"
                         : "text-red-500"
@@ -196,9 +186,9 @@ export default function Home() {
                 </div>
               ))}
               <div className="space-y-1">
-                <div className="text-sm text-gray-600">Savings Rate</div>
+                <div className="text-lg text-gray-600">Savings Rate</div>
                 <div
-                  className={`${
+                  className={`text-lg ${
                     savingsRate >= 50 ? "text-emerald-500" : "text-red-500"
                   }`}
                 >
@@ -222,9 +212,13 @@ export default function Home() {
               {events.map((event, index) => (
                 <div key={index} className="flex gap-3">
                   <div className="shrink-0 w-12 h-12 rounded-lg bg-emerald-100 flex flex-col items-center justify-center">
-                    <div className="text-gray-900">{event.date.getDate()}</div>
+                    <div className="text-gray-900">
+                      {new Date(event.date).getDate()}
+                    </div>
                     <div className="text-xs text-gray-500">
-                      {event.date.toLocaleString("en-US", { month: "short" })}
+                      {new Date(event.date).toLocaleString("en-US", {
+                        month: "short",
+                      })}
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">
@@ -530,9 +524,9 @@ export default function Home() {
             <div className="flex flex-col px-2 gap-y-3 mt-4">
               {reports.map((report, index) => (
                 <div key={index} className="space-y-1">
-                  <div className="text-sm text-gray-600">{report.title}</div>
+                  <div className="text-lg text-gray-600">{report.title}</div>
                   <div
-                    className={`${
+                    className={`text-lg ${
                       report.title === "Monthly Income"
                         ? "text-emerald-500"
                         : "text-red-500"
@@ -543,9 +537,9 @@ export default function Home() {
                 </div>
               ))}
               <div className="space-y-1">
-                <div className="text-sm text-gray-600">Savings Rate</div>
+                <div className="text-lg text-gray-600">Savings Rate</div>
                 <div
-                  className={`${
+                  className={`text-lg ${
                     savingsRate >= 50 ? "text-emerald-500" : "text-red-500"
                   }`}
                 >
@@ -567,16 +561,29 @@ export default function Home() {
             </div>
             <div className="flex flex-col px-2 gap-y-3 mt-4 h-50 overflow-y-auto">
               {events.map((event, index) => (
-                <div key={index} className="flex gap-3">
-                  <div className="shrink-0 w-12 h-12 rounded-lg bg-emerald-100 flex flex-col items-center justify-center">
-                    <div className="text-gray-900">{event.date.getDate()}</div>
-                    <div className="text-xs text-gray-500">
-                      {event.date.toLocaleString("en-US", { month: "short" })}
+                <div
+                  key={index}
+                  className="flex gap-3 items-center justify-between"
+                >
+                  <div className="flex gap-x-3 items-center">
+                    <div className="shrink-0 w-12 h-12 rounded-lg bg-emerald-100 flex items-center justify-center">
+                      <div className="text-gray-900">
+                        {new Date(event.date).getDate()}
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-y-1">
+                      <div className="text-lg text-gray-500 flex items-center justify-center">
+                        {new Date(event.date).toLocaleDateString("en-GB", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                        })}
+                      </div>
+                      <div className="text-sm text-gray-400">{event.time}</div>
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-gray-900">{event.title}</div>
-                    <div className="text-sm text-gray-400">{event.time}</div>
+                    <div className="text-gray-900 text-lg">{event.title}</div>
                   </div>
                 </div>
               ))}

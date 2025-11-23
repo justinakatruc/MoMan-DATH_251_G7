@@ -49,3 +49,12 @@ model Transaction {
   categoryId     String   @db.ObjectId
   description     String?
 }
+
+model Event {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  date        DateTime
+  time        String
+  name       String
+  isRecurring Boolean  @default(false)
+  userId     String   @db.ObjectId
+}

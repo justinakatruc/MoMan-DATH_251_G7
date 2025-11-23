@@ -201,3 +201,72 @@ export const transactionAPI = {
     return response.json();
   },
 };
+
+export const eventAPI = {
+  getEvents: async () => {
+    const response = await fetch(`${BASE_API}/events`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        action: "getEvents",
+        token: localStorage.getItem("token"),
+      }),
+    });
+    return response.json();
+  },
+  addEvent: async (event: {
+    date: Date;
+    title: string;
+    time: string;
+    recurring: boolean;
+  }) => {
+    const response = await fetch(`${BASE_API}/events`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        action: "addEvent",
+        token: localStorage.getItem("token"),
+        event,
+      }),
+    });
+    return response.json();
+  },
+  updateEvent: async (event: {
+    id: string;
+    date?: Date;
+    title?: string;
+    time?: string;
+    recurring?: boolean;
+  }) => {
+    const response = await fetch(`${BASE_API}/events`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        action: "updateEvent",
+        token: localStorage.getItem("token"),
+        event,
+      }),
+    });
+    return response.json();
+  },
+  deleteEvent: async (eventId: string) => {
+    const response = await fetch(`${BASE_API}/events`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        action: "deleteEvent",
+        token: localStorage.getItem("token"),
+        eventId,
+      }),
+    });
+    return response.json();
+  },
+};

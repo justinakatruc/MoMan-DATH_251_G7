@@ -17,9 +17,11 @@ export type Transaction = {
 };
 
 export type EventType = {
+  id: string;
   date: Date;
   title: string;
   time: string;
+  isRecurring: boolean;
 };
 
 export type User = {
