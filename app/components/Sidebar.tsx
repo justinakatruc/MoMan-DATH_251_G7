@@ -72,13 +72,13 @@ export default function Sidebar() {
             className="w-auto h-auto"
           />
         </Link>
-        <ul className="flex gap-x-[10px] md:gap-x-[20px] items-center pr-4">
+        <ul className="flex gap-x-2.5 md:gap-x-5 items-center pr-4">
           {pathname.includes("admin") ? (
             <>
               <Link
                 href={`/admin/dashboard`}
                 key={1}
-                className="size-[40px] md:size-[50px] flex items-center justify-center cursor-pointer bg-[rgba(226,229,233,0.5)] hover:bg-[rgba(226,229,233,0.8)] rounded-full relative"
+                className="size-10 md:size-[50px] flex items-center justify-center cursor-pointer bg-[rgba(226,229,233,0.5)] hover:bg-[rgba(226,229,233,0.8)] rounded-full relative"
                 onMouseEnter={() => {
                   setTimeout(() => setShowLabel(1), 100);
                 }}
@@ -86,9 +86,9 @@ export default function Sidebar() {
                   setTimeout(() => setShowLabel(null), 100);
                 }}
               >
-                <LayoutDashboardIcon className="size-[24px] md:size-[28px]" />
+                <LayoutDashboardIcon className="size-6 md:size-7" />
                 {showLabel === 1 && (
-                  <div className="absolute top-[65px] w-[80px] flex items-center justify-center text-[9px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px]">
+                  <div className="absolute top-[65px] w-20 flex items-center justify-center text-[9px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px]">
                     Dashboard
                   </div>
                 )}
@@ -96,7 +96,7 @@ export default function Sidebar() {
               <Link
                 href={`/admin/users`}
                 key={2}
-                className="size-[40px] md:size-[50px] flex items-center justify-center cursor-pointer bg-[rgba(226,229,233,0.5)] hover:bg-[rgba(226,229,233,0.8)] rounded-full relative"
+                className="size-10 md:size-[50px] flex items-center justify-center cursor-pointer bg-[rgba(226,229,233,0.5)] hover:bg-[rgba(226,229,233,0.8)] rounded-full relative"
                 onMouseEnter={() => {
                   setTimeout(() => setShowLabel(2), 100);
                 }}
@@ -104,9 +104,9 @@ export default function Sidebar() {
                   setTimeout(() => setShowLabel(null), 100);
                 }}
               >
-                <Users className="size-[24px] md:size-[28px]" />
+                <Users className="size-6 md:size-7" />
                 {showLabel === 2 && (
-                  <div className="absolute top-[65px] w-[80px] flex items-center justify-center text-[9px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px]">
+                  <div className="absolute top-[65px] w-20 flex items-center justify-center text-[9px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px]">
                     Users
                   </div>
                 )}
@@ -114,7 +114,7 @@ export default function Sidebar() {
               <Link
                 href={`/admin/categories`}
                 key={3}
-                className="size-[40px] md:size-[50px] flex items-center justify-center cursor-pointer bg-[rgba(226,229,233,0.5)] hover:bg-[rgba(226,229,233,0.8)] rounded-full relative"
+                className="size-10 md:size-[50px] flex items-center justify-center cursor-pointer bg-[rgba(226,229,233,0.5)] hover:bg-[rgba(226,229,233,0.8)] rounded-full relative"
                 onMouseEnter={() => {
                   setTimeout(() => setShowLabel(3), 100);
                 }}
@@ -122,9 +122,9 @@ export default function Sidebar() {
                   setTimeout(() => setShowLabel(null), 100);
                 }}
               >
-                <Layers2 className="size-[24px] md:size-[28px]" />
+                <Layers2 className="size-6 md:size-7" />
                 {showLabel === 3 && (
-                  <div className="absolute top-[65px] w-[80px] flex items-center justify-center text-[9px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px]">
+                  <div className="absolute top-[65px] w-20 flex items-center justify-center text-[9px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px]">
                     Categories
                   </div>
                 )}
@@ -132,7 +132,7 @@ export default function Sidebar() {
               <Link
                 href={`/admin/transactions`}
                 key={4}
-                className="size-[40px] md:size-[50px] flex items-center justify-center cursor-pointer bg-[rgba(226,229,233,0.5)] hover:bg-[rgba(226,229,233,0.8)] rounded-full relative"
+                className="size-10 md:size-[50px] flex items-center justify-center cursor-pointer bg-[rgba(226,229,233,0.5)] hover:bg-[rgba(226,229,233,0.8)] rounded-full relative"
                 onMouseEnter={() => {
                   setTimeout(() => setShowLabel(3), 100);
                 }}
@@ -140,9 +140,9 @@ export default function Sidebar() {
                   setTimeout(() => setShowLabel(null), 100);
                 }}
               >
-                <BadgeDollarSign className="size-[24px] md:size-[28px]" />
+                <BadgeDollarSign className="size-6 md:size-7" />
                 {showLabel === 4 && (
-                  <div className="absolute top-[65px] w-[80px] flex items-center justify-center text-[9px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px]">
+                  <div className="absolute top-[65px] w-20 flex items-center justify-center text-[9px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px]">
                     Transactions
                   </div>
                 )}
@@ -150,7 +150,7 @@ export default function Sidebar() {
               {user ? (
                 <div
                   key={6}
-                  className="size-[40px] md:size-[50px] flex items-center justify-center cursor-pointer bg-[rgba(226,229,233,0.5)] hover:bg-[rgba(226,229,233,0.8)] rounded-full relative"
+                  className="size-10 md:size-[50px] flex items-center justify-center cursor-pointer bg-[rgba(226,229,233,0.5)] hover:bg-[rgba(226,229,233,0.8)] rounded-full relative"
                   onMouseEnter={() => {
                     setTimeout(() => setShowLabel(6), 100);
                   }}
@@ -167,7 +167,7 @@ export default function Sidebar() {
                     accountType={user!.accountType}
                   />
                   {showLabel === 6 && (
-                    <div className="absolute top-[65px] w-[80px] flex items-center justify-center text-[9px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px]">
+                    <div className="absolute top-[65px] w-20 flex items-center justify-center text-[9px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px]">
                       Profile
                     </div>
                   )}
@@ -181,7 +181,7 @@ export default function Sidebar() {
               <Link
                 href={`/category`}
                 key={1}
-                className="size-[40px] md:size-[50px] flex items-center justify-center cursor-pointer bg-[rgba(226,229,233,0.5)] hover:bg-[rgba(226,229,233,0.8)] rounded-full relative"
+                className="size-10 md:size-[50px] flex items-center justify-center cursor-pointer bg-[rgba(226,229,233,0.5)] hover:bg-[rgba(226,229,233,0.8)] rounded-full relative"
                 onMouseEnter={() => {
                   setTimeout(() => setShowLabel(1), 100);
                 }}
@@ -194,10 +194,10 @@ export default function Sidebar() {
                   alt="Category Icon"
                   width={24}
                   height={24}
-                  className="size-[24px] md:size-[28px]"
+                  className="size-6 md:size-7"
                 />
                 {showLabel === 1 && (
-                  <div className="absolute top-[65px] w-[80px] flex items-center justify-center text-[9px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px]">
+                  <div className="absolute top-[65px] w-20 flex items-center justify-center text-[9px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px]">
                     Category
                   </div>
                 )}
@@ -205,7 +205,7 @@ export default function Sidebar() {
               <Link
                 href={`/scheduler`}
                 key={2}
-                className="size-[40px] md:size-[50px] flex items-center justify-center cursor-pointer bg-[rgba(226,229,233,0.5)] hover:bg-[rgba(226,229,233,0.8)] rounded-full relative"
+                className="size-10 md:size-[50px] flex items-center justify-center cursor-pointer bg-[rgba(226,229,233,0.5)] hover:bg-[rgba(226,229,233,0.8)] rounded-full relative"
                 onMouseEnter={() => {
                   setTimeout(() => setShowLabel(2), 100);
                 }}
@@ -218,10 +218,10 @@ export default function Sidebar() {
                   alt="Scheduler Icon"
                   width={24}
                   height={24}
-                  className="size-[24px] md:size-[28px]"
+                  className="size-6 md:size-7"
                 />
                 {showLabel === 2 && (
-                  <div className="absolute top-[65px] w-[80px] flex items-center justify-center text-[9px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px]">
+                  <div className="absolute top-[65px] w-20 flex items-center justify-center text-[9px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px]">
                     Scheduler
                   </div>
                 )}
@@ -229,7 +229,7 @@ export default function Sidebar() {
               <Link
                 href={`/report`}
                 key={3}
-                className="size-[40px] md:size-[50px] flex items-center justify-center cursor-pointer bg-[rgba(226,229,233,0.5)] hover:bg-[rgba(226,229,233,0.8)] rounded-full relative"
+                className="size-10 md:size-[50px] flex items-center justify-center cursor-pointer bg-[rgba(226,229,233,0.5)] hover:bg-[rgba(226,229,233,0.8)] rounded-full relative"
                 onMouseEnter={() => {
                   setTimeout(() => setShowLabel(3), 100);
                 }}
@@ -242,10 +242,10 @@ export default function Sidebar() {
                   alt="Report Icon"
                   width={24}
                   height={24}
-                  className="size-[24px] md:size-[28px]"
+                  className="size-6 md:size-7"
                 />
                 {showLabel === 3 && (
-                  <div className="absolute top-[65px] w-[80px] flex items-center justify-center text-[9px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px]">
+                  <div className="absolute top-[65px] w-20 flex items-center justify-center text-[9px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px]">
                     Report
                   </div>
                 )}
@@ -256,7 +256,7 @@ export default function Sidebar() {
             <Link
               href={pathname.includes("admin") ? "/home" : "/admin/dashboard"}
               key={5}
-              className="size-[40px] md:size-[50px] flex items-center justify-center cursor-pointer bg-[rgba(226,229,233,0.5)] hover:bg-[rgba(226,229,233,0.8)] rounded-full relative"
+              className="size-10 md:size-[50px] flex items-center justify-center cursor-pointer bg-[rgba(226,229,233,0.5)] hover:bg-[rgba(226,229,233,0.8)] rounded-full relative"
               onMouseEnter={() => {
                 setTimeout(() => setShowLabel(5), 100);
               }}
@@ -264,9 +264,9 @@ export default function Sidebar() {
                 setTimeout(() => setShowLabel(null), 100);
               }}
             >
-              <RefreshCcw className="size-[24px] md:size-[28px]" />
+              <RefreshCcw className="size-6 md:size-7" />
               {showLabel === 5 && (
-                <div className="absolute top-[65px] w-[80px] flex items-center justify-center text-[9px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px]">
+                <div className="absolute top-[65px] w-20 flex items-center justify-center text-[9px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px]">
                   Change View
                 </div>
               )}
@@ -275,7 +275,7 @@ export default function Sidebar() {
           <div ref={menuRef} className="relative">
             <li
               key={4}
-              className="size-[40px] md:size-[50px] flex items-center justify-center cursor-pointer bg-[rgba(226,229,233,0.5)] rounded-full border relative"
+              className="size-10 md:size-[50px] flex items-center justify-center cursor-pointer bg-[rgba(226,229,233,0.5)] rounded-full border relative"
               onMouseEnter={() => {
                 setTimeout(() => setShowLabel(4), 100);
               }}
@@ -287,27 +287,27 @@ export default function Sidebar() {
                 setShowProfileMenu(!showProfileMenu);
               }}
             >
-              <Menu className="size-[24px] md:size-[28px]" />
+              <Menu className="size-6 md:size-7" />
               {showLabel === 4 && (
-                <div className="absolute top-[65px] w-[80px] flex items-center justify-center text-[9px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px] z-[11]">
+                <div className="absolute top-[65px] w-20 flex items-center justify-center text-[9px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px] z-11">
                   Menu
                 </div>
               )}
             </li>
             {showProfileMenu && (
-              <div className="absolute top-[60px] right-0 w-[320px] md:w-[360px] h-[80px] bg-[#ffffff] shadow-md rounded-[15px] z-10">
+              <div className="absolute top-[60px] right-0 w-[320px] md:w-[360px] h-20 bg-[#ffffff] shadow-md rounded-[15px] z-10">
                 <div className="p-4 flex flex-col gap-y-3">
                   <div
                     className="flex items-center cursor-pointer hover:bg-[rgba(226,229,233,0.3)] rounded-[10px] p-2"
                     onClick={clear}
                   >
-                    <div className="size-[36px] flex items-center justify-center bg-[#e2e5e9] rounded-full">
+                    <div className="size-9 flex items-center justify-center bg-[#e2e5e9] rounded-full">
                       <Image
                         src="/logout.png"
                         alt="User Icon"
                         width={20}
                         height={20}
-                        className="size-[20px]"
+                        className="size-5"
                       />
                     </div>
                     <div className="ml-4 text-[18px] font-semibold">
@@ -332,10 +332,10 @@ export default function Sidebar() {
         </Link>
         {!pathname.includes("admin") ? (
           <div className="w-full flex flex-col overflow-y-auto">
-            <ul className="flex flex-col gap-y-[8px] 2xl:gap-y-[20px] px-4 mb-3 2xl:mb-4 overflow-y-auto">
+            <ul className="flex flex-col gap-y-2 2xl:gap-y-5 px-4 mb-3 2xl:mb-4 overflow-y-auto">
               <Link
                 href={"/home"}
-                className={`w-full pl-[8px] pr-[4px] py-[4px] flex items-center cursor-pointer hover:bg-[#CFF0E7] hover:rounded-[10px] ${
+                className={`w-full pl-2 pr-1 py-1 flex items-center cursor-pointer hover:bg-[#CFF0E7] hover:rounded-[10px] ${
                   pathname === "/home" ? "bg-[#CFF0E7] rounded-[10px]" : ""
                 }`}
               >
@@ -352,7 +352,7 @@ export default function Sidebar() {
               </Link>
               <Link
                 href={"/category"}
-                className={`w-full pl-[8px] pr-[4px] py-[4px] flex items-center cursor-pointer hover:bg-[#CFF0E7] hover:rounded-[10px] ${
+                className={`w-full pl-2 pr-1 py-1 flex items-center cursor-pointer hover:bg-[#CFF0E7] hover:rounded-[10px] ${
                   pathname === "/category" ? "bg-[#CFF0E7] rounded-[10px]" : ""
                 }`}
               >
@@ -369,7 +369,7 @@ export default function Sidebar() {
               </Link>
               <Link
                 href={"/scheduler"}
-                className={`w-full pl-[8px] pr-[4px] py-[4px] flex items-center cursor-pointer hover:bg-[#CFF0E7] hover:rounded-[10px] ${
+                className={`w-full pl-2 pr-1 py-1 flex items-center cursor-pointer hover:bg-[#CFF0E7] hover:rounded-[10px] ${
                   pathname === "/scheduler" ? "bg-[#CFF0E7] rounded-[10px]" : ""
                 }`}
               >
@@ -386,7 +386,7 @@ export default function Sidebar() {
               </Link>
               <Link
                 href={"/report"}
-                className={`w-full pl-[8px] pr-[4px] py-[4px] flex items-center cursor-pointer hover:bg-[#CFF0E7] hover:rounded-[10px] ${
+                className={`w-full pl-2 pr-1 py-1 flex items-center cursor-pointer hover:bg-[#CFF0E7] hover:rounded-[10px] ${
                   pathname === "/report" ? "bg-[#CFF0E7] rounded-[10px]" : ""
                 }`}
               >
@@ -407,12 +407,12 @@ export default function Sidebar() {
                 Expense
               </div>
               {userExpenseCategories ? (
-                <ul className="flex flex-col gap-y-[8px] 2xl:gap-y-[20px] overflow-y-auto">
+                <ul className="flex flex-col gap-y-2.5 2xl:gap-y-5 overflow-y-auto">
                   {userExpenseCategories.map((category) => (
                     <Link
                       href={`/category/${formatLink(category.name)}`}
                       key={category.id}
-                      className={`w-full pl-[8px] pr-[4px] py-[4px] flex items-center cursor-pointer hover:bg-[#CFF0E7] hover:rounded-[10px] ${
+                      className={`w-full pl-2 pr-1 py-1 flex items-center cursor-pointer hover:bg-[#CFF0E7] hover:rounded-[10px] ${
                         pathname === `/${formatLink(category.name)}`
                           ? "bg-[#CFF0E7] rounded-[10px]"
                           : ""
@@ -432,7 +432,7 @@ export default function Sidebar() {
                   ))}
                 </ul>
               ) : (
-                <div className="flex flex-col px-2 gap-y-[8px] 2xl:gap-y-[20px] overflow-y-auto">
+                <div className="flex flex-col px-2 gap-y-2.5 2xl:gap-y-5 overflow-y-auto">
                   Loading...
                 </div>
               )}
@@ -442,12 +442,12 @@ export default function Sidebar() {
                 Income
               </div>
               {userIncomeCategories ? (
-                <ul className="flex flex-col gap-y-[8px] 2xl:gap-y-[20px] overflow-y-auto">
+                <ul className="flex flex-col gap-y-2.5 2xl:gap-y-5 overflow-y-auto">
                   {userIncomeCategories.map((category) => (
                     <Link
                       href={`/category/${formatLink(category.name)}`}
                       key={category.id}
-                      className={`w-full pl-[8px] pr-[4px] py-[4px] flex items-center cursor-pointer hover:bg-[#CFF0E7] hover:rounded-[10px] ${
+                      className={`w-full pl-2 pr-1 py-1 flex items-center cursor-pointer hover:bg-[#CFF0E7] hover:rounded-[10px] ${
                         pathname === `/${formatLink(category.name)}`
                           ? "bg-[#CFF0E7] rounded-[10px]"
                           : ""
@@ -467,7 +467,7 @@ export default function Sidebar() {
                   ))}
                 </ul>
               ) : (
-                <div className="flex flex-col px-2 gap-y-[8px] 2xl:gap-y-[20px] overflow-y-auto">
+                <div className="flex flex-col px-2 gap-y-2.5 2xl:gap-y-5 overflow-y-auto">
                   Loading...
                 </div>
               )}
@@ -478,10 +478,10 @@ export default function Sidebar() {
             <div className="text-[15px] 2xl:text-[17px] font-bold dark:text-[rgb(23,23,23)] mb-4 2xl:mb-6">
               Admin Dashboard
             </div>
-            <ul className="w-full flex flex-col gap-y-[10px] 2xl:gap-y-[20px] px-4 overflow-y-auto">
+            <ul className="w-full flex flex-col gap-y-2.5 2xl:gap-y-5 px-4 overflow-y-auto">
               <Link
                 href={"/admin/dashboard"}
-                className={`w-full pl-[8px] pr-[4px] py-[4px] flex items-center cursor-pointer hover:bg-[#CFF0E7] hover:rounded-[10px] ${
+                className={`w-full pl-2 pr-1 py-1 flex items-center cursor-pointer hover:bg-[#CFF0E7] hover:rounded-[10px] ${
                   pathname === "/admin/dashboard"
                     ? "bg-[#CFF0E7] rounded-[10px]"
                     : ""
@@ -494,7 +494,7 @@ export default function Sidebar() {
               </Link>
               <Link
                 href={"/admin/users"}
-                className={`w-full pl-[8px] pr-[4px] py-[4px] flex items-center cursor-pointer hover:bg-[#CFF0E7] hover:rounded-[10px] ${
+                className={`w-full pl-2 pr-1 py-1 flex items-center cursor-pointer hover:bg-[#CFF0E7] hover:rounded-[10px] ${
                   pathname === "/admin/users"
                     ? "bg-[#CFF0E7] rounded-[10px]"
                     : ""
@@ -507,7 +507,7 @@ export default function Sidebar() {
               </Link>
               <Link
                 href={"/admin/categories"}
-                className={`w-full pl-[8px] pr-[4px] py-[4px] flex items-center cursor-pointer hover:bg-[#CFF0E7] hover:rounded-[10px] ${
+                className={`w-full pl-2 pr-1 py-1 flex items-center cursor-pointer hover:bg-[#CFF0E7] hover:rounded-[10px] ${
                   pathname === "/admin/categories"
                     ? "bg-[#CFF0E7] rounded-[10px]"
                     : ""
@@ -520,7 +520,7 @@ export default function Sidebar() {
               </Link>
               <Link
                 href={"/admin/transactions"}
-                className={`w-full pl-[8px] pr-[4px] py-[4px] flex items-center cursor-pointer hover:bg-[#CFF0E7] hover:rounded-[10px] ${
+                className={`w-full pl-2 pr-1 py-1 flex items-center cursor-pointer hover:bg-[#CFF0E7] hover:rounded-[10px] ${
                   pathname === "/admin/transactions"
                     ? "bg-[#CFF0E7] rounded-[10px]"
                     : ""
@@ -560,7 +560,7 @@ export default function Sidebar() {
                   href={
                     pathname.includes("admin") ? "/home" : "/admin/dashboard"
                   }
-                  className="flex items-center justify-center h-[40px] xl:h-[45px] 2xl:h-[60px] bg-[#F4F7FD] hover:bg-[#E0E4EA] cursor-pointer rounded-[20px] font-semibold text-[15px] xl:text-[17px] 2xl:text-[19px]"
+                  className="flex items-center justify-center h-10 xl:h-[45px] 2xl:h-[60px] bg-[#F4F7FD] hover:bg-[#E0E4EA] cursor-pointer rounded-[20px] font-semibold text-[15px] xl:text-[17px] 2xl:text-[19px]"
                 >
                   <div className="flex flex-row gap-x-2 items-center justify-center">
                     <RefreshCcw className="rotate-180 size-5 2xl:size-6" />
@@ -570,7 +570,7 @@ export default function Sidebar() {
               </>
             )}
             <button
-              className="h-[40px] xl:h-[45px] 2xl:h-[60px] bg-[rgba(235,106,99,0.91)] hover:bg-[rgba(235,106,99,1)] cursor-pointer rounded-[12px] text-white font-semibold text-[15px] xl:text-[17px] 2xl:text-[19px]"
+              className="h-10 xl:h-[45px] 2xl:h-[60px] bg-[rgba(235,106,99,0.91)] hover:bg-[rgba(235,106,99,1)] cursor-pointer rounded-[12px] text-white font-semibold text-[15px] xl:text-[17px] 2xl:text-[19px]"
               onClick={clear}
             >
               Log Out

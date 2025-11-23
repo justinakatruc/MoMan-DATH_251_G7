@@ -7,7 +7,7 @@ export type Category = {
 };
 
 export type Transaction = {
-  id: number;
+  id: string;
   categoryId: string;
   type: "income" | "expense";
   name: string;
@@ -29,4 +29,14 @@ export type User = {
   email: string;
   memberSince: string;
   accountType: string;
+};
+
+export type TransactionAPIResponse = {
+  type: string;
+  name: string;
+  amount: number;
+  date: string;
+  description: string;
+  categoryName: string;
+  categoryIcon: string;
 };

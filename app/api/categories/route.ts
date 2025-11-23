@@ -107,8 +107,6 @@ async function handleAddCategory(
         },
       });
 
-      console.log("All expense categories:", allExpenseCategories);
-
       const existing = allExpenseCategories.find(
         (cat) => cat.name.toLowerCase() === category.name.toLowerCase()
       );

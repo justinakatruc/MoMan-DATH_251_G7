@@ -9,8 +9,9 @@ import {
 } from "react";
 import { Category, Transaction } from "@/app/model";
 import { useCategoryStore } from "../store/useCategoryStore";
-import { categoryAPI } from "@/lib/api";
+import { categoryAPI, transactionAPI } from "@/lib/api";
 import { toast } from "sonner";
+import { useTransactionStore } from "../store/useTransactionStore";
 interface CategoryContextType {
   userExpenseCategories: Category[];
   userIncomeCategories: Category[];
@@ -18,8 +19,11 @@ interface CategoryContextType {
   addCategory: (category: Category) => Promise<boolean>;
   removeCategory: (categoryId: string, type: "expense" | "income") => void;
   addTransaction: (transaction: Transaction) => void;
-  removeTransaction: (transactionId: number) => void;
-  updateTransaction: (id: number, updated: Partial<Transaction>) => void;
+  removeTransaction: (transactionId: string) => void;
+  updateTransaction: (
+    transactionId: string,
+    updated: Partial<Transaction>
+  ) => void;
   getTransactionsByCategory: (categoryId: string) => Transaction[];
 }
 
@@ -30,6 +34,7 @@ const CategoryContext = createContext<CategoryContextType | undefined>(
 export function CategoryProvider({ children }: { children: ReactNode }) {
   const { expensesCategory, incomesCategory, fetchCategories } =
     useCategoryStore();
+  const { fetchTransactions } = useTransactionStore();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   useEffect(() => {
@@ -91,6 +96,8 @@ export function CategoryProvider({ children }: { children: ReactNode }) {
       if (result.success) {
         await fetchCategories();
 
+        await transactionAPI.removeTransactionBaseOnCategory(categoryId);
+
         setTransactions((prev) =>
           prev.filter((transaction) => transaction.categoryId !== categoryId)
         );
@@ -103,18 +110,64 @@ export function CategoryProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const addTransaction = (transaction: Transaction) => {
-    setTransactions((prev) => [...prev, transaction]);
+  const addTransaction = async (transaction: Transaction) => {
+    try {
+      const result = await transactionAPI.addTransaction({
+        type: transaction.type,
+        date: new Date(transaction.date).toISOString(),
+        name: transaction.name,
+        amount: transaction.amount,
+        description: transaction.description,
+        categoryId: transaction.categoryId,
+      });
+
+      if (result.success) {
+        toast.success("Transaction added successfully!");
+        await fetchTransactions();
+        setTransactions((prev) => [...prev, transaction]);
+      } else {
+        toast.error("Failed to add transaction.");
+      }
+    } catch (error) {
+      console.error("Error adding transaction:", error);
+      toast.error("Failed to add transaction.");
+    }
   };
 
-  const removeTransaction = (transactionId: number) => {
-    setTransactions((prev) => prev.filter((t) => t.id !== transactionId));
+  const removeTransaction = async (transactionId: string) => {
+    try {
+      const result = await transactionAPI.removeTransaction(transactionId);
+
+      if (result.success) {
+        await fetchTransactions();
+        setTransactions((prev) => prev.filter((t) => t.id !== transactionId));
+      }
+    } catch (error) {
+      console.error("Error removing transaction:", error);
+    }
   };
 
-  function updateTransaction(id: number, updated: Partial<Transaction>) {
-    setTransactions((prev) =>
-      prev.map((tx) => (tx.id === id ? { ...tx, ...updated } : tx))
-    );
+  async function updateTransaction(
+    transactionId: string,
+    updated: Partial<Transaction>
+  ) {
+    try {
+      const result = await transactionAPI.updateTransaction(
+        transactionId,
+        updated
+      );
+
+      if (result.success) {
+        await fetchTransactions();
+        setTransactions((prev) =>
+          prev.map((tx) =>
+            tx.id === transactionId ? { ...tx, ...updated } : tx
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Error updating transaction:", error);
+    }
   }
 
   const getTransactionsByCategory = (categoryId: string) => {

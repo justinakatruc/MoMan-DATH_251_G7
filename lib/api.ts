@@ -1,3 +1,5 @@
+import { Transaction } from "@/app/model";
+
 const BASE_API = "http://localhost:3000/api";
 
 export const authAPI = {
@@ -97,6 +99,103 @@ export const categoryAPI = {
         token: localStorage.getItem("token"),
         categoryId,
         type,
+      }),
+    });
+    return response.json();
+  },
+};
+
+export const transactionAPI = {
+  getAllTransactions: async () => {
+    const response = await fetch(`${BASE_API}/transactions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        action: "getAllTransactions",
+        token: localStorage.getItem("token"),
+      }),
+    });
+    return response.json();
+  },
+  getCategoryTransactions: async (categoryId: string) => {
+    const response = await fetch(`${BASE_API}/transactions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        action: "getCategoryTransactions",
+        token: localStorage.getItem("token"),
+        categoryId,
+      }),
+    });
+    return response.json();
+  },
+  addTransaction: async (transaction: {
+    type: "expense" | "income";
+    date: string;
+    name: string;
+    amount: number;
+    categoryId: string;
+    description?: string;
+  }) => {
+    const response = await fetch(`${BASE_API}/transactions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        action: "addTransaction",
+        token: localStorage.getItem("token"),
+        transaction: transaction,
+      }),
+    });
+    return response.json();
+  },
+  updateTransaction: async (
+    transactionId: string,
+    updated: Partial<Transaction>
+  ) => {
+    const response = await fetch(`${BASE_API}/transactions`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        action: "updateTransaction",
+        token: localStorage.getItem("token"),
+        transactionId,
+        updated,
+      }),
+    });
+    return response.json();
+  },
+  removeTransaction: async (transactionId: string) => {
+    const response = await fetch(`${BASE_API}/transactions`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        action: "removeTransaction",
+        token: localStorage.getItem("token"),
+        transactionId,
+      }),
+    });
+    return response.json();
+  },
+  removeTransactionBaseOnCategory: async (categoryId: string) => {
+    const response = await fetch(`${BASE_API}/transactions`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        action: "removeTransactionBaseOnCategory",
+        token: localStorage.getItem("token"),
+        categoryId,
       }),
     });
     return response.json();

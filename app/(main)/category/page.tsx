@@ -48,7 +48,7 @@ function CategoryItem({
           }`}
         />
         <button
-          className={`w-6 h-6 rounded-[8px] border-2 absolute transition-opacity duration-1000 ${
+          className={`w-6 h-6 rounded-2 border-2 absolute transition-opacity duration-1000 ${
             removeMode ? "opacity-100 z-50 shadow-md" : "opacity-0"
           } ${
             isDefault
@@ -176,7 +176,7 @@ function AddCustomCategoryModal({
               value={categoryName}
               onChange={(e) => setCategoryName(e.target.value)}
               placeholder="Enter category name"
-              className="w-full px-3 py-2 border border-gray-300 placeholder:text-gray-500 text-gray-700 rounded-[8px] focus:outline-none focus:border-green-500"
+              className="w-full px-3 py-2 border border-gray-300 placeholder:text-gray-500 text-gray-700 rounded-2 focus:outline-none focus:border-green-500"
               maxLength={25}
             />
             <div className="text-right text-xs text-gray-400 mt-1">
@@ -194,7 +194,7 @@ function AddCustomCategoryModal({
               <button
                 key={index}
                 onClick={() => setSelectedIcon(icon)}
-                className={`w-12 h-12 rounded-[8px] flex items-center justify-center border-2 transition-colors cursor-pointer ${
+                className={`w-12 h-12 rounded-2 flex items-center justify-center border-2 transition-colors cursor-pointer ${
                   selectedIcon === icon
                     ? "border-green-500 bg-green-50"
                     : "border-gray-300 hover:border-green-300"

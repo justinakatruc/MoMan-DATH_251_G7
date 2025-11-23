@@ -1,9 +1,27 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { useCategories } from "@/app/context/CategoryContext";
 import Topbar from "@/app/components/Topbar";
+import { Transaction } from "@/app/model";
+import { usePathname } from "next/navigation";
+import { transactionAPI } from "@/lib/api";
+import { useCategoryStore } from "@/app/store/useCategoryStore";
 
 export default function CategoryPage() {
+  const pathname = usePathname();
+  const categoryName = pathname.split("/")[2];
+
+  const formatLink = (name: string) => {
+    let lower = name.toLowerCase().trim();
+
+    if (lower.includes("&")) {
+      lower = lower.replace(/\s*&\s*/g, "&");
+      return lower.replace(/\s+/g, "-");
+    }
+
+    return lower.replace(/\s+/g, "-");
+  };
+
   const months = [
     "January",
     "February",
@@ -20,8 +38,10 @@ export default function CategoryPage() {
   ];
   const getMonthIndex = (month: string) => months.findIndex((m) => m === month);
 
-  const { transactions, removeTransaction, updateTransaction } =
-    useCategories();
+  const { expensesCategory, incomesCategory } = useCategoryStore();
+  const { removeTransaction, updateTransaction } = useCategories();
+  const [transactionsSet, setTransactionsSet] = useState<Transaction[]>([]);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [fromMonth, setFromMonth] = useState("January");
   const [toMonth, setToMonth] = useState("December");
   const fromMonthIndex = getMonthIndex(fromMonth);
@@ -32,6 +52,46 @@ export default function CategoryPage() {
 
   const fromDropdownRef = useRef<HTMLDivElement>(null);
   const toDropdownRef = useRef<HTMLDivElement>(null);
+
+  const fetchTransactions = useCallback(async () => {
+    let categoryId: string | null = null;
+    const expenseCategory = expensesCategory.find(
+      (cat) => formatLink(cat.name) === categoryName
+    );
+    if (expenseCategory) {
+      categoryId = expenseCategory.id;
+    } else {
+      const incomeCategory = incomesCategory.find(
+        (cat) => formatLink(cat.name) === categoryName
+      );
+      if (incomeCategory) {
+        categoryId = incomeCategory.id;
+      }
+    }
+
+    if (categoryId) {
+      const result = await transactionAPI.getCategoryTransactions(categoryId);
+
+      if (result.success) {
+        // Convert date strings to Date objects
+        const fetchedTransactions: Transaction[] = result.transactions.map(
+          (tx: {
+            id: number;
+            type: "expense" | "income";
+            name: string;
+            amount: number;
+            date: string;
+            description?: string;
+            categoryId: string;
+          }) => ({
+            ...tx,
+            date: tx.date ? new Date(tx.date) : null,
+          })
+        );
+        setTransactionsSet(fetchedTransactions);
+      }
+    }
+  }, [categoryName, expensesCategory, incomesCategory]);
 
   // Check if the use click outside Dropdown Menu and close it
   useEffect(() => {
@@ -57,19 +117,22 @@ export default function CategoryPage() {
     };
   }, []);
 
-  // Get Food & Drink transaction with month filter applied
-  const FoodnDrinkTransactions = transactions.filter((transaction) => {
-    if (transaction.categoryId !== 1) return false;
-    if (!transaction.date) return true;
+  useEffect(() => {
+    fetchTransactions();
+  }, [fetchTransactions, isEditMode]);
 
-    const tMonth = transaction.date.getMonth();
-    return tMonth >= fromMonthIndex && tMonth <= toMonthIndex;
-  });
+  const filteredTransactions = useMemo(() => {
+    if (fromMonthIndex > toMonthIndex) return [];
 
-  const [isEditMode, setIsEditMode] = useState(false);
+    return transactionsSet.filter((transaction) => {
+      if (!transaction.date) return true;
+      const tMonth = transaction.date.getMonth();
+      return tMonth >= fromMonthIndex && tMonth <= toMonthIndex;
+    });
+  }, [transactionsSet, fromMonthIndex, toMonthIndex]);
 
-  // Temporay form to store edit transaction details
   type EditForm = {
+    id: string;
     name: string;
     amount: string;
     description: string;
@@ -81,21 +144,20 @@ export default function CategoryPage() {
   useEffect(() => {
     if (isEditMode) {
       const forms: { [id: number]: EditForm } = {};
-      transactions
-        .filter((transaction) => transaction.categoryId === 1)
-        .forEach((transaction) => {
-          forms[transaction.id] = {
-            name: transaction.name,
-            amount: transaction.amount?.toString() || "",
-            description: transaction.description || "",
-            date: transaction.date
-              ? new Date(transaction.date).toISOString().split("T")[0]
-              : "",
-          };
-        });
+      transactionsSet.forEach((transaction, index) => {
+        forms[index] = {
+          id: transaction.id,
+          name: transaction.name,
+          amount: transaction.amount?.toString() || "",
+          description: transaction.description || "",
+          date: transaction.date
+            ? new Date(transaction.date).toISOString().split("T")[0]
+            : "",
+        };
+      });
       setEditForms(forms);
     }
-  }, [isEditMode, transactions]);
+  }, [isEditMode, transactionsSet]);
 
   return (
     <div className="flex w-full items-center justify-center">
@@ -191,18 +253,22 @@ export default function CategoryPage() {
             </div>
             <div className="hidden lg:flex items-center">
               <button
-                onClick={() => {
+                onClick={async () => {
                   if (isEditMode) {
-                    Object.entries(editForms).forEach(([id, form]) => {
-                      const isAllEmpty =
-                        !form.name.trim() &&
-                        !form.amount.trim() &&
-                        !form.description.trim();
+                    Object.entries(editForms).forEach(([, form]) => {
+                      const nameEmpty = !form.name.trim();
+                      const amountEmpty = !form.amount.trim();
+                      const dateEmpty = !form.date?.trim();
+                      const isAllEmpty = nameEmpty && amountEmpty && dateEmpty;
+
+                      const isAnyEmpty = nameEmpty || amountEmpty || dateEmpty;
 
                       if (isAllEmpty) {
-                        removeTransaction(Number(id));
+                        removeTransaction(form.id);
+                      } else if (isAnyEmpty) {
+                        return;
                       } else {
-                        updateTransaction(Number(id), {
+                        updateTransaction(form.id, {
                           name: form.name,
                           amount: parseFloat(form.amount),
                           description: form.description,
@@ -210,12 +276,14 @@ export default function CategoryPage() {
                         });
                       }
                     });
+
+                    await fetchTransactions();
                   }
                   setIsEditMode(!isEditMode);
                 }}
                 className="w-20 text-2xl bg-[#FBFDFF] border-2 border-gray-200 rounded-md text-center justify-center shadow-md cursor-pointer"
               >
-                {isEditMode && FoodnDrinkTransactions.length > 0
+                {isEditMode && filteredTransactions.length > 0
                   ? "Done"
                   : "Edit"}
               </button>
@@ -256,16 +324,16 @@ export default function CategoryPage() {
             <button
               onClick={() => {
                 if (isEditMode) {
-                  Object.entries(editForms).forEach(([id, form]) => {
+                  Object.entries(editForms).forEach(([, form]) => {
                     const isAllEmpty =
                       !form.name.trim() &&
                       !form.amount.trim() &&
                       !form.description.trim();
 
                     if (isAllEmpty) {
-                      removeTransaction(Number(id));
+                      removeTransaction(form.id);
                     } else {
-                      updateTransaction(Number(id), {
+                      updateTransaction(form.id, {
                         name: form.name,
                         amount: parseFloat(form.amount),
                         description: form.description,
@@ -278,9 +346,7 @@ export default function CategoryPage() {
               }}
               className="w-18 h-8 text-base bg-[#FBFDFF] border-2 border-gray-200 rounded-md text-center justify-center shadow-md cursor-pointer"
             >
-              {isEditMode && FoodnDrinkTransactions.length > 0
-                ? "Done"
-                : "Edit"}
+              {isEditMode && filteredTransactions.length > 0 ? "Done" : "Edit"}
             </button>
             <a
               href="./"
@@ -331,12 +397,12 @@ export default function CategoryPage() {
               </div>
             </div>
             <div className="max-h-[600px] lg:max-h-[700px] overflow-y-auto">
-              {FoodnDrinkTransactions.length === 0 ? (
+              {filteredTransactions.length === 0 ? (
                 <div className="p-8 text-center text-gray-500">
                   No transactions yet. Click the green button to create one!
                 </div>
               ) : (
-                FoodnDrinkTransactions.map((transaction) => (
+                filteredTransactions.map((transaction, index) => (
                   <div
                     key={transaction.id}
                     className="grid grid-cols-4 gap-4 p-4 border-b border-gray-100 hover:bg-gray-50 text-center"
@@ -345,12 +411,12 @@ export default function CategoryPage() {
                       <>
                         <input
                           className="text-gray-900 border rounded px-2"
-                          value={editForms[transaction.id]?.name || ""}
+                          value={editForms[index]?.name || ""}
                           onChange={(e) =>
                             setEditForms((forms) => ({
                               ...forms,
-                              [transaction.id]: {
-                                ...(forms[transaction.id] || {}),
+                              [index]: {
+                                ...(forms[index] || {}),
                                 name: e.target.value,
                               },
                             }))
@@ -359,12 +425,12 @@ export default function CategoryPage() {
                         <input
                           className="text-gray-900 border rounded px-2"
                           type="number"
-                          value={editForms[transaction.id]?.amount || ""}
+                          value={editForms[index]?.amount || ""}
                           onChange={(e) =>
                             setEditForms((forms) => ({
                               ...forms,
-                              [transaction.id]: {
-                                ...(forms[transaction.id] || {}),
+                              [index]: {
+                                ...(forms[index] || {}),
                                 amount: e.target.value,
                               },
                             }))
@@ -372,12 +438,12 @@ export default function CategoryPage() {
                         />
                         <input
                           className="text-gray-600 border rounded px-2"
-                          value={editForms[transaction.id]?.description || ""}
+                          value={editForms[index]?.description || ""}
                           onChange={(e) =>
                             setEditForms((forms) => ({
                               ...forms,
-                              [transaction.id]: {
-                                ...(forms[transaction.id] || {}),
+                              [index]: {
+                                ...(forms[index] || {}),
                                 description: e.target.value,
                               },
                             }))
@@ -386,12 +452,12 @@ export default function CategoryPage() {
                         <input
                           className="text-gray-600 border rounded px-2"
                           type="date"
-                          value={editForms[transaction.id]?.date || ""}
+                          value={editForms[index]?.date || ""}
                           onChange={(e) =>
                             setEditForms((forms) => ({
                               ...forms,
-                              [transaction.id]: {
-                                ...(forms[transaction.id] || {}),
+                              [index]: {
+                                ...(forms[index] || {}),
                                 date: e.target.value,
                               },
                             }))

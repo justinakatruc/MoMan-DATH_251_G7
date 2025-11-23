@@ -14,7 +14,7 @@ export default function TransactionButton() {
     amount: "",
     date: new Date().toISOString().split("T")[0],
     description: "",
-    categoryId: 0,
+    categoryId: "",
   });
 
   const { userExpenseCategories, userIncomeCategories, addTransaction } =
@@ -26,7 +26,7 @@ export default function TransactionButton() {
   const handleSubmit = () => {
     if (formData.name.trim() && formData.amount && formData.categoryId) {
       const newTransaction: Transaction = {
-        id: Date.now() + Math.floor(Math.random() * 1000),
+        id: (Date.now() + Math.floor(Math.random() * 1000)).toString(),
         categoryId: formData.categoryId,
         type: transactionType,
         name: formData.name.trim(),
@@ -43,9 +43,11 @@ export default function TransactionButton() {
         amount: "",
         date: new Date().toISOString().split("T")[0],
         description: "",
-        categoryId: 0,
+        categoryId: "",
       });
-      setIsOpen(false);
+      setTimeout(() => {
+        setIsOpen(false);
+      }, 1000);
     }
   };
 
@@ -57,7 +59,7 @@ export default function TransactionButton() {
       amount: "",
       date: new Date().toISOString().split("T")[0],
       description: "",
-      categoryId: 0,
+      categoryId: "",
     });
   };
 
@@ -65,8 +67,8 @@ export default function TransactionButton() {
     <>
       {/* Responsive Button */}
       <button
-              onClick={() => setIsOpen(true)}
-              className="flex w-12 h-12 bg-[#07B681] rounded-[12px] items-center justify-center shadow-md hover:bg-[rgba(7,182,129,0.8)] transition-colors cursor-pointer"
+        onClick={() => setIsOpen(true)}
+        className="flex w-12 h-12 bg-[#07B681] rounded-[12px] items-center justify-center shadow-md hover:bg-[rgba(7,182,129,0.8)] transition-colors cursor-pointer"
       >
         <svg
           className="w-8 h-8 text-white"
@@ -113,7 +115,7 @@ export default function TransactionButton() {
             </button>
 
             {/* Fixed Header Section */}
-            <div className="text-center mb-4 sm:mb-6 flex-shrink-0">
+            <div className="text-center mb-4 sm:mb-6 shrink-0">
               <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-700 mb-3 sm:mb-4">
                 Add Transaction
               </h2>
@@ -123,7 +125,7 @@ export default function TransactionButton() {
                 <button
                   onClick={() => {
                     setTransactionType("income");
-                    setFormData((prev) => ({ ...prev, categoryId: 0 }));
+                    setFormData((prev) => ({ ...prev, categoryId: "" }));
                   }}
                   className={`flex-1 py-2 sm:py-3 px-3 sm:px-4 rounded-md text-sm sm:text-base font-medium transition-colors cursor-pointer ${
                     transactionType === "income"
@@ -136,7 +138,7 @@ export default function TransactionButton() {
                 <button
                   onClick={() => {
                     setTransactionType("expense");
-                    setFormData((prev) => ({ ...prev, categoryId: 0 }));
+                    setFormData((prev) => ({ ...prev, categoryId: "" }));
                   }}
                   className={`flex-1 py-2 sm:py-3 px-3 sm:px-4 rounded-md text-sm sm:text-base font-medium transition-colors cursor-pointer ${
                     transactionType === "expense"
@@ -273,7 +275,7 @@ export default function TransactionButton() {
             </div>
 
             {/* Fixed Submit Button */}
-            <div className="flex-shrink-0 pt-4 sm:pt-6">
+            <div className="shrink-0 pt-4 sm:pt-6">
               <button
                 onClick={handleSubmit}
                 disabled={

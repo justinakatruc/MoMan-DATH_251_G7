@@ -38,3 +38,14 @@ model IncomeCategory {
   isDefault   Boolean  @default(false)
   userId     String?  @db.ObjectId
 }
+
+model Transaction {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  type            String
+  date            DateTime @default(now())
+  name           String
+  amount          Float
+  userId         String   @db.ObjectId
+  categoryId     String   @db.ObjectId
+  description     String?
+}
