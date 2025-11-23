@@ -72,7 +72,7 @@ export default function Sidebar() {
 
   return (
     <>
-      <div className="lg:hidden w-full flex items-center justify-between flex-wrap py-2 px-1">
+      <div className="lg:hidden w-full flex items-center justify-between flex-wrap py-2 px-1 z-50 relative">
         <Link href={`/home`} className="h-full flex items-center">
           <Image
             src="/logo.png"
@@ -356,7 +356,7 @@ export default function Sidebar() {
           </div>
         </ul>
       </div>
-      <div className="hidden lg:flex lg:w-[260px] h-screen md:bg-[#FBFDFF] flex-col items-center sticky left-0 top-0">
+      <div className="hidden lg:flex lg:w-[260px] h-screen md:bg-[#FBFDFF] flex-col items-center sticky left-0 top-0 z-50">
         <Link href={"/home"} className="w-full h-[70px] flex items-center">
           <Image
             src="/logo.png"

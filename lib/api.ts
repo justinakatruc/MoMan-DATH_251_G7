@@ -322,3 +322,76 @@ export const userAPI = {
     return response.json();
   },
 };
+
+export const adminAPI = {
+  getUsersDashboard: async () => {
+    const response = await fetch(`${BASE_API}/admin`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        action: "getUsersDashboard",
+        token: localStorage.getItem("token"),
+      }),
+    });
+    return response.json();
+  },
+
+  getTransactionsDashboard: async () => {
+    const response = await fetch(`${BASE_API}/admin`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        action: "getTransactionsDashboard",
+        token: localStorage.getItem("token"),
+      }),
+    });
+    return response.json();
+  },
+
+  getTotalBaseCategories: async () => {
+    const response = await fetch(`${BASE_API}/admin`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        action: "getTotalBaseCategories",
+        token: localStorage.getItem("token"),
+      }),
+    });
+    return response.json();
+  },
+
+  getAllUsers: async () => {
+    const response = await fetch(`${BASE_API}/admin`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        action: "getAllUsers",
+        token: localStorage.getItem("token"),
+      }),
+    });
+    return response.json();
+  },
+
+  deleteUser: async (userId: string) => {
+    const response = await fetch(`${BASE_API}/admin`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        action: "deleteUser",
+        token: localStorage.getItem("token"),
+        userId,
+      }),
+    });
+    return response.json();
+  },
+};

@@ -5,7 +5,7 @@ import { useState } from "react";
 import { ProfileCard } from "./ProfileCard";
 
 interface ProfileProps {
-  id: number;
+  id: string;
   firstName: string;
   lastName: string;
   email: string;

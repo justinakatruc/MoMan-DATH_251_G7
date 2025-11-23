@@ -1,7 +1,7 @@
 "use client";
 
 import { useUserStore } from "@/app/store/useUserStore";
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 
 export default function AdminLayout({
   children,
@@ -9,10 +9,9 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const { user } = useUserStore();
-  const router = useRouter();
 
   if (user && user.accountType !== "Admin") {
-    router.push("/home");
+    redirect("/home");
   }
 
   return <div>{children}</div>;

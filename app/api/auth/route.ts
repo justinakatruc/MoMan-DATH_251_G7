@@ -82,6 +82,7 @@ async function handleLogin(data: { email: string; password: string }) {
     {
       id: user.id,
       email: user.email,
+      role: user.accountType,
     },
     JWT_SECRET,
     { expiresIn: "12h" }

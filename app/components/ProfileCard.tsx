@@ -26,7 +26,7 @@ export function ProfileCard({ user, setIsOpen }: ProfileCardProps) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { setUser } = useUserStore();
+  const { user: currentUser, setUser } = useUserStore();
 
   const validateName = (name: string): boolean => {
     const nameRegex = /^[a-zA-Z]+$/;
@@ -54,8 +54,10 @@ export function ProfileCard({ user, setIsOpen }: ProfileCardProps) {
       newErrors.email = "Email is invalid";
     }
 
-    if (newPassword !== confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match";
+    if (user.id === currentUser?.id) {
+      if (newPassword !== confirmPassword) {
+        newErrors.confirmPassword = "Passwords do not match";
+      }
     }
 
     setFormErrors(newErrors);
@@ -201,53 +203,63 @@ export function ProfileCard({ user, setIsOpen }: ProfileCardProps) {
               <p className="text-sm text-red-500 mt-1">{formErrors.email}</p>
             )}
           </div>
-          <div className="w-full xl:w-1/2 flex flex-col gap-y-4 relative">
-            <label className="block text-sm font-medium text-[#000000]">
-              New Password
-            </label>
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Enter your New Password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              title="Password must contain at least one uppercase letter, one lowercase letter, and one number."
-              className="w-full h-12 px-4 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-[#F4F7FD]"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-13 text-gray-500 cursor-pointer"
-            >
-              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-            </button>
-            {formErrors.password && (
-              <p className="text-sm text-red-500 mt-1">{formErrors.password}</p>
-            )}
-          </div>
-          <div className="w-full xl:w-1/2 flex flex-col gap-y-4 relative">
-            <label className="block text-sm font-medium text-[#000000]">
-              Confirm New Password
-            </label>
-            <input
-              type={showConfirmPassword ? "text" : "password"}
-              placeholder="Enter your Confirm Password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full h-12 px-4 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-[#F4F7FD]"
-            />
-            <button
-              type="button"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-3 top-13 text-gray-500 cursor-pointer"
-            >
-              {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-            </button>
-            {formErrors.confirmPassword && (
-              <p className="text-sm text-red-500 mt-1">
-                {formErrors.confirmPassword}
-              </p>
-            )}
-          </div>
+          {user.id === currentUser?.id && (
+            <>
+              <div className="w-full xl:w-1/2 flex flex-col gap-y-4 relative">
+                <label className="block text-sm font-medium text-[#000000]">
+                  New Password
+                </label>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Your new password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  title="Password must contain at least one uppercase letter, one lowercase letter, and one number."
+                  className="w-full h-12 px-4 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-[#F4F7FD]"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-13 text-gray-500 cursor-pointer"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+                {formErrors.password && (
+                  <p className="text-sm text-red-500 mt-1">
+                    {formErrors.password}
+                  </p>
+                )}
+              </div>
+              <div className="w-full xl:w-1/2 flex flex-col gap-y-4 relative">
+                <label className="block text-sm font-medium text-[#000000]">
+                  Confirm New Password
+                </label>
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Confirm your password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full h-12 px-4 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-[#F4F7FD]"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-13 text-gray-500 cursor-pointer"
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff size={20} />
+                  ) : (
+                    <Eye size={20} />
+                  )}
+                </button>
+                {formErrors.confirmPassword && (
+                  <p className="text-sm text-red-500 mt-1">
+                    {formErrors.confirmPassword}
+                  </p>
+                )}
+              </div>
+            </>
+          )}
           <button
             className="mt-2 w-full h-12 bg-[#07B681] rounded-[10px] text-white font-semibold hover:bg-[#06a56c] transition-colors cursor-pointer"
             disabled={isLoading}

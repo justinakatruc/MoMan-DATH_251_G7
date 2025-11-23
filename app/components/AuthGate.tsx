@@ -29,9 +29,7 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
 
   if (!hasHydrated || !user) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-[#F4F7FD]">
-        <p className="text-xl">Loading session...</p>
-      </div>
+      <div className="flex justify-center items-center min-h-screen bg-[#F4F7FD]"></div>
     );
   }
 
