@@ -52,7 +52,9 @@ export default function Topbar() {
           <h1 className="text-3xl font-bold text-gray-800">{pageName}</h1>
           {pageName === "Home" ? (
             <h1 className="text-xl font-bold text-gray-800">
-              {user?.email.split("@")[0]}
+              {user!.firstName.charAt(0).toUpperCase() +
+                user!.firstName.slice(1)}{" "}
+              {user!.lastName.charAt(0).toUpperCase() + user!.lastName.slice(1)}
             </h1>
           ) : (
             <></>

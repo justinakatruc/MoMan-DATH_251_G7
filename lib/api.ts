@@ -37,6 +37,36 @@ export const authAPI = {
 
     return response.json();
   },
+
+  logout: async () => {
+    const response = await fetch(`${BASE_API}/auth`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        action: "logout",
+        token: localStorage.getItem("token"),
+      }),
+    });
+
+    return response.json();
+  },
+
+  authorize: async () => {
+    const response = await fetch(`${BASE_API}/auth`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        action: "authorize",
+        token: localStorage.getItem("token"),
+      }),
+    });
+
+    return response.json();
+  },
 };
 
 export const categoryAPI = {
@@ -265,6 +295,28 @@ export const eventAPI = {
         action: "deleteEvent",
         token: localStorage.getItem("token"),
         eventId,
+      }),
+    });
+    return response.json();
+  },
+};
+
+export const userAPI = {
+  updateUserProfile: async (updatedData: {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    password?: string;
+  }) => {
+    const response = await fetch(`${BASE_API}/users`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        action: "updateUserProfile",
+        token: localStorage.getItem("token"),
+        updatedData,
       }),
     });
     return response.json();

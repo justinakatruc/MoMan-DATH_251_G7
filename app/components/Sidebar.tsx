@@ -15,6 +15,7 @@ import {
 import Profile from "./Profile";
 import { useUserStore } from "../store/useUserStore";
 import { useCategoryStore } from "../store/useCategoryStore";
+import { authAPI } from "@/lib/api";
 
 export default function Sidebar() {
   const { user } = useUserStore();
@@ -40,6 +41,15 @@ export default function Sidebar() {
     }
 
     return lower.replace(/\s+/g, "-");
+  };
+
+  const handleLogout = async () => {
+    const result = await authAPI.logout();
+
+    if (result.success) {
+      localStorage.removeItem("token");
+      clear();
+    }
   };
 
   useEffect(() => {
@@ -181,6 +191,30 @@ export default function Sidebar() {
           ) : (
             <>
               <Link
+                href={`/home`}
+                key={0}
+                className="size-10 md:size-[50px] flex items-center justify-center cursor-pointer bg-[rgba(226,229,233,0.5)] hover:bg-[rgba(226,229,233,0.8)] rounded-full relative"
+                onMouseEnter={() => {
+                  setTimeout(() => setShowLabel(0), 100);
+                }}
+                onMouseLeave={() => {
+                  setTimeout(() => setShowLabel(null), 100);
+                }}
+              >
+                <Image
+                  src="/home.png"
+                  alt="Home Icon"
+                  width={24}
+                  height={24}
+                  className="size-6 md:size-7"
+                />
+                {showLabel === 0 && (
+                  <div className="absolute top-[65px] w-20 flex items-center justify-center text-[9px] font-semibold bg-[#080809] text-white py-1.5 px-2 rounded-[25px]">
+                    Home
+                  </div>
+                )}
+              </Link>
+              <Link
                 href={`/category`}
                 key={1}
                 className="size-10 md:size-[50px] flex items-center justify-center cursor-pointer bg-[rgba(226,229,233,0.5)] hover:bg-[rgba(226,229,233,0.8)] rounded-full relative"
@@ -301,7 +335,7 @@ export default function Sidebar() {
                 <div className="p-4 flex flex-col gap-y-3">
                   <div
                     className="flex items-center cursor-pointer hover:bg-[rgba(226,229,233,0.3)] rounded-[10px] p-2"
-                    onClick={clear}
+                    onClick={handleLogout}
                   >
                     <div className="size-9 flex items-center justify-center bg-[#e2e5e9] rounded-full">
                       <Image
@@ -575,7 +609,7 @@ export default function Sidebar() {
             )}
             <button
               className="h-10 xl:h-[45px] 2xl:h-[60px] bg-[rgba(235,106,99,0.91)] hover:bg-[rgba(235,106,99,1)] cursor-pointer rounded-[12px] text-white font-semibold text-[15px] xl:text-[17px] 2xl:text-[19px]"
-              onClick={clear}
+              onClick={handleLogout}
             >
               Log Out
             </button>

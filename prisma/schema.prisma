@@ -21,6 +21,7 @@ model User {
   memberSince DateTime @default(now())
   accountType String
   password    String
+  isActive  Boolean  @default(false)
 }
 
 model ExpenseCategory {

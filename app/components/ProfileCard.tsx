@@ -1,18 +1,90 @@
 "use client";
 
-import { Calendar, CircleUser } from "lucide-react";
+import { Calendar, CircleUser, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { User } from "../model";
+import { userAPI } from "@/lib/api";
+import { toast } from "sonner";
+import { useUserStore } from "../store/useUserStore";
 
 interface ProfileCardProps {
   user: User;
   setIsOpen: (isOpen: boolean) => void;
 }
 
+type FormErrors = {
+  [key: string]: string;
+};
+
 export function ProfileCard({ user, setIsOpen }: ProfileCardProps) {
   const [firstName, setFirstName] = useState(user.firstName);
   const [lastName, setLastName] = useState(user.lastName);
   const [email, setEmail] = useState(user.email);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { setUser } = useUserStore();
+
+  const validateName = (name: string): boolean => {
+    const nameRegex = /^[a-zA-Z]+$/;
+    return nameRegex.test(name);
+  };
+
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
+
+    if (!firstName) {
+      newErrors.firstName = "First name is required";
+    } else if (!validateName(firstName)) {
+      newErrors.firstName = "First name can only contain letters";
+    }
+
+    if (!lastName) {
+      newErrors.lastName = "Last name is required";
+    } else if (!validateName(lastName)) {
+      newErrors.lastName = "Last name can only contain letters";
+    }
+
+    if (!email) {
+      newErrors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = "Email is invalid";
+    }
+
+    if (newPassword !== confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match";
+    }
+
+    setFormErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
+
+  async function handleSaveChanges() {
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsLoading(true);
+    const result = await userAPI.updateUserProfile({
+      firstName,
+      lastName,
+      email,
+      password: newPassword.length > 0 ? newPassword : undefined,
+    });
+
+    if (result.success) {
+      toast.success("Profile updated successfully");
+      setUser(result.user);
+      setIsOpen(false);
+    } else {
+      toast.error(result.error || "Failed to update profile");
+    }
+    setIsLoading(false);
+  }
 
   return (
     <div
@@ -96,6 +168,11 @@ export function ProfileCard({ user, setIsOpen }: ProfileCardProps) {
                 onChange={(e) => setFirstName(e.target.value)}
                 className="w-full h-12 px-4 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-[#F4F7FD]"
               />
+              {formErrors.firstName && (
+                <p className="text-sm text-red-500 mt-1">
+                  {formErrors.firstName}
+                </p>
+              )}
             </div>
             <div className="w-full xl:w-1/2 flex flex-col gap-y-4">
               <label className="font-medium text-[14px]">Last Name</label>
@@ -105,6 +182,11 @@ export function ProfileCard({ user, setIsOpen }: ProfileCardProps) {
                 onChange={(e) => setLastName(e.target.value)}
                 className="w-full h-12 px-4 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-[#F4F7FD]"
               />
+              {formErrors.lastName && (
+                <p className="text-sm text-red-500 mt-1">
+                  {formErrors.lastName}
+                </p>
+              )}
             </div>
           </div>
           <div className="w-full xl:w-1/2 flex flex-col gap-y-4">
@@ -115,8 +197,62 @@ export function ProfileCard({ user, setIsOpen }: ProfileCardProps) {
               onChange={(e) => setEmail(e.target.value)}
               className="w-full h-12 px-4 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-[#F4F7FD]"
             />
+            {formErrors.email && (
+              <p className="text-sm text-red-500 mt-1">{formErrors.email}</p>
+            )}
           </div>
-          <button className="mt-2 w-full h-12 bg-[#07B681] rounded-[10px] text-white font-semibold hover:bg-[#06a56c] transition-colors cursor-pointer">
+          <div className="w-full xl:w-1/2 flex flex-col gap-y-4 relative">
+            <label className="block text-sm font-medium text-[#000000]">
+              New Password
+            </label>
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="Enter your New Password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              title="Password must contain at least one uppercase letter, one lowercase letter, and one number."
+              className="w-full h-12 px-4 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-[#F4F7FD]"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-13 text-gray-500 cursor-pointer"
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+            {formErrors.password && (
+              <p className="text-sm text-red-500 mt-1">{formErrors.password}</p>
+            )}
+          </div>
+          <div className="w-full xl:w-1/2 flex flex-col gap-y-4 relative">
+            <label className="block text-sm font-medium text-[#000000]">
+              Confirm New Password
+            </label>
+            <input
+              type={showConfirmPassword ? "text" : "password"}
+              placeholder="Enter your Confirm Password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="w-full h-12 px-4 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-[#F4F7FD]"
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-3 top-13 text-gray-500 cursor-pointer"
+            >
+              {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+            {formErrors.confirmPassword && (
+              <p className="text-sm text-red-500 mt-1">
+                {formErrors.confirmPassword}
+              </p>
+            )}
+          </div>
+          <button
+            className="mt-2 w-full h-12 bg-[#07B681] rounded-[10px] text-white font-semibold hover:bg-[#06a56c] transition-colors cursor-pointer"
+            disabled={isLoading}
+            onClick={handleSaveChanges}
+          >
             Save Changes
           </button>
         </div>

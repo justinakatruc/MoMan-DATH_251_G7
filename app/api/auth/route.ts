@@ -73,6 +73,11 @@ async function handleLogin(data: { email: string; password: string }) {
     );
   }
 
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { isActive: true },
+  });
+
   const token = jwt.sign(
     {
       id: user.id,
@@ -99,10 +104,99 @@ async function handleLogin(data: { email: string; password: string }) {
   );
 }
 
+async function handleLogout(token: string) {
+  if (!token) {
+    return NextResponse.json(
+      { success: false, message: "Authentication token is missing." },
+      { status: 401 }
+    );
+  }
+
+  let decoded: { id: string; email: string };
+  try {
+    decoded = jwt.verify(token, JWT_SECRET) as { id: string; email: string };
+  } catch (error) {
+    console.error("Token verification error:", error);
+    return NextResponse.json(
+      { success: false, message: "Invalid or expired token." },
+      { status: 401 }
+    );
+  }
+
+  const userId = decoded.id;
+  try {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { isActive: false },
+    });
+    return NextResponse.json(
+      { success: true, message: "Logged out successfully." },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error logging out user:", error);
+    return NextResponse.json(
+      { success: false, message: "Failed to log out." },
+      { status: 500 }
+    );
+  }
+}
+
+async function handleAuthorize(token: string) {
+  if (!token) {
+    return NextResponse.json(
+      { success: false, message: "Authentication token is missing." },
+      { status: 401 }
+    );
+  }
+
+  let decoded: { id: string; email: string };
+  try {
+    decoded = jwt.verify(token, JWT_SECRET) as { id: string; email: string };
+  } catch (error) {
+    console.error("Token verification error:", error);
+    return NextResponse.json(
+      { success: false, message: "Invalid or expired token." },
+      { status: 401 }
+    );
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: decoded.id },
+  });
+
+  if (!user) {
+    return NextResponse.json(
+      { success: false, message: "User not found." },
+      { status: 404 }
+    );
+  } else {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { isActive: true },
+    });
+
+    return NextResponse.json(
+      {
+        success: true,
+        user: {
+          id: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          accountType: user.accountType,
+          memberSince: user.memberSince,
+        },
+      },
+      { status: 200 }
+    );
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { action, ...userData } = body;
+    const { action, token, ...userData } = body;
 
     if (!action) {
       return NextResponse.json(
@@ -116,6 +210,10 @@ export async function POST(request: Request) {
         return await handleSignUp(userData);
       case "login":
         return await handleLogin(userData);
+      case "logout":
+        return await handleLogout(token);
+      case "authorize":
+        return await handleAuthorize(token);
       default:
         return NextResponse.json(
           { success: false, message: "Invalid action." },
