@@ -21,7 +21,7 @@ export default function MainLayout({
   return (
     <CategoryProvider>
       <AuthGate>
-        <div className="w-full flex flex-col lg:flex-row bg-[#F4F7FD]">
+        <div className="w-full flex flex-col lg:flex-row bg-[#F4F7FD] min-h-screen pb-8">
           <Sidebar />
           <div className="flex-1 w-full px-10 lg:px-0 xl:px-15 2xl:px-20">
             {children}
