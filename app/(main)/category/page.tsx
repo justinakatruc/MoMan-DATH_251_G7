@@ -1,11 +1,12 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Category } from "@/app/model";
 import { X } from "lucide-react";
 import { useCategories } from "@/app/context/CategoryContext";
 import Topbar from "@/app/components/Topbar";
 import Link from "next/link";
+import { useCategoryStore } from "@/app/store/useCategoryStore";
 
 interface CategoryItemProps {
   category: Category;
@@ -227,6 +228,11 @@ export default function CategoriesPage() {
   const [isEditIncomeMode, setIsEditIncomeMode] = useState(false);
   const [isRemoveExpenseMode, setIsRemoveExpenseMode] = useState(false);
   const [isRemoveIncomeMode, setIsRemoveIncomeMode] = useState(false);
+  const { fetchCategories } = useCategoryStore();
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
 
   const [showAddModal, setShowAddModal] = useState<{
     type: "expense" | "income" | null;

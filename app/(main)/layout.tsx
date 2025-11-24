@@ -4,7 +4,6 @@ import "@/app/globals.css";
 import Sidebar from "@/app/components/Sidebar";
 import { CategoryProvider } from "@/app/context/CategoryContext";
 import AuthGate from "../components/AuthGate";
-import { useCategoryStore } from "../store/useCategoryStore";
 import { useEffect } from "react";
 import { redirect } from "next/navigation";
 import { authAPI } from "@/lib/api";
@@ -16,7 +15,6 @@ export default function MainLayout({
   children: React.ReactNode;
 }>) {
   const { user, setUser } = useUserStore();
-  const fetchCategories = useCategoryStore((state) => state.fetchCategories);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -33,10 +31,6 @@ export default function MainLayout({
       checkUser();
     }
   }, [user, setUser]);
-
-  useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories]);
 
   return (
     <CategoryProvider>
