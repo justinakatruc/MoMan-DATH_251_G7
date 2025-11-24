@@ -49,7 +49,7 @@ function CategoryItem({
           }`}
         />
         <button
-          className={`w-6 h-6 rounded-2 border-2 absolute transition-opacity duration-1000 ${
+          className={`w-6 h-6 rounded-[6px] border-2 absolute transition-opacity duration-1000 ${
             removeMode ? "opacity-100 z-50 shadow-md" : "opacity-0"
           } ${
             isDefault
