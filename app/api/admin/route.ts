@@ -176,6 +176,52 @@ async function handleGetAllUsers() {
   }
 }
 
+async function handleGetAllTransactions() {
+  try {
+    const transactions = await prisma.transaction.findMany({
+      orderBy: { date: "desc" },
+    });
+
+    const returnTransactions = await Promise.all(
+      transactions.map(async (transaction) => {
+        const user = await prisma.user.findUnique({
+          where: { id: transaction.userId },
+          select: { firstName: true, lastName: true, email: true },
+        });
+        let category = null;
+        if (transaction.type === "expense") {
+          category = await prisma.expenseCategory.findUnique({
+            where: { id: transaction.categoryId },
+            select: { name: true },
+          });
+        } else {
+          category = await prisma.incomeCategory.findUnique({
+            where: { id: transaction.categoryId },
+            select: { name: true },
+          });
+        }
+        return {
+          ...transaction,
+          firstName: user?.firstName,
+          lastName: user?.lastName,
+          email: user?.email,
+          category: category?.name,
+        };
+      })
+    );
+    return NextResponse.json(
+      { success: true, transactions: returnTransactions },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error fetching all transactions:", error);
+    return NextResponse.json(
+      { success: false, message: "Failed to fetch all transactions." },
+      { status: 500 }
+    );
+  }
+}
+
 async function handleDeleteUser(userId: string) {
   try {
     if (!userId) {
@@ -270,6 +316,8 @@ export async function POST(request: Request) {
       return await handleGetTotalBaseCategories();
     case "getAllUsers":
       return await handleGetAllUsers();
+    case "getAllTransactions":
+      return await handleGetAllTransactions();
     default:
       return NextResponse.json(
         { success: false, message: "Invalid action." },

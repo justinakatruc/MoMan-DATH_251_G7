@@ -59,7 +59,7 @@ export default function UserPage() {
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [displayProfileModal]);
 
   const handleDeleteUser = async (userId: string) => {
     if (isLoading) return;

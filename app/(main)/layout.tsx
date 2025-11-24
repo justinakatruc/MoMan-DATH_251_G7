@@ -6,13 +6,33 @@ import { CategoryProvider } from "@/app/context/CategoryContext";
 import AuthGate from "../components/AuthGate";
 import { useCategoryStore } from "../store/useCategoryStore";
 import { useEffect } from "react";
+import { redirect } from "next/navigation";
+import { authAPI } from "@/lib/api";
+import { useUserStore } from "../store/useUserStore";
 
 export default function MainLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { user, setUser } = useUserStore();
   const fetchCategories = useCategoryStore((state) => state.fetchCategories);
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const result = await authAPI.authorize();
+
+      if (!result.success) {
+        redirect("/login");
+      } else {
+        setUser(result.user);
+      }
+    };
+
+    if (user === null) {
+      checkUser();
+    }
+  }, [user, setUser]);
 
   useEffect(() => {
     fetchCategories();

@@ -5,24 +5,24 @@ import bcrypt from "bcryptjs";
 
 const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret";
 
-async function handleUpdateUserProfile(
-  userId: string,
-  updatedData: {
-    firstName?: string;
-    lastName?: string;
-    email?: string;
-    password?: string;
-  }
-) {
+async function handleUpdateUserProfile(updatedData: {
+  id: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  password?: string;
+}) {
   try {
+    const { id, ...dataToUpdate } = updatedData;
+    console.log("Updating user with data:", updatedData);
     if (updatedData.password) {
       const hashedPassword = await bcrypt.hash(updatedData.password, 10);
       updatedData.password = hashedPassword;
     }
 
     const updatedUser = await prisma.user.update({
-      where: { id: userId },
-      data: updatedData,
+      where: { id: id },
+      data: dataToUpdate,
     });
     if (updatedUser) {
       return NextResponse.json(
@@ -65,9 +65,8 @@ export async function PUT(request: Request) {
       );
     }
 
-    let decoded: { id: string; email: string };
     try {
-      decoded = jwt.verify(token, JWT_SECRET) as { id: string; email: string };
+      jwt.verify(token, JWT_SECRET) as { id: string; email: string };
     } catch (error) {
       console.error("Invalid token:", error);
       return NextResponse.json(
@@ -75,8 +74,6 @@ export async function PUT(request: Request) {
         { status: 401 }
       );
     }
-
-    const userId = decoded.id;
 
     if (!action) {
       return NextResponse.json(
@@ -88,7 +85,7 @@ export async function PUT(request: Request) {
     switch (action) {
       case "updateUserProfile":
         const { updatedData } = body;
-        return await handleUpdateUserProfile(userId, updatedData);
+        return await handleUpdateUserProfile(updatedData);
       default:
         return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     }

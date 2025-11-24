@@ -303,6 +303,7 @@ export const eventAPI = {
 
 export const userAPI = {
   updateUserProfile: async (updatedData: {
+    id: string;
     firstName?: string;
     lastName?: string;
     email?: string;
@@ -374,6 +375,20 @@ export const adminAPI = {
       },
       body: JSON.stringify({
         action: "getAllUsers",
+        token: localStorage.getItem("token"),
+      }),
+    });
+    return response.json();
+  },
+
+  getAllTransactions: async () => {
+    const response = await fetch(`${BASE_API}/admin`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        action: "getAllTransactions",
         token: localStorage.getItem("token"),
       }),
     });

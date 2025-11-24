@@ -72,6 +72,7 @@ export function ProfileCard({ user, setIsOpen }: ProfileCardProps) {
 
     setIsLoading(true);
     const result = await userAPI.updateUserProfile({
+      id: user.id,
       firstName,
       lastName,
       email,
@@ -80,7 +81,9 @@ export function ProfileCard({ user, setIsOpen }: ProfileCardProps) {
 
     if (result.success) {
       toast.success("Profile updated successfully");
-      setUser(result.user);
+      if (currentUser?.id === user.id) {
+        setUser(result.user);
+      }
       setIsOpen(false);
     } else {
       toast.error(result.error || "Failed to update profile");

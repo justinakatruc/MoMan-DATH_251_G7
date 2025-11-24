@@ -4,19 +4,22 @@ import {
   NativeSelect,
   NativeSelectOption,
 } from "@/app/components/ui/native-select";
+import { adminAPI } from "@/lib/api";
 import { Search, Download, TrendingUp, TrendingDown } from "lucide-react";
 import { useEffect, useState } from "react";
 
 type Transaction = {
-  transaction_id: string;
-  id: number;
-  name: string;
-  category: string;
+  id: string;
+  type: "income" | "expense";
   date: string;
-  time: string;
-  type: string;
-  status: string;
-  amount: string;
+  name: string;
+  amount: number;
+  userId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  categoryId: string;
+  category: string;
 };
 
 interface TransactionProps {
@@ -36,7 +39,7 @@ function TransactionInformation({ transaction, setOpen }: TransactionProps) {
       >
         <div className="flex justify-between items-center mb-6 z-50">
           <h2 className="text-xl font-bold text-gray-700">
-            {`Transaction Details - ${transaction.transaction_id}`}
+            {`Transaction Details - ${transaction.id}`}
           </h2>
           <button
             onClick={() => setOpen(false)}
@@ -59,8 +62,9 @@ function TransactionInformation({ transaction, setOpen }: TransactionProps) {
         </div>
         <div className="space-y-4">
           <p>
-            <span className="font-semibold">User:</span> {transaction.name} (ID:{" "}
-            {transaction.id})
+            <span className="font-semibold">User:</span> {transaction.firstName}{" "}
+            {transaction.lastName} (ID: {transaction.userId} |{" "}
+            {transaction.email})
           </p>
           <p>
             <span className="font-semibold">Category:</span>{" "}
@@ -68,17 +72,14 @@ function TransactionInformation({ transaction, setOpen }: TransactionProps) {
           </p>
           <p>
             <span className="font-semibold">Date & Time:</span>{" "}
-            {transaction.date} {transaction.time}
+            {new Date(transaction.date).toLocaleString()}
           </p>
           <p>
             <span className="font-semibold">Type:</span> {transaction.type}
           </p>
           <p>
-            <span className="font-semibold">Status:</span> {transaction.status}
-          </p>
-          <p>
             <span className="font-semibold">Amount:</span>{" "}
-            {transaction.type === "Income"
+            {transaction.type === "income"
               ? `+ $${transaction.amount}`
               : `- $${transaction.amount}`}
           </p>
@@ -89,118 +90,22 @@ function TransactionInformation({ transaction, setOpen }: TransactionProps) {
 }
 
 export default function TransactionsPage() {
-  const [transactionsList, setTransactionsList] = useState([
-    {
-      transaction_id: "TRX001",
-      id: 1,
-      name: "John Doe",
-      category: "Food & Drink",
-      date: "2025-10-27",
-      time: "14:32",
-      type: "Expense",
-      status: "Completed",
-      amount: "25.50",
-    },
-    {
-      transaction_id: "TRX002",
-      id: 2,
-      name: "Jane Smith",
-      category: "Utilities",
-      date: "2025-10-28",
-      time: "09:15",
-      type: "Expense",
-      status: "Completed",
-      amount: "100.00",
-    },
-    {
-      transaction_id: "TRX003",
-      id: 3,
-      name: "Bob Johnson",
-      category: "Entertainment",
-      date: "2025-10-29",
-      time: "18:45",
-      type: "Expense",
-      status: "Completed",
-      amount: "75.00",
-    },
-    {
-      transaction_id: "TRX004",
-      id: 4,
-      name: "Alice Williams",
-      category: "Groceries",
-      date: "2025-10-30",
-      time: "12:00",
-      type: "Expense",
-      status: "Completed",
-      amount: "50.00",
-    },
-    {
-      transaction_id: "TRX005",
-      id: 5,
-      name: "Michael Brown",
-      category: "Salary",
-      date: "2025-10-31",
-      time: "10:00",
-      type: "Income",
-      status: "Completed",
-      amount: "100.00",
-    },
-    {
-      transaction_id: "TRX006",
-      id: 6,
-      name: "Emily Davis",
-      category: "Utilities",
-      date: "2025-11-01",
-      time: "09:00",
-      type: "Expense",
-      status: "Pending",
-      amount: "80.00",
-    },
-    {
-      transaction_id: "TRX007",
-      id: 7,
-      name: "David Wilson",
-      category: "Stock",
-      date: "2025-11-02",
-      time: "15:30",
-      type: "Income",
-      status: "Completed",
-      amount: "60.00",
-    },
-  ]);
+  const [transactionsList, setTransactionsList] = useState([]);
   const [filteredTransactions, setFilteredTransactions] =
     useState(transactionsList);
 
   const [itemsList, setItemsList] = useState([
     {
       title: "Total Income",
-      value:
-        "$" +
-        transactionsList
-          .filter((tx) => tx.type === "Income")
-          .reduce((sum, tx) => sum + parseFloat(tx.amount), 0)
-          .toFixed(2)
-          .toString(),
+      value: "$0",
     },
     {
       title: "Total Expense",
-      value:
-        "$" +
-        transactionsList
-          .filter((tx) => tx.type === "Expense")
-          .reduce((sum, tx) => sum + parseFloat(tx.amount), 0)
-          .toFixed(2)
-          .toString(),
+      value: "$0",
     },
     {
       title: "Total Transactions",
       value: transactionsList.length.toString(),
-    },
-    {
-      title: "Pending",
-      value: transactionsList
-        .filter((tx) => tx.status === "Pending")
-        .length.toString(),
     },
   ]);
   const [isOpenTransactionInfo, setIsOpenTransactionInfo] =
@@ -208,39 +113,47 @@ export default function TransactionsPage() {
   const [transaction, setTransaction] = useState<Transaction | null>(null);
   const [inputValue, setInputValue] = useState<string>("");
   const [type, setType] = useState<"all" | "expense" | "income">("all");
-  const [status, setStatus] = useState<"all" | "completed" | "pending">("all");
+
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        const result = await adminAPI.getAllTransactions();
+
+        if (result.success) {
+          setTransactionsList(result.transactions);
+        }
+      } catch (error) {
+        console.error("Error fetching transactions:", error);
+      }
+    };
+    fetchTransactions();
+  }, []);
 
   useEffect(() => {
     setItemsList([
       {
         title: "Total Income",
-        value:
-          "$" +
-          transactionsList
-            .filter((tx) => tx.type === "Income")
-            .reduce((sum, tx) => sum + parseFloat(tx.amount), 0)
-            .toFixed(2)
-            .toString(),
+        value: transactionsList
+          .reduce(
+            (acc: number, tx: Transaction) =>
+              tx.type === "income" ? acc + tx.amount : acc,
+            0
+          )
+          .toLocaleString("en-US", { style: "currency", currency: "USD" }),
       },
       {
         title: "Total Expense",
-        value:
-          "$" +
-          transactionsList
-            .filter((tx) => tx.type === "Expense")
-            .reduce((sum, tx) => sum + parseFloat(tx.amount), 0)
-            .toFixed(2)
-            .toString(),
+        value: transactionsList
+          .reduce(
+            (acc: number, tx: Transaction) =>
+              tx.type === "expense" ? acc + tx.amount : acc,
+            0
+          )
+          .toLocaleString("en-US", { style: "currency", currency: "USD" }),
       },
       {
         title: "Total Transactions",
         value: transactionsList.length.toString(),
-      },
-      {
-        title: "Pending",
-        value: transactionsList
-          .filter((tx) => tx.status === "Pending")
-          .length.toString(),
       },
     ]);
   }, [transactionsList]);
@@ -248,27 +161,22 @@ export default function TransactionsPage() {
   useEffect(() => {
     let filteredList = transactionsList;
     if (type === "expense" || type === "income") {
-      filteredList = filteredList.filter(
-        (tx) => tx.type.toLowerCase() === type.toLowerCase()
-      );
-    }
-    if (status === "completed" || status === "pending") {
-      filteredList = filteredList.filter(
-        (tx) => tx.status.toLowerCase() === status.toLowerCase()
-      );
+      filteredList = filteredList.filter((tx: Transaction) => tx.type === type);
     }
     if (inputValue) {
       filteredList = filteredList.filter(
-        (tx) =>
+        (tx: Transaction) =>
           tx.name.toLowerCase().includes(inputValue.toLowerCase()) ||
-          tx.transaction_id.toLowerCase().includes(inputValue.toLowerCase()) ||
+          tx.id.toLowerCase().includes(inputValue.toLowerCase()) ||
           tx.category.toLowerCase().includes(inputValue.toLowerCase()) ||
           tx.date.toLowerCase().includes(inputValue.toLowerCase()) ||
-          tx.time.toLowerCase().includes(inputValue.toLowerCase())
+          tx.firstName.toLowerCase().includes(inputValue.toLowerCase()) ||
+          tx.lastName.toLowerCase().includes(inputValue.toLowerCase()) ||
+          tx.email.toLowerCase().includes(inputValue.toLowerCase())
       );
     }
     setFilteredTransactions(filteredList);
-  }, [inputValue, type, status, transactionsList]);
+  }, [inputValue, type, transactionsList]);
 
   return (
     <div className="lg:px-6 mt-14">
@@ -323,7 +231,7 @@ export default function TransactionsPage() {
         </div>
         <div className="h-[620px] bg-white rounded-[20px] py-6 px-8 flex flex-col gap-y-[30px]">
           <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center w-full lg:gap-x-8 lg:gap-y-0 gap-y-4">
-            <div className="lg:w-3/5 flex items-center border rounded-[10px] px-4 bg-[#F4F7FD]">
+            <div className="lg:w-1/2 flex items-center border rounded-[10px] px-4 bg-[#F4F7FD]">
               <Search className="size-5 text-[rgba(0,0,0,0.5)]" />
               <input
                 value={inputValue}
@@ -332,7 +240,7 @@ export default function TransactionsPage() {
                 className="w-full h-12 py-0 px-3 border-none focus:outline-none"
               />
             </div>
-            <div className="lg:w-2/5 flex items-center gap-x-4">
+            <div className="lg:w-1/2 flex items-center gap-x-4">
               <NativeSelect
                 className="bg-[#F4F7FD]"
                 value={type}
@@ -350,104 +258,74 @@ export default function TransactionsPage() {
                   Income
                 </NativeSelectOption>
               </NativeSelect>
-              <NativeSelect
-                className="bg-[#F4F7FD]"
-                value={status}
-                onChange={(e) =>
-                  setStatus(e.target.value as "all" | "completed" | "pending")
-                }
-              >
-                <NativeSelectOption value="all" className="cursor-pointer">
-                  All Status
-                </NativeSelectOption>
-                <NativeSelectOption
-                  value="completed"
-                  className="cursor-pointer"
-                >
-                  Completed
-                </NativeSelectOption>
-                <NativeSelectOption value="pending" className="cursor-pointer">
-                  Pending
-                </NativeSelectOption>
-              </NativeSelect>
             </div>
           </div>
           <div className="w-full">
-            <div className="grid grid-cols-3 xl:grid-cols-7 gap-x-10 font-bold text-[16px]">
+            <div className="grid grid-cols-3 xl:grid-cols-6 gap-x-10 font-bold text-[16px]">
               <p className="">Transaction ID</p>
               <p className="hidden xl:flex">User</p>
               <p className="hidden xl:flex">Category</p>
               <p className="hidden xl:flex">Date & Time</p>
-              <p className="hidden xl:flex">Type</p>
-              <p className="">Status</p>
+              <p className="">Type</p>
               <p className="">Amount</p>
             </div>
             <div className="mt-4 max-h-[400px] overflow-y-auto">
-              {filteredTransactions.map((tx, index) => (
-                <div
-                  key={index}
-                  className="grid grid-cols-3 xl:grid-cols-7 gap-x-10 items-center py-3 border-t border-gray-200"
-                >
+              {filteredTransactions.length > 0 ? (
+                filteredTransactions.map((tx: Transaction, index) => (
                   <div
-                    className="cursor-pointer font-medium text-[16px] hover:underline"
-                    onClick={() => {
-                      setTransaction({
-                        transaction_id: tx.transaction_id,
-                        id: tx.id,
-                        name: tx.name,
-                        category: tx.category,
-                        date: tx.date,
-                        time: tx.time,
-                        type: tx.type,
-                        status: tx.status,
-                        amount: tx.amount,
-                      });
-                      setIsOpenTransactionInfo(true);
-                    }}
+                    key={index}
+                    className="grid grid-cols-3 xl:grid-cols-6 gap-x-10 items-center py-3 border-t border-gray-200"
                   >
-                    {tx.transaction_id}
-                  </div>
-                  <div className="hidden xl:flex flex-col gap-y-1">
-                    <div className="font-medium text-[16px]">{tx.name}</div>
-                    <div className="text-[14px] text-[rgba(0,0,0,0.5)]">
-                      ID: {tx.id}
+                    <div
+                      className="cursor-pointer font-medium text-[16px] hover:underline"
+                      onClick={() => {
+                        setTransaction(tx);
+                        setIsOpenTransactionInfo(true);
+                      }}
+                    >
+                      {tx.id}
+                    </div>
+                    <div className="hidden xl:flex flex-col gap-y-1">
+                      <div className="font-medium text-[16px]">
+                        {tx.firstName} {tx.lastName}
+                      </div>
+                      <div className="text-[14px] text-[rgba(0,0,0,0.5)]">
+                        ID: {tx.userId} | {tx.email}
+                      </div>
+                    </div>
+                    <div className="hidden xl:flex text-[16px]">
+                      {tx.category}
+                    </div>
+                    <div className="hidden xl:flex text-[16px]">
+                      {new Date(tx.date).toLocaleString()}
+                    </div>
+                    <div
+                      className={`flex w-[100px] h-[35px] rounded-[15px] items-center justify-center ${
+                        tx.type === "income"
+                          ? "bg-[#CFF0E7] text-[#07B681]"
+                          : "bg-[#FFCCCB] text-[#ED7771]"
+                      }`}
+                    >
+                      {tx.type}
+                    </div>
+                    <div
+                      className={`font-medium text-[16px] pl-4 ${
+                        tx.type === "income"
+                          ? "text-[#37C39A]"
+                          : "text-[#ED7771]"
+                      }`}
+                    >
+                      {tx.type === "income"
+                        ? `+ $${tx.amount}`
+                        : `- $${tx.amount}`}
                     </div>
                   </div>
-                  <div className="hidden xl:flex text-[16px]">
-                    {tx.category}
-                  </div>
-                  <div className="hidden xl:flex text-[16px]">
-                    {tx.date} {tx.time}
-                  </div>
-                  <div
-                    className={`hidden xl:flex w-[100px] h-[35px] rounded-[15px] items-center justify-center ${
-                      tx.type === "Income"
-                        ? "bg-[#CFF0E7] text-[#07B681]"
-                        : "bg-[#FFCCCB] text-[#ED7771]"
-                    }`}
-                  >
-                    {tx.type}
-                  </div>
-                  <div
-                    className={`w-[100px] h-[35px] rounded-[15px] flex items-center justify-center ${
-                      tx.status === "Completed"
-                        ? "bg-[#CFF0E7] text-[#07B681]"
-                        : "bg-[#FFE584] text-[#D4A017]"
-                    }`}
-                  >
-                    {tx.status}
-                  </div>
-                  <div
-                    className={`font-medium text-[16px] pl-4 ${
-                      tx.type === "Income" ? "text-[#37C39A]" : "text-[#ED7771]"
-                    }`}
-                  >
-                    {tx.type === "Income"
-                      ? `+ $${tx.amount}`
-                      : `- $${tx.amount}`}
-                  </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-center text-gray-500 mt-10 text-lg">
+                  No transactions found.
+                </p>
+              )}
             </div>
             {isOpenTransactionInfo && transaction && (
               <TransactionInformation
