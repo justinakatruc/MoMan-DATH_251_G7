@@ -8,9 +8,11 @@ interface CategoryState {
   isLoading: boolean;
 
   fetchCategories: () => Promise<void>;
+  addCategory: (category: Category) => Promise<void>;
+  removeCategory: (categoryId: string, type: "expense" | "income", isDefault?: boolean) => Promise<void>;
 }
 
-export const useCategoryStore = create<CategoryState>((set) => ({
+export const useCategoryStore = create<CategoryState>((set, get) => ({
   expensesCategory: [],
   incomesCategory: [],
   isLoading: false,
@@ -41,5 +43,15 @@ export const useCategoryStore = create<CategoryState>((set) => ({
       console.error("Error fetching categories:", error);
       set({ isLoading: false });
     }
+  },
+
+  addCategory: async (category: Category) => {
+    await categoryAPI.addCategory(category);
+    await get().fetchCategories();
+  },
+
+  removeCategory: async (categoryId: string, type: "expense" | "income", isDefault: boolean = false) => {
+    await categoryAPI.removeCategory(categoryId, type, isDefault);
+    await get().fetchCategories();
   },
 }));

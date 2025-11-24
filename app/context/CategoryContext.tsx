@@ -17,7 +17,11 @@ interface CategoryContextType {
   userIncomeCategories: Category[];
   transactions: Transaction[];
   addCategory: (category: Category) => Promise<boolean>;
-  removeCategory: (categoryId: string, type: "expense" | "income") => void;
+  removeCategory: (
+    categoryId: string,
+    type: "expense" | "income",
+    isDefault: boolean
+  ) => void;
   addTransaction: (transaction: Transaction) => void;
   removeTransaction: (transactionId: string) => void;
   updateTransaction: (
@@ -88,21 +92,24 @@ export function CategoryProvider({ children }: { children: ReactNode }) {
 
   const removeCategory = async (
     categoryId: string,
-    type: "expense" | "income"
+    type: "expense" | "income",
+    isDefault: boolean = false
   ) => {
     try {
-      const result = await categoryAPI.removeCategory(categoryId, type);
-
+      const result = await categoryAPI.removeCategory(
+        categoryId,
+        type,
+        isDefault
+      );
       if (result.success) {
         await fetchCategories();
-
-        await transactionAPI.removeTransactionBaseOnCategory(categoryId);
-
-        setTransactions((prev) =>
-          prev.filter((transaction) => transaction.categoryId !== categoryId)
-        );
-
-        toast.success("Category removed successfully!");
+        if (!isDefault) {
+          await transactionAPI.removeTransactionBaseOnCategory(categoryId);
+          setTransactions((prev) =>
+            prev.filter((transaction) => transaction.categoryId !== categoryId)
+          );
+          toast.success("Category removed successfully!");
+        }
       }
     } catch (error) {
       console.error("Error removing category:", error);

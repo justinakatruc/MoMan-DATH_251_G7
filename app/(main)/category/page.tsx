@@ -12,7 +12,11 @@ interface CategoryItemProps {
   category: Category;
   removeMode: boolean;
   isEditMode: boolean;
-  onRemove: (categoryId: string, type: "expense" | "income") => void;
+  onRemove: (
+    categoryId: string,
+    type: "expense" | "income",
+    isDefault: boolean
+  ) => void;
 }
 
 function CategoryItem({
@@ -36,7 +40,11 @@ function CategoryItem({
   return (
     <div className={`flex items-center gap-3 p-3 select-none relative`}>
       <div
-        onClick={() => onRemove(category.id, category.type)}
+        onClick={() => {
+          if (category.isDefault) {
+            return;
+          } else onRemove(category.id, category.type, category.isDefault);
+        }}
         className="w-8 h-8 flex items-center"
       >
         <Image
@@ -81,7 +89,7 @@ interface AddCustomCategoryModalProps {
   setErrorState: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-function AddCustomCategoryModal({
+export function AddCustomCategoryModal({
   isOpen,
   onClose,
   onAddCategory,

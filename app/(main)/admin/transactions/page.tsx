@@ -5,7 +5,12 @@ import {
   NativeSelectOption,
 } from "@/app/components/ui/native-select";
 import { adminAPI } from "@/lib/api";
-import { Search, Download, TrendingUp, TrendingDown } from "lucide-react";
+import {
+  Search,
+  ArrowDownToLine,
+  TrendingUp,
+  TrendingDown,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 
 type Transaction = {
@@ -93,6 +98,53 @@ export default function TransactionsPage() {
   const [transactionsList, setTransactionsList] = useState([]);
   const [filteredTransactions, setFilteredTransactions] =
     useState(transactionsList);
+
+  const convertToCSV = (data: Transaction[]) => {
+    const headers = [
+      "Transaction ID",
+      "User",
+      "Category",
+      "Date",
+      "Type",
+      "Amount",
+    ];
+
+    const rows = data.map((transaction) => [
+      transaction.id,
+      `${transaction.firstName} ${transaction.lastName} (${transaction.email})`,
+      transaction.category,
+      new Date(transaction.date).toISOString().split("T")[0],
+      transaction.type,
+      `$${transaction.amount}`,
+    ]);
+
+    const csvContent = [headers, ...rows]
+      .map((row) => row.map((item) => `"${item}"`).join(","))
+      .join("\n");
+
+    return csvContent;
+  };
+
+  const downloadCSV = () => {
+    if (!transactionsList || transactionsList.length === 0) {
+      alert("No transactions to export.");
+      return;
+    }
+
+    const csvContent = convertToCSV(transactionsList);
+    const bom = "\uFEFF";
+    const blob = new Blob([bom + csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "transactions.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const [itemsList, setItemsList] = useState([
     {
@@ -188,14 +240,13 @@ export default function TransactionsPage() {
               Monitor and manage all platform transactions
             </p>
           </div>
-          <a
-            href="./"
-            download
+          <button
+            onClick={downloadCSV}
             className="h-12 bg-[#07B681] rounded-[10px] flex items-center gap-x-2 px-2"
           >
-            <Download className="size-5 text-white" />
+            <ArrowDownToLine className="text-white" />
             <div className="text-white">Export Data</div>
-          </a>
+          </button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {itemsList.map((item, index) => (

@@ -53,6 +53,37 @@ export const authAPI = {
     return response.json();
   },
 
+  forgotPassword: async (email: string) => {
+    const response = await fetch(`${BASE_API}/auth`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        action: "forgot-password",
+        email,
+      }),
+    });
+
+    return response.json();
+  },
+
+  resetPassword: async (token: string, password: string) => {
+    const response = await fetch(`${BASE_API}/auth`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        action: "reset-password",
+        token,
+        password,
+      }),
+    });
+
+    return response.json();
+  },
+
   authorize: async () => {
     const response = await fetch(`${BASE_API}/auth`, {
       method: "POST",
@@ -118,7 +149,7 @@ export const categoryAPI = {
     return response.json();
   },
 
-  removeCategory: async (categoryId: string, type: "expense" | "income") => {
+  removeCategory: async (categoryId: string, type: "expense" | "income", isDefault: boolean = false) => {
     const response = await fetch(`${BASE_API}/categories`, {
       method: "DELETE",
       headers: {
@@ -129,8 +160,10 @@ export const categoryAPI = {
         token: localStorage.getItem("token"),
         categoryId,
         type,
+        isDefault,
       }),
     });
+    console.log("API Response for removeCategory:", response);
     return response.json();
   },
 };

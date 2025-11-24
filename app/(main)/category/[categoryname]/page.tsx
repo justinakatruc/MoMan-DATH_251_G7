@@ -6,6 +6,7 @@ import { Transaction } from "@/app/model";
 import { usePathname } from "next/navigation";
 import { transactionAPI } from "@/lib/api";
 import { useCategoryStore } from "@/app/store/useCategoryStore";
+import { ArrowDownToLine } from "lucide-react";
 
 export default function CategoryPage() {
   const pathname = usePathname();
@@ -159,6 +160,44 @@ export default function CategoryPage() {
     }
   }, [isEditMode, transactionsSet]);
 
+  const convertToCSV = (data: Transaction[]) => {
+    const headers = ["Name", "Price", "Description", "Date"];
+
+    const rows = data.map((transaction) => [
+      transaction.name,
+      transaction.amount?.toFixed(2),
+      transaction.description || "",
+      new Date(transaction.date).toISOString().split("T")[0],
+    ]);
+
+    const csvContent = [headers, ...rows]
+      .map((row) => row.map((item) => `"${item}"`).join(","))
+      .join("\n");
+
+    return csvContent;
+  };
+
+  const downloadCSV = () => {
+    if (!filteredTransactions || filteredTransactions.length === 0) {
+      alert("No transactions to export.");
+      return;
+    }
+
+    const csvContent = convertToCSV(filteredTransactions);
+    const bom = "\uFEFF";
+    const blob = new Blob([bom + csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `${categoryName}-transactions.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="flex w-full items-center justify-center">
       <div className="flex flex-col min-h-screen gap-8 w-full">
@@ -287,37 +326,13 @@ export default function CategoryPage() {
                   ? "Done"
                   : "Edit"}
               </button>
-              <a
-                href="./"
-                download
-                className="hidden lg:flex flex-row items-center px-4 py-2 font-medium text-black"
+              <button
+                onClick={downloadCSV}
+                className="flex flex-row items-center px-4 py-2 font-medium text-black cursor-pointer"
               >
-                <svg
-                  width="32"
-                  height="32"
-                  viewBox="0 0 32 32"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-8 h-8 text-gray-700"
-                >
-                  <rect
-                    x="10"
-                    y="26"
-                    width="12"
-                    height="2"
-                    rx="1"
-                    fill="currentColor"
-                  />
-                  <path
-                    d="M16 6v14M16 20l-5-5M16 20l5-5"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                <ArrowDownToLine />
                 <span>Download</span>
-              </a>
+              </button>
             </div>
           </div>
           <div className="flex lg:hidden justify-between w-full">
@@ -348,37 +363,6 @@ export default function CategoryPage() {
             >
               {isEditMode && filteredTransactions.length > 0 ? "Done" : "Edit"}
             </button>
-            <a
-              href="./"
-              download
-              className="flex lg:hidden flex-row items-center px-4 py-2 font-medium text-black"
-            >
-              <svg
-                width="32"
-                height="32"
-                viewBox="0 0 32 32"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-8 h-8 text-gray-700"
-              >
-                <rect
-                  x="10"
-                  y="26"
-                  width="12"
-                  height="2"
-                  rx="1"
-                  fill="currentColor"
-                />
-                <path
-                  d="M16 6v14M16 20l-5-5M16 20l5-5"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <span>Download</span>
-            </a>
           </div>
           {/* Main table */}
           <div className="w-full bg-white rounded-xl shadow-md border border-gray-200 mt-4 overflow-x-auto">

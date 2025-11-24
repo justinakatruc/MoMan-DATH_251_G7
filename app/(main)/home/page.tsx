@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useTransactionStore } from "@/app/store/useTransactionStore";
 import { eventAPI } from "@/lib/api";
+import Link from "next/link";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("Expense");
@@ -163,12 +164,12 @@ export default function Home() {
           {/* Report */}
           <div className="bg-white rounded-2xl shadow-md/20 p-4 h-74 w-1/3 flex flex-col gap-y-1">
             <div className="flex flex-row justify-between items-center">
-              <a
+              <Link
                 href="/report"
                 className="text-2xl font-inter font-semibold text-gray-800 hover:underline"
               >
                 Reports
-              </a>
+              </Link>
             </div>
             <div className="flex flex-col px-2 gap-y-2">
               {reports.map((report, index) => (
@@ -201,12 +202,12 @@ export default function Home() {
           {/* Scheduler */}
           <div className="bg-white rounded-2xl shadow-md/20 p-4 h-74 w-1/3 flex flex-col gap-y-1">
             <div className="flex flex-row justify-between items-center">
-              <a
+              <Link
                 href="/scheduler"
                 className="text-2xl font-inter font-semibold text-gray-800 hover:underline"
               >
                 Scheduler
-              </a>
+              </Link>
             </div>
             <div className="flex flex-col px-2 gap-y-2 overflow-y-auto">
               {events.map((event, index) => (
@@ -514,12 +515,12 @@ export default function Home() {
           {/* Report */}
           <div className="bg-white rounded-2xl shadow-md/20 p-4 h-70 w-full">
             <div className="flex flex-row justify-between items-center">
-              <a
+              <Link
                 href="/report"
                 className="text-xl font-inter font-semibold text-gray-800 hover:underline"
               >
                 Reports
-              </a>
+              </Link>
             </div>
             <div className="flex flex-col px-2 gap-y-3 mt-4">
               {reports.map((report, index) => (
@@ -552,12 +553,12 @@ export default function Home() {
           {/* Scheduler */}
           <div className="bg-white rounded-2xl shadow-md/20 p-4 h-70 w-full">
             <div className="flex flex-row justify-between items-center">
-              <a
+              <Link
                 href="/scheduler"
                 className="text-xl font-inter font-semibold text-gray-800 hover:underline"
               >
                 Scheduler
-              </a>
+              </Link>
             </div>
             <div className="flex flex-col px-2 gap-y-3 mt-4 h-50 overflow-y-auto">
               {events.map((event, index) => (

@@ -5,6 +5,7 @@ import { authAPI } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import Link from "next/link";
 
 type FormErrors = {
   [key: string]: string;
@@ -167,12 +168,12 @@ export default function LoginPage() {
               <p className="text-sm text-red-500 mt-1">{errors.password}</p>
             )}
             <div className="flex justify-end">
-              <a
-                href="#"
+              <Link
+                href="forgot-password"
                 className="text-sm font-semibold text-[#000000] hover:underline"
               >
                 Forgot Password?
-              </a>
+              </Link>
             </div>
           </div>
           <button
@@ -187,12 +188,12 @@ export default function LoginPage() {
 
         <p className="text-center text-sm text-gray-600">
           Don&apos;t have an account?{" "}
-          <a
+          <Link
             href="/signup"
             className="text-[#000000] hover:underline font-semibold"
           >
             Sign up
-          </a>
+          </Link>
         </p>
       </div>
     </div>

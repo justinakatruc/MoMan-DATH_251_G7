@@ -123,7 +123,7 @@ async function handleAddCategory(
           name: category.name,
           icon: category.icon,
           isDefault: category.isDefault,
-          userId,
+          userId: category.isDefault ? null : userId,
         },
       });
     } else if (category.type === "income") {
@@ -149,7 +149,7 @@ async function handleAddCategory(
           name: category.name,
           icon: category.icon,
           isDefault: category.isDefault,
-          userId,
+          userId: category.isDefault ? null : userId,
         },
       });
     }
@@ -180,25 +180,44 @@ async function handleAddCategory(
 async function handleRemoveCategory(
   categoryId: string,
   type: "expense" | "income",
-  userId: string
+  userId: string,
+  isDefault?: boolean
 ) {
   try {
     if (type === "expense") {
-      await prisma.expenseCategory.deleteMany({
-        where: {
-          id: categoryId,
-          userId: userId,
-          isDefault: false,
-        },
-      });
+      if (isDefault) {
+        await prisma.expenseCategory.deleteMany({
+          where: {
+            id: categoryId,
+            isDefault: true,
+          },
+        });
+      } else {
+        await prisma.expenseCategory.deleteMany({
+          where: {
+            id: categoryId,
+            userId: userId,
+            isDefault: false,
+          },
+        });
+      }
     } else if (type === "income") {
-      await prisma.incomeCategory.deleteMany({
-        where: {
-          id: categoryId,
-          userId: userId,
-          isDefault: false,
-        },
-      });
+      if (isDefault) {
+        await prisma.incomeCategory.deleteMany({
+          where: {
+            id: categoryId,
+            isDefault: true,
+          },
+        });
+      } else {
+        await prisma.incomeCategory.deleteMany({
+          where: {
+            id: categoryId,
+            userId: userId,
+            isDefault: false,
+          },
+        });
+      }
     }
 
     // Remove associated transactions
@@ -305,8 +324,8 @@ export async function DELETE(request: Request) {
 
     switch (action) {
       case "removeCategory":
-        const { categoryId, type } = body;
-        return await handleRemoveCategory(categoryId, type, userId);
+        const { categoryId, type, isDefault } = body;
+        return await handleRemoveCategory(categoryId, type, userId, isDefault);
 
       default:
         return NextResponse.json(

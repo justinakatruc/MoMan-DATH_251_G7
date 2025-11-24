@@ -5,6 +5,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { authAPI } from "@/lib/api";
+import Link from "next/link";
 
 type FormErrors = {
   [key: string]: string;
@@ -229,9 +230,12 @@ export default function SignupPage() {
         {/* Login link */}
         <p className="text-center text-gray-600 text-sm mt-6">
           Already have an account?{" "}
-          <a href="/login" className="text-black font-medium hover:underline">
+          <Link
+            href="/login"
+            className="text-black font-medium hover:underline"
+          >
             Login
-          </a>
+          </Link>
         </p>
       </div>
     </div>
