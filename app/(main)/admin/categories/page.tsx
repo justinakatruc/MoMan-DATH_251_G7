@@ -1,11 +1,12 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Category } from "@/app/model";
 import { X } from "lucide-react";
 import Topbar from "@/app/components/Topbar";
 import { AddCustomCategoryModal } from "../../category/page";
 import { useCategories } from "@/app/context/CategoryContext";
+import { adminAPI } from "@/lib/api";
 interface CategoryItemProps {
   category: Category;
   removeMode: boolean;
@@ -48,13 +49,7 @@ function CategoryItem({ category, removeMode, onRemove }: CategoryItemProps) {
 }
 
 export default function AdminCategoriesPage() {
-  const {
-    userExpenseCategories,
-    userIncomeCategories,
-    addCategory,
-    removeCategory,
-  } = useCategories();
-
+  const { addCategory, removeCategory } = useCategories();
   const [isRemoveExpenseMode, setIsRemoveExpenseMode] = useState(false);
   const [isRemoveIncomeMode, setIsRemoveIncomeMode] = useState(false);
   const [showAddModal, setShowAddModal] = useState<{
@@ -63,13 +58,14 @@ export default function AdminCategoriesPage() {
 
   const [errorState, setErrorState] = useState(false);
 
-  const handleRemove = (
+  const handleRemove = async (
     categoryId: string,
     type: "expense" | "income",
     isDefault: boolean
   ) => {
     try {
-      removeCategory(categoryId, type, isDefault);
+      await removeCategory(categoryId, type, isDefault);
+      await fetchDefaultCategories();
     } catch (error) {
       console.error("Error removing category:", error);
       setErrorState(true);
@@ -79,7 +75,9 @@ export default function AdminCategoriesPage() {
   const handleAdd = async (category: Category): Promise<boolean> => {
     try {
       category.isDefault = true;
-      return await addCategory(category);
+      await addCategory(category);
+      await fetchDefaultCategories();
+      return true;
     } catch (error) {
       console.error("Error adding category:", error);
       setErrorState(true);
@@ -87,8 +85,20 @@ export default function AdminCategoriesPage() {
     }
   };
 
-  const defaultExpenses = userExpenseCategories.filter((cat) => cat.isDefault);
-  const defaultIncomes = userIncomeCategories.filter((cat) => cat.isDefault);
+  const fetchDefaultCategories = async () => {
+    const result = await adminAPI.getAllDefaultCategories();
+    if (result.success) {
+      setDefaultExpenses(result.expenseCategories);
+      setDefaultIncomes(result.incomeCategories);
+    }
+  };
+
+  const [defaultExpenses, setDefaultExpenses] = useState<Category[]>([]);
+  const [defaultIncomes, setDefaultIncomes] = useState<Category[]>([]);
+
+  useEffect(() => {
+    fetchDefaultCategories();
+  }, []);
 
   return (
     <>

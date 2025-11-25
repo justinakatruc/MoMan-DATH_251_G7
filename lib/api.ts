@@ -149,7 +149,11 @@ export const categoryAPI = {
     return response.json();
   },
 
-  removeCategory: async (categoryId: string, type: "expense" | "income", isDefault: boolean = false) => {
+  removeCategory: async (
+    categoryId: string,
+    type: "expense" | "income",
+    isDefault: boolean = false
+  ) => {
     const response = await fetch(`${BASE_API}/categories`, {
       method: "DELETE",
       headers: {
@@ -394,6 +398,20 @@ export const adminAPI = {
       },
       body: JSON.stringify({
         action: "getTotalBaseCategories",
+        token: localStorage.getItem("token"),
+      }),
+    });
+    return response.json();
+  },
+
+  getAllDefaultCategories: async () => {
+    const response = await fetch(`${BASE_API}/admin`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        action: "getAllDefaultCategories",
         token: localStorage.getItem("token"),
       }),
     });

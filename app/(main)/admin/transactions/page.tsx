@@ -242,13 +242,13 @@ export default function TransactionsPage() {
           </div>
           <button
             onClick={downloadCSV}
-            className="h-12 bg-[#07B681] rounded-[10px] flex items-center gap-x-2 px-2"
+            className="h-12 bg-[#07B681] rounded-[10px] flex items-center gap-x-2 px-2 cursor-pointer"
           >
             <ArrowDownToLine className="text-white" />
             <div className="text-white">Export Data</div>
           </button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {itemsList.map((item, index) => (
             <div
               key={index}

@@ -136,6 +136,52 @@ async function handleGetTotalBaseCategories() {
   }
 }
 
+async function handleGetAllDefaultCategories() {
+  try {
+    const expenseCategories = await prisma.expenseCategory.findMany({
+      where: { isDefault: true },
+    });
+
+    const returnedExpenseCategories = expenseCategories.map((category) => ({
+      id: category.id,
+      type: "expense",
+      name: category.name,
+      icon: category.icon,
+      isDefault: category.isDefault,
+    }));
+
+    const incomeCategories = await prisma.incomeCategory.findMany({
+      where: { isDefault: true },
+    });
+
+    const returnedIncomeCategories = incomeCategories.map((category) => ({
+      id: category.id,
+      type: "income",
+      name: category.name,
+      icon: category.icon,
+      isDefault: category.isDefault,
+    }));
+
+    return NextResponse.json(
+      {
+        success: true,
+        expenseCategories: returnedExpenseCategories,
+        incomeCategories: returnedIncomeCategories,
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error fetching all default categories:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Failed to fetch all default categories.",
+      },
+      { status: 500 }
+    );
+  }
+}
+
 async function handleGetAllUsers() {
   try {
     const users = await prisma.user.findMany({
@@ -314,6 +360,8 @@ export async function POST(request: Request) {
       return await handleGetTransactionsDashboard();
     case "getTotalBaseCategories":
       return await handleGetTotalBaseCategories();
+    case "getAllDefaultCategories":
+      return await handleGetAllDefaultCategories();
     case "getAllUsers":
       return await handleGetAllUsers();
     case "getAllTransactions":

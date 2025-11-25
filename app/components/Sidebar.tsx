@@ -19,8 +19,12 @@ import { authAPI } from "@/lib/api";
 
 export default function Sidebar() {
   const { user } = useUserStore();
-  const expensesCategory = useCategoryStore((s) => s.expensesCategory);
-  const incomesCategory = useCategoryStore((s) => s.incomesCategory);
+  const { expensesCategory, incomesCategory, fetchCategories } =
+    useCategoryStore();
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
 
   const [userExpenseCategories, setUserExpenseCategories] =
     useState(expensesCategory);
