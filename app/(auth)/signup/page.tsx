@@ -36,6 +36,43 @@ export default function SignupPage() {
     return nameRegex.test(name);
   };
 
+  const validatePassword = (
+    password: string
+  ): { valid: boolean; reason: string } => {
+    const minLength = 12;
+    const hasLower = /[a-z]/.test(password);
+    const hasUpper = /[A-Z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSymbol = /[!@#$%^&*()_\-+\[\]{}|;:,.<>?]/.test(password);
+
+    if (password.length < minLength) {
+      return {
+        valid: false,
+        reason: "Password must be at least 12 characters long.",
+      };
+    }
+    if (!hasLower) {
+      return {
+        valid: false,
+        reason: "Password must include a lowercase letter.",
+      };
+    }
+    if (!hasUpper) {
+      return {
+        valid: false,
+        reason: "Password must include an uppercase letter.",
+      };
+    }
+    if (!hasNumber) {
+      return { valid: false, reason: "Password must include a number." };
+    }
+    if (!hasSymbol) {
+      return { valid: false, reason: "Password must include a symbol." };
+    }
+
+    return { valid: true, reason: "Password is strong." };
+  };
+
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
 
@@ -56,6 +93,11 @@ export default function SignupPage() {
     }
     if (!formData.password) {
       newErrors.password = "Password is required";
+    } else {
+      const passwordValidation = validatePassword(formData.password);
+      if (!passwordValidation.valid) {
+        newErrors.password = passwordValidation.reason;
+      }
     }
     if (formData.password !== confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
