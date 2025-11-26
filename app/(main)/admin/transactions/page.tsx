@@ -10,8 +10,10 @@ import {
   ArrowDownToLine,
   TrendingUp,
   TrendingDown,
+  Trash2,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 type Transaction = {
   id: string;
@@ -96,6 +98,7 @@ function TransactionInformation({ transaction, setOpen }: TransactionProps) {
 
 export default function TransactionsPage() {
   const [transactionsList, setTransactionsList] = useState([]);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [filteredTransactions, setFilteredTransactions] =
     useState(transactionsList);
 
@@ -166,18 +169,19 @@ export default function TransactionsPage() {
   const [inputValue, setInputValue] = useState<string>("");
   const [type, setType] = useState<"all" | "expense" | "income">("all");
 
-  useEffect(() => {
-    const fetchTransactions = async () => {
-      try {
-        const result = await adminAPI.getAllTransactions();
+  const fetchTransactions = async () => {
+    try {
+      const result = await adminAPI.getAllTransactions();
 
-        if (result.success) {
-          setTransactionsList(result.transactions);
-        }
-      } catch (error) {
-        console.error("Error fetching transactions:", error);
+      if (result.success) {
+        setTransactionsList(result.transactions);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+    }
+  };
+
+  useEffect(() => {
     fetchTransactions();
   }, []);
 
@@ -229,6 +233,20 @@ export default function TransactionsPage() {
     }
     setFilteredTransactions(filteredList);
   }, [inputValue, type, transactionsList]);
+
+  const deleteTransaction = (id: string) => async () => {
+    setIsDeleting(true);
+
+    const result = await adminAPI.deleteTransaction(id);
+
+    if (result.success) {
+      toast.success("Transaction deleted successfully.");
+      await fetchTransactions();
+    } else {
+      toast.error("Failed to delete transaction.");
+    }
+    setIsDeleting(false);
+  };
 
   return (
     <div className="lg:px-6 mt-14">
@@ -312,29 +330,39 @@ export default function TransactionsPage() {
             </div>
           </div>
           <div className="w-full">
-            <div className="grid grid-cols-3 xl:grid-cols-6 gap-x-10 font-bold text-[16px]">
+            <div className="grid grid-cols-4 xl:grid-cols-7 gap-x-10 font-bold text-[16px]">
               <p className="">Transaction ID</p>
               <p className="hidden xl:flex">User</p>
               <p className="hidden xl:flex">Category</p>
               <p className="hidden xl:flex">Date & Time</p>
               <p className="">Type</p>
               <p className="">Amount</p>
+              <p className="">Actions</p>
             </div>
-            <div className="mt-4 max-h-[400px] overflow-y-auto">
+            <div className="mt-4 max-h-[400px] overflow-auto">
               {filteredTransactions.length > 0 ? (
                 filteredTransactions.map((tx: Transaction, index) => (
                   <div
                     key={index}
-                    className="grid grid-cols-3 xl:grid-cols-6 gap-x-10 items-center py-3 border-t border-gray-200"
+                    className="grid grid-cols-4 xl:grid-cols-7 gap-x-10 items-center py-3 border-t border-gray-200"
                   >
                     <div
-                      className="cursor-pointer font-medium text-[16px] hover:underline"
+                      className="hidden xl:flex cursor-pointer font-medium text-[16px] hover:underline"
                       onClick={() => {
                         setTransaction(tx);
                         setIsOpenTransactionInfo(true);
                       }}
                     >
                       {tx.id}
+                    </div>
+                    <div
+                      className="flex xl:hidden cursor-pointer font-medium text-[16px] hover:underline"
+                      onClick={() => {
+                        setTransaction(tx);
+                        setIsOpenTransactionInfo(true);
+                      }}
+                    >
+                      {tx.id.length > 10 ? tx.id.slice(0, 10) + "..." : tx.id}
                     </div>
                     <div className="hidden xl:flex flex-col gap-y-1">
                       <div className="font-medium text-[16px]">
@@ -369,6 +397,15 @@ export default function TransactionsPage() {
                       {tx.type === "income"
                         ? `+ $${tx.amount}`
                         : `- $${tx.amount}`}
+                    </div>
+                    <div className="pl-8 xl:pl-10">
+                      <button
+                        className="w-8 h-8 text-red-600 hover:text-red-700 hover:bg-red-50 cursor-pointer border flex items-center justify-center rounded-[10px]"
+                        disabled={isDeleting}
+                        onClick={deleteTransaction(tx.id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
                 ))

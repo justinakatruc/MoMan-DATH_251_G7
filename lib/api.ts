@@ -446,6 +446,21 @@ export const adminAPI = {
     return response.json();
   },
 
+  deleteTransaction: async (transactionId: string) => {
+    const response = await fetch(`${BASE_API}/admin`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        action: "deleteTransaction",
+        token: localStorage.getItem("token"),
+        transactionId,
+      }),
+    });
+    return response.json();
+  },
+
   deleteUser: async (userId: string) => {
     const response = await fetch(`${BASE_API}/admin`, {
       method: "DELETE",

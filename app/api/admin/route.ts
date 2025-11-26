@@ -268,6 +268,43 @@ async function handleGetAllTransactions() {
   }
 }
 
+async function handleDeleteTransaction(transactionId: string) {
+  try {
+    if (!transactionId) {
+      return NextResponse.json(
+        { success: false, message: "Transaction ID is required." },
+        { status: 400 }
+      );
+    }
+
+    const transaction = await prisma.transaction.findUnique({
+      where: { id: transactionId },
+    });
+
+    if (!transaction) {
+      return NextResponse.json(
+        { success: false, message: "Transaction not found." },
+        { status: 404 }
+      );
+    }
+
+    await prisma.transaction.delete({
+      where: { id: transactionId },
+    });
+
+    return NextResponse.json(
+      { success: true, message: "Transaction deleted successfully." },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error deleting transaction:", error);
+    return NextResponse.json(
+      { success: false, message: "Failed to delete transaction." },
+      { status: 500 }
+    );
+  }
+}
+
 async function handleDeleteUser(userId: string) {
   try {
     if (!userId) {
@@ -376,7 +413,7 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   const body = await request.json();
-  const { action, token, userId } = body;
+  const { action, token, userId, transactionId } = body;
 
   if (!token) {
     return NextResponse.json(
@@ -415,6 +452,8 @@ export async function DELETE(request: Request) {
   }
 
   switch (action) {
+    case "deleteTransaction":
+      return await handleDeleteTransaction(transactionId);
     case "deleteUser":
       return await handleDeleteUser(userId);
     default:
