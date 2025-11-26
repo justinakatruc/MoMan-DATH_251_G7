@@ -3,6 +3,7 @@
 import Topbar from '@/app/components/Topbar';
 import Image from 'next/image'
 import { useState } from 'react';
+import axios from 'axios';
 
 
 export default function Report() {
@@ -16,6 +17,13 @@ export default function Report() {
         const currentTime = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
         setChatHistory([...chatHistory, { text: messages, sender: 'user', time: currentTime}]);
         setMessages('');
+        const response = axios.post('/api/chatbot', { message: messages })
+        response.then((res) => {
+            setChatHistory((prevHistory) => [
+                ...prevHistory,
+                { text: res.data.reply, sender: 'bot', time: currentTime },
+            ]);
+        });
     };
 
     return(
