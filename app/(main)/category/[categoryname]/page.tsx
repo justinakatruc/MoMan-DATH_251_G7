@@ -40,7 +40,8 @@ export default function CategoryPage() {
   const getMonthIndex = (month: string) => months.findIndex((m) => m === month);
 
   const { expensesCategory, incomesCategory } = useCategoryStore();
-  const { removeTransaction, updateTransaction } = useCategories();
+  const { transactions, removeTransaction, updateTransaction } =
+    useCategories();
   const [transactionsSet, setTransactionsSet] = useState<Transaction[]>([]);
   const [isEditMode, setIsEditMode] = useState(false);
   const [fromMonth, setFromMonth] = useState("January");
@@ -120,7 +121,7 @@ export default function CategoryPage() {
 
   useEffect(() => {
     fetchTransactions();
-  }, [fetchTransactions, isEditMode]);
+  }, [fetchTransactions, isEditMode, transactions]);
 
   const filteredTransactions = useMemo(() => {
     if (fromMonthIndex > toMonthIndex) return [];
