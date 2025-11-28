@@ -6,7 +6,7 @@ import { Toaster } from "sonner";
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
-})
+});
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -20,12 +20,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${inter.variable} antialiased`}
-      >
-        <div className="w-full flex flex-col md:flex-row bg-[#F4F7FD]">
-          {children}
-        </div>
+      <body className={`${inter.variable} antialiased`}>
+        <div className="w-full flex flex-col bg-[#F4F7FD]">{children}</div>
         <Toaster position="top-right" richColors />
       </body>
     </html>
