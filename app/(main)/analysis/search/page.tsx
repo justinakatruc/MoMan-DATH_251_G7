@@ -4,10 +4,13 @@ import Content from "@/app/components/Content";
 import { Category, TransactionAPIResponse } from "@/app/model";
 import { useCategoryStore } from "@/app/store/useCategoryStore";
 import { transactionAPI } from "@/lib/api";
+import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 export default function AnalysisSearch() {
+  const router = useRouter();
   const today = new Date();
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -92,11 +95,19 @@ export default function AnalysisSearch() {
   };
 
   return (
-    <div className="flex flex-col gap-y-10 flex-1 items-center">
+    <div className="flex flex-col gap-y-10 flex-1 items-center relative">
       {/* Header */}
       <div className="flex items-center h-[85px]">
         <div className="font-semibold text-xl mt-8 px-5 text-[#052224]">
           Search
+        </div>
+        <div
+          onClick={() => {
+            router.back();
+          }}
+          className="absolute left-3 top-12"
+        >
+          <ArrowLeft className="text-white" />
         </div>
       </div>
 

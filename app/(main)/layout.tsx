@@ -4,7 +4,7 @@ import "@/app/globals.css";
 import { CategoryProvider } from "@/app/context/CategoryContext";
 import AuthGate from "../components/AuthGate";
 import { useEffect, useState } from "react";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { authAPI } from "@/lib/api";
 import { useUserStore } from "../store/useUserStore";
 import BottomBar from "../components/BottomBar";
@@ -16,13 +16,14 @@ export default function MainLayout({
 }>) {
   const { user, setUser } = useUserStore();
   const [checking, setChecking] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const checkUser = async () => {
       const result = await authAPI.authorize();
 
       if (!result.success) {
-        redirect("/login");
+        router.replace("/login");
       } else {
         setUser(result.user);
       }
@@ -34,7 +35,7 @@ export default function MainLayout({
     } else {
       setChecking(false);
     }
-  }, [user, setUser]);
+  }, [user, setUser, router]);
 
   if (checking) {
     return (
@@ -47,7 +48,7 @@ export default function MainLayout({
   return (
     <CategoryProvider>
       <AuthGate>
-        <div className="w-full flex flex-col min-h-screen relative z-0">
+        <div className="w-full flex flex-col items-center min-h-screen relative z-0">
           <div className="flex-1 bg-linear-to-b from-[#00D09E] to-[#F1FFF3] flex flex-col">
             {children}
           </div>

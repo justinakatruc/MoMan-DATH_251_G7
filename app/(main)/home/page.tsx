@@ -134,7 +134,7 @@ export default function Home() {
   }, [selectedTab, transactions]);
 
   return (
-    <div className="flex flex-col gap-y-10 flex-1">
+    <div className="flex flex-col gap-y-10 flex-1 items-center">
       {/* Header */}
       <div className="flex flex-col gap-y-1 mt-8 px-5 text-[#052224]">
         <div className="font-medium text-xl">Hi, Welcome Back</div>

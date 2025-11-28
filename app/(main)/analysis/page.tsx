@@ -189,7 +189,7 @@ export default function Analysis() {
 
       {/* Content */}
       <Content>
-        <div className="flex flex-col items-center gap-y-5">
+        <div className="flex flex-col items-center gap-y-6">
           <div className="w-[358px] h-[60px] bg-[#DFF7E2] rounded-[22px] px-3.5 py-1.5">
             <div className="grid grid-cols-4">
               {tabs.map((tab) => (
@@ -209,7 +209,7 @@ export default function Analysis() {
             </div>
           </div>
 
-          <div className="relative w-[358px] h-[247px] bg-[#DFF7E2] rounded-[22px] px-4 py-3.5 flex flex-col gap-y-4">
+          <div className="relative w-[358px] h-[247px] bg-[#DFF7E2] rounded-[22px] px-4 py-3.5 flex flex-col gap-y-1">
             <div className="w-full flex items-center justify-between">
               <div className="font-medium text-[15px]">Income & Expenses</div>
               <div className="flex items-center gap-x-3">
