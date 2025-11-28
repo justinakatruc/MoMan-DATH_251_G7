@@ -147,6 +147,69 @@ async function handleGetCategoryTransactions(
   }
 }
 
+async function handleSearchTransactions(
+  category: string,
+  type: string,
+  date: string,
+  userId: string
+) {
+  try {
+    let transactions = await prisma.transaction.findMany({
+      where: {
+        userId: userId,
+        type: type,
+      },
+      select: {
+        id: true,
+        type: true,
+        name: true,
+        amount: true,
+        description: true,
+        date: true,
+        categoryId: true,
+      },
+      orderBy: [{ date: "desc" }, { id: "desc" }],
+    });
+
+    if (category) {
+      transactions = transactions.filter((tx) => tx.categoryId === category);
+    }
+
+    if (date) {
+      transactions = transactions.filter(
+        (tx) => tx.date.toISOString().split("T")[0] === date
+      );
+    }
+
+    const returnTransactions = await Promise.all(
+      transactions.map(async (tx) => {
+        let categoryData = null;
+        if (tx.type === "expense") {
+          categoryData = await prisma.expenseCategory.findUnique({
+            where: { id: tx.categoryId },
+          });
+        } else {
+          categoryData = await prisma.incomeCategory.findUnique({
+            where: { id: tx.categoryId },
+          });
+        }
+        return {
+          ...tx,
+          categoryName: categoryData?.name,
+          categoryIcon: categoryData?.icon,
+        };
+      })
+    );
+
+    return NextResponse.json(
+      { success: true, transactions: returnTransactions },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error searching transactions:", error);
+  }
+}
+
 async function handleUpdateTransaction(
   transactionId: string,
   updated: Partial<Transaction>,
@@ -281,6 +344,9 @@ export async function POST(request: Request) {
       case "getCategoryTransactions":
         const { categoryId } = body;
         return await handleGetCategoryTransactions(categoryId, userId);
+      case "searchTransactions":
+        const { category, type, date } = body;
+        return await handleSearchTransactions(category, type, date, userId);
 
       default:
         return NextResponse.json(

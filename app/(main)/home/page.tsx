@@ -138,13 +138,13 @@ export default function Home() {
       {/* Header */}
       <div className="flex flex-col gap-y-1 mt-8 px-5 text-[#052224]">
         <div className="font-medium text-xl">Hi, Welcome Back</div>
-        <div className="text-[14px]">
+        <div className="text-[14px] font-bold">
           {user?.firstName} {user?.lastName}
         </div>
       </div>
 
       {/* Overview */}
-      <div className="flex flex-col items-center gap-y-2">
+      <div className="flex flex-col items-center gap-y-1.5">
         <div className="flex gap-x-4">
           <div>
             <div className="flex items-center">
@@ -233,8 +233,8 @@ export default function Home() {
 
       {/* Content */}
       <Content>
-        <div className="p-9 flex flex-col items-center gap-y-7">
-          <div className="w-[357px] h-[152px] bg-[#00D09E] rounded-4xl px-8 py-6 flex flex-col gap-y-4">
+        <div className="flex flex-col items-center gap-y-5">
+          <div className="w-[358px] h-[152px] bg-[#00D09E] rounded-4xl px-8 py-6 flex flex-col gap-y-4">
             <div className="flex gap-x-4 items-center">
               <BanknoteArrowUp className="w-9 h-9" />
               <div className="text-[#052224]">
@@ -254,7 +254,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="w-[357px] h-[60px] bg-[#DFF7E2] rounded-[22px] px-3.5 py-1.5">
+          <div className="w-[358px] h-[60px] bg-[#DFF7E2] rounded-[22px] px-3.5 py-1.5">
             <div className="grid grid-cols-3">
               {tabs.map((tab) => (
                 <div key={tab}>
@@ -275,7 +275,7 @@ export default function Home() {
 
           <div
             className={`flex flex-col gap-y-4 overflow-y-auto pt-1.5 ${
-              screenHeight > 950 ? "max-h-[262px]" : "max-h-[200px]"
+              screenHeight > 950 ? "max-h-[200px]" : "max-h-[200px]"
             }`}
           >
             {filteredTransactions.length === 0 ? (
@@ -286,7 +286,7 @@ export default function Home() {
               filteredTransactions.map((transaction) => (
                 <div
                   key={transaction.id}
-                  className="w-[357px] h-[53px] flex items-center gap-x-4"
+                  className="w-[358px] h-[53px] flex items-center gap-x-4"
                 >
                   <div
                     className={`size-14 rounded-[22px] flex items-center justify-center ${

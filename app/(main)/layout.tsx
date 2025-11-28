@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { redirect } from "next/navigation";
 import { authAPI } from "@/lib/api";
 import { useUserStore } from "../store/useUserStore";
-import BotBar from "../components/BotBar";
+import BottomBar from "../components/BottomBar";
 
 export default function MainLayout({
   children,
@@ -47,9 +47,11 @@ export default function MainLayout({
   return (
     <CategoryProvider>
       <AuthGate>
-        <div className="w-full flex flex-col min-h-screen relative z-0 max-w-[430px] mx-auto">
-          <div className="flex-1 bg-[#00D09E] flex flex-col">{children}</div>
-          <BotBar />
+        <div className="w-full flex flex-col min-h-screen relative z-0">
+          <div className="flex-1 bg-linear-to-b from-[#00D09E] to-[#F1FFF3] flex flex-col">
+            {children}
+          </div>
+          <BottomBar />
         </div>
       </AuthGate>
     </CategoryProvider>

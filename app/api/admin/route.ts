@@ -314,8 +314,6 @@ async function handleDeleteUser(userId: string) {
       );
     }
 
-    console.log("Deleting user with ID:", userId);
-
     await prisma.user.delete({
       where: { id: userId },
     });

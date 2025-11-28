@@ -14,7 +14,6 @@ async function handleUpdateUserProfile(updatedData: {
 }) {
   try {
     const { id, ...dataToUpdate } = updatedData;
-    console.log("Updating user with data:", updatedData);
     if (updatedData.password) {
       const hashedPassword = await bcrypt.hash(updatedData.password, 10);
       updatedData.password = hashedPassword;

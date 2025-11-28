@@ -167,7 +167,6 @@ export const categoryAPI = {
         isDefault,
       }),
     });
-    console.log("API Response for removeCategory:", response);
     return response.json();
   },
 };
@@ -196,6 +195,26 @@ export const transactionAPI = {
         action: "getCategoryTransactions",
         token: localStorage.getItem("token"),
         categoryId,
+      }),
+    });
+    return response.json();
+  },
+  searchTransactions: async (
+    category: string | undefined,
+    type: string,
+    date: string
+  ) => {
+    const response = await fetch(`${BASE_API}/transactions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        action: "searchTransactions",
+        token: localStorage.getItem("token"),
+        category,
+        type,
+        date,
       }),
     });
     return response.json();
@@ -471,6 +490,37 @@ export const adminAPI = {
         action: "deleteUser",
         token: localStorage.getItem("token"),
         userId,
+      }),
+    });
+    return response.json();
+  },
+};
+
+export const analysisAPI = {
+  getTotalIncomeAndExpenses: async () => {
+    const response = await fetch(`${BASE_API}/analysis`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        action: "getTotalIncomeAndExpenses",
+        token: localStorage.getItem("token"),
+      }),
+    });
+    return response.json();
+  },
+
+  getStatistic: async (timeFrame: string) => {
+    const response = await fetch(`${BASE_API}/analysis`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        action: "getStatistics",
+        token: localStorage.getItem("token"),
+        timeFrame,
       }),
     });
     return response.json();

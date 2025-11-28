@@ -267,7 +267,7 @@ export default function Sidebar() {
                 )}
               </Link>
               <Link
-                href={`/report`}
+                href={`/analysis/report`}
                 key={3}
                 className="size-10 md:size-[50px] flex items-center justify-center cursor-pointer bg-[rgba(226,229,233,0.5)] hover:bg-[rgba(226,229,233,0.8)] rounded-full relative"
                 onMouseEnter={() => {
@@ -425,9 +425,11 @@ export default function Sidebar() {
                 </div>
               </Link>
               <Link
-                href={"/report"}
+                href={"/analysis/report"}
                 className={`w-full pl-2 pr-1 py-1 flex items-center cursor-pointer hover:bg-[#CFF0E7] hover:rounded-[10px] ${
-                  pathname === "/report" ? "bg-[#CFF0E7] rounded-[10px]" : ""
+                  pathname === "/analysis/report"
+                    ? "bg-[#CFF0E7] rounded-[10px]"
+                    : ""
                 }`}
               >
                 <Image
