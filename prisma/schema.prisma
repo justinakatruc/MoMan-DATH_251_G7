@@ -59,3 +59,13 @@ model Event {
   isRecurring Boolean  @default(false)
   userId     String   @db.ObjectId
 }
+
+model Verify {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  token     String   @unique
+  expiresAt DateTime
+  createdAt   DateTime @default(now())
+  lastSentAt  DateTime @default(now())
+  resendCount Int      @default(0)
+}

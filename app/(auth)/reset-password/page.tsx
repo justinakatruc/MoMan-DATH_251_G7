@@ -4,137 +4,166 @@ import { authAPI } from "@/lib/api";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import Image from "next/image";
 
 type FormErrors = {
   [key: string]: string;
 };
 
 export default function ResetPasswordPage() {
-  const [formData, setFormData] = useState({
-    password: "",
-    confirmPassword: "",
-  });
-  const [errors, setErrors] = useState<FormErrors>({});
-  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
 
-  const validateForm = (): boolean => {
+  const [formData, setFormData] = useState({
+    password: "",
+    confirmPassword: "",
+  });
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [isLoading, setIsLoading] = useState(false);
+
+  const validateForm = () => {
     const newErrors: FormErrors = {};
-
-    if (!formData.password) {
-      newErrors.password = "Password is required";
-    } else if (formData.password.length < 8) {
-      newErrors.password = "Password must be at least 8 characters long";
+    if (!formData.password || formData.password.length < 8) {
+      newErrors.password = "Minimum 8 characters";
     }
-
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = "Confirm Password is required";
-    } else if (formData.password !== formData.confirmPassword) {
+    if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleResetPassword = async () => {
-    setErrors({});
-    if (!validateForm()) {
-      return;
-    }
-
-    if (!token) {
-      toast.error("Invalid or missing reset token");
-      return;
-    }
+    if (!token) return toast.error("Invalid token");
+    if (!validateForm()) return;
 
     setIsLoading(true);
-
     try {
       const result = await authAPI.resetPassword(token, formData.password);
       if (result.success) {
-        toast.success("Password reset successfully!");
+        toast.success("Password changed successfully");
         router.push("/login");
       } else {
-        toast.error(result.message || "Failed to reset password");
+        toast.error(result.message);
       }
-    } catch (error) {
-      console.error("Error resetting password:", error);
-      toast.error("An error occurred. Please try again");
+    } catch {
+      toast.error("Something went wrong");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-6 text-[#000000]">
-      <div className="w-full max-w-md bg-[#FBFDFF] shadow rounded-xl p-6 space-y-6">
-        <div className="space-y-1 text-center">
-          <h1 className="text-2xl font-semibold">Reset Password</h1>
-          <p className="text-sm text-gray-500">
-            Enter your new password below to reset your account password.
-          </p>
+    <div className="min-h-screen flex items-center justify-center bg-black">
+      <div className="w-[430px] h-[932px] bg-[#00D09E] rounded-[30px] overflow-hidden relative">
+
+        {/* HEADER */}
+        <div className="h-[240px] flex items-center justify-center">
+          <h1 className="text-[26px] font-semibold text-black">
+            New Password
+          </h1>
         </div>
 
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-[#000000]"
-            >
-              New Password
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={(e) =>
-                setFormData({ ...formData, password: e.target.value })
-              }
-              placeholder="Enter your new password"
-              className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-emerald-500 focus:outline-none text-gray-900"
-            />
+        {/* CARD */}
+        <div className="absolute bottom-0 w-full h-[745px] bg-[#F1FFF3] rounded-t-[60px] px-6 pt-10">
+
+          {/* NEW PASSWORD */}
+          <div className="mb-6 mt-15">
+            <label className="text-sm font-semibold text-gray-700 ml-5">New Password</label>
+            <div className="relative mt-2">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="••••••••"
+                value={formData.password}
+                onChange={(e) =>
+                  setFormData({ ...formData, password: e.target.value })
+                }
+                className="
+                  w-full
+                  h-[54px]
+                  rounded-full
+                  bg-[#DFF7E2]
+                  px-5
+                  pr-12
+                  text-sm
+                  focus:outline-none
+                  font-bold
+                "
+              />
+              <button
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-5 top-1/2 -translate-y-1/2"
+              >
+                <Image
+                  src={showPassword ? "/eye-open.png" : "/eye-close.png"}
+                  alt="Toggle password visibility"
+                  width={20}
+                  height={20}
+                />
+              </button>
+            </div>
             {errors.password && (
-              <p className="text-sm text-red-500 mt-1">{errors.password}</p>
+              <p className="text-xs text-red-500 mt-1">{errors.password}</p>
             )}
           </div>
 
-          <div className="space-y-2">
-            <label
-              htmlFor="confirmPassword"
-              className="block text-sm font-medium text-[#000000]"
-            >
-              Confirm Password
-            </label>
-            <input
-              id="confirmPassword"
-              name="confirmPassword"
-              type="password"
-              value={formData.confirmPassword}
-              onChange={(e) =>
-                setFormData({ ...formData, confirmPassword: e.target.value })
-              }
-              placeholder="Confirm your new password"
-              className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-emerald-500 focus:outline-none text-gray-900"
-            />
+          {/* CONFIRM PASSWORD */}
+          <div className="mb-10">
+            <label className="text-sm font-semibold text-gray-700 ml-5">Confirm New Password</label>
+            <div className="relative mt-2">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="••••••••"
+                value={formData.password}
+                onChange={(e) =>
+                  setFormData({ ...formData, password: e.target.value })
+                }
+                className="
+                  w-full
+                  h-[54px]
+                  rounded-full
+                  bg-[#DFF7E2]
+                  px-5
+                  pr-12
+                  text-sm
+                  focus:outline-none
+                  font-bold
+                "
+              />
+              <button
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-5 top-1/2 -translate-y-1/2"
+              >
+                <Image
+                  src={showPassword ? "/eye-open.png" : "/eye-close.png"}
+                  alt="Toggle password visibility"
+                  width={20}
+                  height={20}
+                />
+              </button>
+            </div>
             {errors.confirmPassword && (
-              <p className="text-sm text-red-500 mt-1">
+              <p className="text-xs text-red-500 mt-1">
                 {errors.confirmPassword}
               </p>
             )}
           </div>
 
-          <button
-            type="submit"
-            className="cursor-pointer w-full bg-emerald-500 text-[#FBFDFF] py-2.5 sm:py-3 rounded-lg font-semibold hover:bg-[#07B681] transition duration-200"
-            onClick={handleResetPassword}
-            disabled={isLoading}
-          >
-            {isLoading ? "Resetting..." : "Reset Password"}
-          </button>
+          {/* BUTTON */}
+          <div className="flex justify-center mt-50">
+            <button
+              onClick={handleResetPassword}
+              disabled={isLoading}
+              className="w-[260px] h-[48px] rounded-full bg-[#00D09E] text-black font-semibold"
+            >
+              {isLoading ? "Changing..." : "Change Password"}
+            </button>
+          </div>
+
         </div>
       </div>
     </div>
