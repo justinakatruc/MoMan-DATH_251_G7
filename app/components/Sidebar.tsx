@@ -547,7 +547,7 @@ export default function Sidebar() {
                   Users
                 </div>
               </Link>
-              {/* <Link
+              <Link
                 href={"/admin/categories"}
                 className={`w-full pl-2 pr-1 py-1 flex items-center cursor-pointer  hover:rounded-[10px] ${
                   pathname === "/admin/categories"
@@ -559,7 +559,7 @@ export default function Sidebar() {
                 <div className="text-[15px] 2xl:text-[17px] font-bold dark:text-[rgb(23,23,23)]">
                   Categories
                 </div>
-              </Link> */}
+              </Link>
               <Link
                 href={"/admin/transactions"}
                 className={`w-full pl-2 pr-1 py-1 flex items-center cursor-pointer  hover:rounded-[10px] ${
