@@ -54,20 +54,20 @@ async function handleAddTransaction(
 }
 
 async function handleGetAllTransactions(userId: string) {
-  const now = new Date();
-  const currentYear = now.getFullYear();
-  const currentMonthIndex = now.getMonth();
-  const startOfMonth = new Date(currentYear, currentMonthIndex, 1);
-  const startOfNextMonth = new Date(currentYear, currentMonthIndex + 1, 1);
+  // const now = new Date();
+  // const currentYear = now.getFullYear();
+  // const currentMonthIndex = now.getMonth();
+  // const startOfMonth = new Date(currentYear, currentMonthIndex, 1);
+  // const startOfNextMonth = new Date(currentYear, currentMonthIndex + 1, 1);
 
   try {
     const transactions = await prisma.transaction.findMany({
       where: {
         userId: userId,
-        AND: [
-          { date: { gte: startOfMonth } },
-          { date: { lt: startOfNextMonth } },
-        ],
+        // AND: [
+        //   { date: { gte: startOfMonth } },
+        //   { date: { lt: startOfNextMonth } },
+        // ],
       },
       select: {
         id: true,
@@ -144,6 +144,69 @@ async function handleGetCategoryTransactions(
       { success: false, message: "Failed to fetch category transactions." },
       { status: 500 }
     );
+  }
+}
+
+async function handleSearchTransactions(
+  category: string,
+  type: string,
+  date: string,
+  userId: string
+) {
+  try {
+    let transactions = await prisma.transaction.findMany({
+      where: {
+        userId: userId,
+        type: type,
+      },
+      select: {
+        id: true,
+        type: true,
+        name: true,
+        amount: true,
+        description: true,
+        date: true,
+        categoryId: true,
+      },
+      orderBy: [{ date: "desc" }, { id: "desc" }],
+    });
+
+    if (category) {
+      transactions = transactions.filter((tx) => tx.categoryId === category);
+    }
+
+    if (date) {
+      transactions = transactions.filter(
+        (tx) => tx.date.toISOString().split("T")[0] === date
+      );
+    }
+
+    const returnTransactions = await Promise.all(
+      transactions.map(async (tx) => {
+        let categoryData = null;
+        if (tx.type === "expense") {
+          categoryData = await prisma.expenseCategory.findUnique({
+            where: { id: tx.categoryId },
+          });
+        } else {
+          categoryData = await prisma.incomeCategory.findUnique({
+            where: { id: tx.categoryId },
+          });
+        }
+        return {
+          ...tx,
+          categoryName: categoryData?.name,
+          categoryIcon: categoryData?.icon,
+        };
+      })
+    );
+
+    return NextResponse.json(
+      { success: true, transactions: returnTransactions },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error searching transactions:", error);
   }
 }
 
@@ -281,6 +344,9 @@ export async function POST(request: Request) {
       case "getCategoryTransactions":
         const { categoryId } = body;
         return await handleGetCategoryTransactions(categoryId, userId);
+      case "searchTransactions":
+        const { category, type, date } = body;
+        return await handleSearchTransactions(category, type, date, userId);
 
       default:
         return NextResponse.json(

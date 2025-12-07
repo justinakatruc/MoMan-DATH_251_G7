@@ -1,30 +1,75 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import prisma from "@/lib/prisma";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import nodemailer from "nodemailer";
+import crypto from "crypto";
 
 const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret";
 
+interface AuthPayload extends JwtPayload {
+  id: string;
+  email: string;
+  role: string;
+}
+
 async function handleSignUp(data: {
-  firstName: string;
-  lastName: string;
+  fullName: string;
   email: string;
   password: string;
 }) {
-  const { firstName, lastName, email, password } = data;
-  if (!firstName || !lastName || !email || !password) {
+  const { fullName, email, password } = data;
+
+  const missingFields: string[] = [];
+  if (!fullName) missingFields.push("fullName");
+  if (!email) missingFields.push("email");
+  if (!password) missingFields.push("password");
+
+  if (missingFields.length > 0) {
     return NextResponse.json(
-      { success: false, message: "Missing required fields." },
+      {
+        success: false,
+        message: "Missing required fields",
+        missing: missingFields,
+      },
       { status: 400 }
     );
   }
 
-  const exisitingUser = await prisma.user.findUnique({
-    where: { email },
-  });
+  const nameParts = fullName.trim().split(/\s+/);
+  const lastName = nameParts.length > 1 ? nameParts.pop()! : "";
+  const firstName = nameParts.join(" ");
 
-  if (exisitingUser) {
+  const existingUser = await prisma.user.findUnique({ where: { email } });
+
+  // CASE: user exists but not verified
+  if (existingUser && !existingUser.isActive) {
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // update info
+    const updatedUser = await prisma.user.update({
+      where: { id: existingUser.id },
+      data: {
+        firstName,
+        lastName,
+        password: hashedPassword,
+      },
+    });
+
+    const token = await generateVerifyToken(updatedUser.id);
+
+    await sendVerificationEmail(email, token);
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Unverified account exists. New verification email sent.",
+      },
+      { status: 200 }
+    );
+  }
+
+  if (existingUser) {
     return NextResponse.json(
       { success: false, message: "User already exists." },
       { status: 409 }
@@ -32,7 +77,8 @@ async function handleSignUp(data: {
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  await prisma.user.create({
+
+  const newUser = await prisma.user.create({
     data: {
       firstName,
       lastName,
@@ -40,14 +86,189 @@ async function handleSignUp(data: {
       memberSince: new Date(),
       password: hashedPassword,
       accountType: "User",
+      isActive: false,
     },
   });
 
-  return NextResponse.json({ success: true }, { status: 201 });
+  const token = await generateVerifyToken(newUser.id);
+
+  await sendVerificationEmail(email, token);
+
+  return NextResponse.json(
+    {
+      success: true,
+      message: "User created. Verification email sent.",
+    },
+    { status: 201 }
+  );
 }
+
+async function generateVerifyToken(userId: string) {
+  await prisma.verify.deleteMany({
+    where: { userId },
+  });
+
+  const token = crypto.randomUUID();
+  const expiresAt = new Date(Date.now() + 1000 * 60 * 30);
+
+  await prisma.verify.create({
+    data: { userId, token, expiresAt },
+  });
+
+  return token;
+}
+
+async function sendVerificationEmail(email: string, token: string) {
+  const transporter = nodemailer.createTransport({
+    service: "Gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
+  const verifyLink = `${
+    process.env.BASE_URL
+  }/verify?token=${token}&email=${encodeURIComponent(email)}`;
+
+  await transporter.sendMail({
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: "Verify Your Email",
+    html: `
+        <h2>Verify Your Email</h2>
+        <p>Click the link below to verify your account:</p>
+        <a href="${verifyLink}" target="_blank">Verify Email</a>
+        <p>This link expires in <b>30 minutes</b>.</p>
+      `,
+  });
+}
+
+async function handleVerifyEmail(token: string) {
+  if (!token) {
+    return NextResponse.json(
+      { success: false, message: "Token is required" },
+      { status: 400 }
+    );
+  }
+
+  const verifyRecord = await prisma.verify.findUnique({
+    where: { token },
+  });
+
+  if (!verifyRecord) {
+    return NextResponse.json(
+      { success: false, message: "Invalid token" },
+      { status: 400 }
+    );
+  }
+
+  if (verifyRecord.expiresAt < new Date()) {
+    return NextResponse.json(
+      { success: false, message: "Token expired" },
+      { status: 400 }
+    );
+  }
+
+  await prisma.user.update({
+    where: { id: verifyRecord.userId },
+    data: { isActive: true },
+  });
+
+  await prisma.verify.delete({ where: { token } });
+
+  return NextResponse.json(
+    { success: true, message: "Email verified successfully" },
+    { status: 200 }
+  );
+}
+
+async function handleResendVerify(email: string) {
+  const user = await prisma.user.findUnique({ where: { email } });
+
+  if (!user) {
+    return NextResponse.json(
+      { success: false, message: "Email not found" },
+      { status: 404 }
+    );
+  }
+
+  if (user.isActive) {
+    return NextResponse.json(
+      { success: false, message: "Account already verified" },
+      { status: 400 }
+    );
+  }
+
+  let record = await prisma.verify.findFirst({
+    where: { userId: user.id },
+  });
+
+  if (!record) {
+    const newToken = await generateVerifyToken(user.id);
+    await sendVerificationEmail(email, newToken);
+    return NextResponse.json(
+      { success: true, message: "Verification email resent" },
+      { status: 200 }
+    );
+  }
+
+  const cooldown = 60 * 1000;
+  const now = Date.now();
+
+  if (now - record.lastSentAt.getTime() < cooldown) {
+    const sec = Math.ceil(
+      (cooldown - (now - record.lastSentAt.getTime())) / 1000
+    );
+    return NextResponse.json(
+      { success: false, message: `Please wait ${sec}s before resending.` },
+      { status: 429 }
+    );
+  }
+
+  const oneDay = 24 * 60 * 60 * 1000;
+
+  if (now - record.createdAt.getTime() > oneDay) {
+    record = await prisma.verify.update({
+      where: { id: record.id },
+      data: { resendCount: 0, createdAt: new Date() },
+    });
+  }
+
+  if (record.resendCount >= 5) {
+    return NextResponse.json(
+      { success: false, message: "Daily resend limit reached (5 times)." },
+      { status: 429 }
+    );
+  }
+
+  const newToken = await generateVerifyToken(user.id);
+
+  await prisma.verify.update({
+    where: { id: record.id },
+    data: {
+      token: newToken,
+      lastSentAt: new Date(),
+      resendCount: record.resendCount + 1,
+      expiresAt: new Date(Date.now() + 60 * 60 * 1000),
+    },
+  });
+
+  await sendVerificationEmail(email, newToken);
+
+  return NextResponse.json(
+    { success: true, message: "Verification email resent" },
+    { status: 200 }
+  );
+}
+
+// =====================================================
+// LOGIN
+// =====================================================
 
 async function handleLogin(data: { email: string; password: string }) {
   const { email, password } = data;
+
   if (!email || !password) {
     return NextResponse.json(
       { success: false, message: "Missing required fields." },
@@ -55,9 +276,7 @@ async function handleLogin(data: { email: string; password: string }) {
     );
   }
 
-  const user = await prisma.user.findUnique({
-    where: { email },
-  });
+  const user = await prisma.user.findUnique({ where: { email } });
 
   if (!user) {
     return NextResponse.json(
@@ -66,8 +285,20 @@ async function handleLogin(data: { email: string; password: string }) {
     );
   }
 
-  const isPasswordValid = await bcrypt.compare(password, user.password);
-  if (!isPasswordValid) {
+  if (!user.isActive) {
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Your email is not verified. Please check your inbox.",
+        needVerify: true,
+      },
+      { status: 403 }
+    );
+  }
+
+  const match = await bcrypt.compare(password, user.password);
+
+  if (!match) {
     return NextResponse.json(
       { success: false, message: "Invalid email or password." },
       { status: 401 }
@@ -80,11 +311,7 @@ async function handleLogin(data: { email: string; password: string }) {
   });
 
   const token = jwt.sign(
-    {
-      id: user.id,
-      email: user.email,
-      role: user.accountType,
-    },
+    { id: user.id, email: user.email, role: user.accountType },
     JWT_SECRET,
     { expiresIn: "12h" }
   );
@@ -106,6 +333,10 @@ async function handleLogin(data: { email: string; password: string }) {
   );
 }
 
+// =====================================================
+// LOGOUT
+// =====================================================
+
 async function handleLogout(token: string) {
   if (!token) {
     return NextResponse.json(
@@ -114,35 +345,30 @@ async function handleLogout(token: string) {
     );
   }
 
-  let decoded: { id: string; email: string };
+  let decoded: AuthPayload | null = null;
   try {
-    decoded = jwt.verify(token, JWT_SECRET) as { id: string; email: string };
-  } catch (error) {
-    console.error("Token verification error:", error);
+    decoded = jwt.verify(token, JWT_SECRET) as AuthPayload;
+  } catch {
     return NextResponse.json(
       { success: false, message: "Invalid or expired token." },
       { status: 401 }
     );
   }
 
-  const userId = decoded.id;
-  try {
-    await prisma.user.update({
-      where: { id: userId },
-      data: { isActive: false },
-    });
-    return NextResponse.json(
-      { success: true, message: "Logged out successfully." },
-      { status: 200 }
-    );
-  } catch (error) {
-    console.error("Error logging out user:", error);
-    return NextResponse.json(
-      { success: false, message: "Failed to log out." },
-      { status: 500 }
-    );
-  }
+  await prisma.user.update({
+    where: { id: decoded.id },
+    data: { isActive: false },
+  });
+
+  return NextResponse.json(
+    { success: true, message: "Logged out successfully." },
+    { status: 200 }
+  );
 }
+
+// =====================================================
+// FORGOT PASSWORD
+// =====================================================
 
 async function handleForgotPassword(email: string) {
   if (!email) {
@@ -152,9 +378,7 @@ async function handleForgotPassword(email: string) {
     );
   }
 
-  const user = await prisma.user.findUnique({
-    where: { email },
-  });
+  const user = await prisma.user.findUnique({ where: { email } });
 
   if (!user) {
     return NextResponse.json(
@@ -164,7 +388,7 @@ async function handleForgotPassword(email: string) {
   }
 
   const resetToken = jwt.sign({ id: user.id }, JWT_SECRET, {
-    expiresIn: "1h", 
+    expiresIn: "1h",
   });
 
   const transporter = nodemailer.createTransport({
@@ -177,150 +401,109 @@ async function handleForgotPassword(email: string) {
 
   const resetLink = `${process.env.BASE_URL}/reset-password?token=${resetToken}`;
 
-  const mailOptions = {
+  await transporter.sendMail({
     from: process.env.EMAIL_USER,
     to: email,
     subject: "Reset Your Password",
-    html: `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e5e5e5; border-radius: 8px;">
-      <h2 style="text-align: center; color: #333;">Password Reset Request</h2>
-      
-      <p style="font-size: 15px; color: #555;">
-        We received a request to reset your password. Click the button below to proceed:
-      </p>
+    html: `Click here: <a href="${resetLink}">${resetLink}</a>`,
+  });
 
-      <div style="text-align: center; margin: 25px 0;">
-        <a href="${resetLink}" 
-          style="background-color: #4f46e5; color: #fff; padding: 12px 20px; text-decoration: none; border-radius: 6px; font-size: 16px;">
-          Reset Password
-        </a>
-      </div>
+  return NextResponse.json(
+    { success: true, message: "Password reset link sent." },
+    { status: 200 }
+  );
+}
 
-      <p style="font-size: 14px; color: #555;">
-        If the button doesn't work, you can use the link below:
-      </p>
-
-      <p style="word-break: break-all; font-size: 14px;">
-        <a href="${resetLink}">${resetLink}</a>
-      </p>
-
-      <p style="font-size: 14px; color: #888;">
-        If you did not request a password reset, please ignore this email. Your account is safe.
-      </p>
-
-      <p style="font-size: 13px; color: #aaa; text-align: center; margin-top: 30px;">
-        This email was sent automatically. Please do not reply.
-      </p>
-    </div>
-    `,
-  };
-
-  try {
-    await transporter.sendMail(mailOptions);
-    return NextResponse.json(
-      { success: true, message: "Password reset link sent to your email." },
-      { status: 200 }
-    );
-  } catch (error) {
-    console.error("Error sending email:", error);
-    return NextResponse.json(
-      { success: false, message: "Failed to send reset link." },
-      { status: 500 }
-    );
-  }}
+// =====================================================
+// RESET PASSWORD
+// =====================================================
 
 async function handleResetPassword(token: string, password: string) {
   if (!token || !password) {
     return NextResponse.json(
-      { success: false, message: "Missing required fields" },
+      { success: false, message: "Missing fields." },
       { status: 400 }
     );
   }
 
-  let decoded: { id: string };
+  let decoded: AuthPayload | null = null;
   try {
-    decoded = jwt.verify(token, JWT_SECRET) as { id: string };
-  } catch (error) {
-    console.error("Token verification error:", error);
+    decoded = jwt.verify(token, JWT_SECRET) as AuthPayload;
+  } catch {
     return NextResponse.json(
-      { success: false, message: "Invalid or expired token" },
+      { success: false, message: "Invalid or expired token." },
       { status: 401 }
     );
   }
 
-  const userId = decoded.id;
-
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  try {
-    await prisma.user.update({
-      where: { id: userId },
-      data: { password: hashedPassword },
-    });
+  await prisma.user.update({
+    where: { id: decoded.id },
+    data: { password: hashedPassword },
+  });
 
-    return NextResponse.json(
-      { success: true, message: "Password reset successfully" },
-      { status: 200 }
-    );
-  } catch (error) {
-    console.error("Error resetting password:", error);
-    return NextResponse.json(
-      { success: false, message: "Failed to reset password." },
-      { status: 500 }
-    );
-  }
+  return NextResponse.json(
+    { success: true, message: "Password reset successfully." },
+    { status: 200 }
+  );
 }
+
+// =====================================================
+// AUTHORIZE
+// =====================================================
 
 async function handleAuthorize(token: string) {
   if (!token) {
     return NextResponse.json(
-      { success: false, message: "Authentication token is missing" },
+      { success: false, message: "Missing token" },
       { status: 401 }
     );
   }
 
-  let decoded: { id: string; email: string };
+  let decoded: AuthPayload | null = null;
   try {
-    decoded = jwt.verify(token, JWT_SECRET) as { id: string; email: string };
-  } catch (error) {
-    console.error("Token verification error:", error);
+    decoded = jwt.verify(token, JWT_SECRET) as AuthPayload;
+  } catch {
     return NextResponse.json(
       { success: false, message: "Invalid or expired token" },
       { status: 401 }
     );
   }
 
-  const user = await prisma.user.findUnique({
-    where: { id: decoded.id },
-  });
+  const user = await prisma.user.findUnique({ where: { id: decoded.id } });
 
   if (!user) {
     return NextResponse.json(
       { success: false, message: "User not found" },
       { status: 404 }
     );
-  } else {
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { isActive: true },
-    });
-
-    return NextResponse.json(
-      {
-        success: true,
-        user: {
-          id: user.id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          accountType: user.accountType,
-          memberSince: user.memberSince,
-        },
-      },
-      { status: 200 }
-    );
   }
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { isActive: true },
+  });
+
+  return NextResponse.json(
+    {
+      success: true,
+      user: {
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        accountType: user.accountType,
+        memberSince: user.memberSince,
+      },
+    },
+    { status: 200 }
+  );
 }
+
+// =====================================================
+// MAIN ROUTE HANDLER
+// =====================================================
 
 export async function POST(request: Request) {
   try {
@@ -336,25 +519,30 @@ export async function POST(request: Request) {
 
     switch (action) {
       case "signup":
-        return await handleSignUp(userData);
+        return handleSignUp(userData);
+      case "verify-email":
+        return handleVerifyEmail(token);
+      case "resend-verify-email":
+        return handleResendVerify(userData.email);
       case "login":
-        return await handleLogin(userData);
+        return handleLogin(userData);
       case "logout":
-        return await handleLogout(token);
+        return handleLogout(token);
       case "forgot-password":
-        return await handleForgotPassword(userData.email);
+        return handleForgotPassword(userData.email);
       case "reset-password":
-        return await handleResetPassword(token, userData.password);
+        return handleResetPassword(token, userData.password);
       case "authorize":
-        return await handleAuthorize(token);
+        return handleAuthorize(token);
+
       default:
         return NextResponse.json(
           { success: false, message: "Invalid action." },
           { status: 400 }
         );
     }
-  } catch (error) {
-    console.error("Error processing request:", error);
+  } catch (err) {
+    console.error(err);
     return NextResponse.json(
       { success: false, message: "Internal server error." },
       { status: 500 }

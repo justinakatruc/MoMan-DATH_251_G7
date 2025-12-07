@@ -132,7 +132,7 @@ export default function DashboardPage() {
           {itemsList.map((item, index) => (
             <div
               key={index}
-              className="bg-white h-[200px] px-8 pt-6 rounded-[20px] flex flex-col gap-y-6"
+              className="bg-white h-[200px] px-8 pt-6 rounded-[20px] flex flex-col gap-y-6 shadow-md"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center justify-center size-12 bg-[rgba(7,182,129,0.125)] rounded-[10px]">
@@ -157,7 +157,7 @@ export default function DashboardPage() {
           ))}
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="h-[500px] bg-white rounded-[20px] py-6 px-8 flex flex-col gap-y-9">
+          <div className="h-[500px] bg-white rounded-[20px] py-6 px-8 flex flex-col gap-y-9 shadow-md">
             <h2 className="font-medium text-[24px] 2xl:text-[32px]">
               Recent Users
             </h2>
@@ -198,7 +198,7 @@ export default function DashboardPage() {
               </div>
             </div>
           </div>
-          <div className="h-[500px] bg-white rounded-[20px] py-6 px-8 flex flex-col gap-y-9">
+          <div className="h-[500px] bg-white rounded-[20px] py-6 px-8 flex flex-col gap-y-9 shadow-md">
             <h2 className="font-medium text-[24px] 2xl:text-[32px]">
               Recent Transactions
             </h2>

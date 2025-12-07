@@ -34,6 +34,7 @@ export type User = {
 };
 
 export type TransactionAPIResponse = {
+  id: string;
   type: string;
   name: string;
   amount: number;

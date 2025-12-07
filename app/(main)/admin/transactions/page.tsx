@@ -172,7 +172,7 @@ export default function TransactionsPage() {
   const fetchTransactions = async () => {
     try {
       const result = await adminAPI.getAllTransactions();
-
+      console.log(result);
       if (result.success) {
         setTransactionsList(result.transactions);
       }
@@ -270,7 +270,7 @@ export default function TransactionsPage() {
           {itemsList.map((item, index) => (
             <div
               key={index}
-              className="bg-white h-[188px] px-8 pt-6 rounded-[20px] text-[rgba(0,0,0,0.6)] flex flex-col gap-y-6"
+              className="bg-white h-[188px] px-8 pt-6 rounded-[20px] text-[rgba(0,0,0,0.6)] flex flex-col gap-y-6 shadow-md"
             >
               <div className="flex gap-x-4 items-center">
                 {item.title === "Total Income" ? (
@@ -298,7 +298,7 @@ export default function TransactionsPage() {
             </div>
           ))}
         </div>
-        <div className="h-[620px] bg-white rounded-[20px] py-6 px-8 flex flex-col gap-y-[30px]">
+        <div className="h-[620px] bg-white rounded-[20px] py-6 px-8 flex flex-col gap-y-[30px] shadow-md">
           <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center w-full lg:gap-x-8 lg:gap-y-0 gap-y-4">
             <div className="lg:w-1/2 flex items-center border rounded-[10px] px-4 bg-[#F4F7FD]">
               <Search className="size-5 text-[rgba(0,0,0,0.5)]" />
