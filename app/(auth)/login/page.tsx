@@ -6,195 +6,167 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import Link from "next/link";
+import Image from "next/image";
 
-type FormErrors = {
-  [key: string]: string;
-};
 
 export default function LoginPage() {
-  const baseData: { email: string; password: string } = {
+  const [formData, setFormData] = useState({
     email: "",
     password: "",
-  };
-  const [formData, setFormData] = useState(baseData);
-  const [errors, setErrors] = useState<FormErrors>({});
+  });
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(false);
+
   const { setUser } = useUserStore();
   const router = useRouter();
 
-  const validateForm = (): boolean => {
-    const newErrors: FormErrors = {};
-
-    if (!formData.email) {
-      newErrors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Email is invalid";
-    }
-    if (!formData.password) {
-      newErrors.password = "Password is required";
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
   const handleLogin = async () => {
-    setErrors({});
-
-    if (!validateForm()) {
-      return;
-    }
-
-    const newErrors: FormErrors = {};
-    setIsLoading(true);
-
     try {
-      const result = await authAPI.login({
-        email: formData.email,
-        password: formData.password,
-      });
+      setIsLoading(true);
+
+      const result = await authAPI.login(formData);
 
       if (result.success && result.user) {
         localStorage.setItem("token", result.token);
         setUser(result.user);
-        toast.success("Login successful!");
-        if (result.user.accountType === "Admin") {
-          router.push("/admin/dashboard");
-        } else {
-          router.push("/home");
-        }
-      } else {
-        newErrors.general = result.message || "Invalid email or password.";
-        setErrors(newErrors);
-        toast.error(result.message || "Invalid email or password.");
+        router.push("/home");
+        return;
       }
-    } catch (error) {
-      console.error("Login error:", error);
-      toast.error("An error occurred during login. Please try again.");
+
+      if (result.needVerify) {
+        toast.error("Your email is not verified. Please check your inbox.");
+        return;
+      }
+
+      toast.error(result.message || "Invalid email or password");
+    } catch (err: any) {
+      toast.error(err.message || "Login failed");
     } finally {
       setIsLoading(false);
     }
   };
 
+
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-6 text-[#000000]">
-      <div className="w-full max-w-md bg-[#FBFDFF] shadow rounded-xl p-6 space-y-6">
-        <div className="space-y-1 text-center">
-          <h1 className="text-2xl font-semibold">Login</h1>
-          <p className="text-sm text-gray-500">
-            Wellcome back! Please login to access your account
-          </p>
+    /* DESKTOP BACKGROUND */
+    <div className="min-h-screen flex items-center justify-center bg-black">
+      {/* MOBILE FRAME */}
+      <div className="w-[430px] h-[932px] bg-[#00D09E] rounded-[30px] overflow-hidden relative">
+
+        {/* WELCOME */}
+        <div className="h-[240px] flex items-center justify-center">
+          <h1 className="text-[28px] font-semibold text-black">
+            Welcome
+          </h1>
         </div>
 
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-[#000000]"
-            >
-              Email
+        {/* CARD */}
+        <div className="absolute bottom-0 w-full h-[745px] bg-[#F1FFF3] rounded-t-[60px] px-6 pt-10">
+
+          {/* EMAIL */}
+          <div className="mb-5 mt-15">
+            <label className="text-sm font-semibold text-gray-700 ml-5">
+              Username Or Email
             </label>
             <input
-              id="email"
-              name="email"
               type="email"
+              placeholder="example@example.com"
               value={formData.email}
               onChange={(e) =>
                 setFormData({ ...formData, email: e.target.value })
               }
-              placeholder="Enter your email"
-              className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-emerald-500 focus:outline-none text-gray-900"
+              className="
+                mt-2
+                w-full
+                h-[54px]
+                rounded-full
+                bg-[#DFF7E2]
+                px-5
+                text-sm
+                placeholder-gray-500
+                focus:outline-none
+                font-semibold
+              "
             />
-            {errors.email && (
-              <p className="text-sm text-red-500 mt-1">{errors.email}</p>
-            )}
           </div>
-          <div className="space-y-2">
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-[#000000]"
-            >
+
+          {/* PASSWORD */}
+          <div className="mb-6">
+            <label className="text-sm text-gray-700 font-semibold ml-5">
               Password
             </label>
-            <div className="relative">
+            <div className="relative mt-2">
               <input
-                id="password"
-                name="password"
                 type={showPassword ? "text" : "password"}
+                placeholder="••••••••"
                 value={formData.password}
                 onChange={(e) =>
                   setFormData({ ...formData, password: e.target.value })
                 }
-                placeholder="Enter your password"
-                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-emerald-500 focus:outline-none text-gray-900"
+                className="
+                  w-full
+                  h-[54px]
+                  rounded-full
+                  bg-[#DFF7E2]
+                  px-5
+                  pr-12
+                  text-sm
+                  focus:outline-none
+                  font-bold
+                "
               />
               <button
-                type="button"
-                aria-label={showPassword ? "Hide password" : "Show password"}
-                onClick={() => setShowPassword((v) => !v)}
-                className="cursor-pointer absolute inset-y-0 right-0 flex items-center pr-3 text-[#DEDEE0] hover:text-[#000000]"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-5 top-1/2 -translate-y-1/2"
               >
-                {showPassword ? (
-                  // Eye-off icon
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    className="h-5 w-5"
-                  >
-                    <path d="M3 3l18 18" />
-                    <path d="M10.585 10.585A2 2 0 0012 14a2 2 0 001.414-.586" />
-                    <path d="M9.88 5.11A9.956 9.956 0 0112 5c5.523 0 10 5 10 7- .344.547-1.117 1.66-2.342 2.79M6.11 6.11C3.787 7.71 2 10 2 12c0 .695.316 1.489.878 2.318.55.813 1.297 1.641 2.17 2.39 2.018 1.712 4.677 3.292 6.952 3.292 1.088 0 2.32-.398 3.514-1.034" />
-                  </svg>
-                ) : (
-                  // Eye icon
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    className="h-5 w-5"
-                  >
-                    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" />
-                    <circle cx="12" cy="12" r="3" />
-                  </svg>
-                )}
+                <Image
+                  src={showPassword ? "/eye-open.png" : "/eye-close.png"}
+                  alt="Toggle password visibility"
+                  width={20}
+                  height={20}
+                />
               </button>
-            </div>
-            {errors.password && (
-              <p className="text-sm text-red-500 mt-1">{errors.password}</p>
-            )}
-            <div className="flex justify-end">
-              <Link
-                href="forgot-password"
-                className="text-sm font-semibold text-[#000000] hover:underline"
-              >
-                Forgot Password?
-              </Link>
+
             </div>
           </div>
-          <button
-            type="submit"
-            className="cursor-pointer w-full bg-emerald-500 text-[#FBFDFF] py-2.5 sm:py-3 rounded-lg font-semibold hover:bg-[#07B681] transition duration-200"
-            onClick={handleLogin}
-            disabled={isLoading}
-          >
-            Log In
-          </button>
-        </div>
+          {/* LOGIN */}
+          <div className="flex justify-center mt-20">
+            <button
+              disabled={isLoading}
+              onClick={handleLogin}
+              className="
+                w-[207px]
+                h-[45px]
+                rounded-full
+                bg-[#00D09E]
+                text-black
+                text-base
+                text-xl
+                font-bold
+              "
+            >
+              Log in
+            </button>
+          </div>
+          
+          {/* FORGOT */}
+          <div className="mt-4 text-center">
+            <Link
+              href="/forgot-password"
+              className="text-sm text-gray-600 font-bold"
+            >
+              Forgot Password?
+            </Link>
+          </div>
 
-        <p className="text-center text-sm text-gray-600">
-          Don&apos;t have an account?{" "}
-          <Link
-            href="/signup"
-            className="text-[#000000] hover:underline font-semibold"
-          >
-            Sign up
-          </Link>
-        </p>
+          {/* FOOTER */}
+          <p className="absolute bottom-8 left-0 right-0 text-center text-sm text-gray-600">
+            Don’t have an account?{" "}
+            <Link href="/signup" className="font-medium text-[#6DB6FE]">
+              Sign Up
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

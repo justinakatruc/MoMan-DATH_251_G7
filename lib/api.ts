@@ -4,10 +4,9 @@ const BASE_API = "http://localhost:3000/api";
 
 export const authAPI = {
   signup: async (userData: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    password: string;
+  fullName: string;
+  email: string;
+  password: string;
   }) => {
     const response = await fetch(`${BASE_API}/auth`, {
       method: "POST",
@@ -20,84 +19,141 @@ export const authAPI = {
       }),
     });
 
-    return response.json();
+    const result = await response.json();
+
+    if (!response.ok) {
+      if (response.status === 400 && result.missing) {
+        throw {
+          status: 400,
+          message: result.message || "Missing required fields",
+          missing: result.missing,
+        };
+      }
+
+      throw {
+        status: response.status,
+        message: result.message || "Signup failed",
+      };
+    }
+
+    return result;
   },
 
-  login: async (credentials: { email: string; password: string }) => {
-    const response = await fetch(`${BASE_API}/auth`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        action: "login",
-        ...credentials,
-      }),
-    });
+  verifyEmail: async (token: string) => {
+  const response = await fetch(`${BASE_API}/auth`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      action: "verify-email",
+      token,
+    }),
+  });
 
-    return response.json();
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw {
+      status: response.status,
+      message: result.message || "Email verification failed",
+    };
+  }
+
+  return result;
   },
 
-  logout: async () => {
-    const response = await fetch(`${BASE_API}/auth`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        action: "logout",
-        token: localStorage.getItem("token"),
-      }),
-    });
+  resendVerify: async (email: string) => {
+  const res = await fetch(`${BASE_API}/auth`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action: "resend-verify-email",
+      email, }),
+  });
+  
+  const result = await res.json();
+  
+  if (!res.ok) throw new Error(result.message);
+  
+  return result;
+},
 
-    return response.json();
-  },
 
-  forgotPassword: async (email: string) => {
-    const response = await fetch(`${BASE_API}/auth`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        action: "forgot-password",
-        email,
-      }),
-    });
+login: async (credentials: { email: string; password: string }) => {
+  const response = await fetch(`${BASE_API}/auth`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      action: "login",
+      ...credentials,
+    }),
+  });
+  
+  return response.json();
+},
 
-    return response.json();
-  },
+logout: async () => {
+  const response = await fetch(`${BASE_API}/auth`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      action: "logout",
+      token: localStorage.getItem("token"),
+    }),
+  });
+  
+  return response.json();
+},
 
-  resetPassword: async (token: string, password: string) => {
-    const response = await fetch(`${BASE_API}/auth`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        action: "reset-password",
-        token,
-        password,
-      }),
-    });
+forgotPassword: async (email: string) => {
+  const response = await fetch(`${BASE_API}/auth`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      action: "forgot-password",
+      email,
+    }),
+  });
+  
+  return response.json();
+},
 
-    return response.json();
-  },
+resetPassword: async (token: string, password: string) => {
+  const response = await fetch(`${BASE_API}/auth`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      action: "reset-password",
+      token,
+      password,
+    }),
+  });
+  
+  return response.json();
+},
 
-  authorize: async () => {
-    const response = await fetch(`${BASE_API}/auth`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        action: "authorize",
-        token: localStorage.getItem("token"),
-      }),
-    });
-
-    return response.json();
-  },
+authorize: async () => {
+  const response = await fetch(`${BASE_API}/auth`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      action: "authorize",
+      token: localStorage.getItem("token"),
+    }),
+  });
+  
+  return response.json();
+},
 };
 
 export const categoryAPI = {
@@ -114,7 +170,7 @@ export const categoryAPI = {
     });
     return response.json();
   },
-
+  
   getUserCategories: async () => {
     const response = await fetch(`${BASE_API}/categories`, {
       method: "POST",
@@ -128,7 +184,7 @@ export const categoryAPI = {
     });
     return response.json();
   },
-
+  
   addCategory: async (category: {
     type: "expense" | "income";
     name: string;
@@ -148,7 +204,7 @@ export const categoryAPI = {
     });
     return response.json();
   },
-
+  
   removeCategory: async (
     categoryId: string,
     type: "expense" | "income",
@@ -358,12 +414,11 @@ export const eventAPI = {
 };
 
 export const userAPI = {
-  updateUserProfile: async (updatedData: {
-    id: string;
+  updateProfile: async (updatedData: {
+    id?: string;
     firstName?: string;
     lastName?: string;
     email?: string;
-    password?: string;
   }) => {
     const response = await fetch(`${BASE_API}/users`, {
       method: "PUT",
@@ -378,6 +433,41 @@ export const userAPI = {
     });
     return response.json();
   },
+
+  updatePassword: async (data: {
+    token: string | null;
+    currentPassword: string;
+    newPassword: string;
+  }) => {
+    const response = await fetch(`${BASE_API}/users`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        action: "updatePassword",
+        ...data,
+      }),
+    });
+
+    return response.json();
+  },
+
+  deleteAccount: async (data: { token: string | null; password: string }) => {
+    const response = await fetch(`${BASE_API}/users`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        action: "deleteAccount",
+        ...data,
+      }),
+    });
+
+    return response.json();
+  },
+
 };
 
 export const adminAPI = {
