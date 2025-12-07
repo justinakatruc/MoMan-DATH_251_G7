@@ -4,7 +4,7 @@ import "@/app/globals.css";
 import { CategoryProvider } from "@/app/context/CategoryContext";
 import AuthGate from "../components/AuthGate";
 import { useEffect, useState } from "react";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { authAPI } from "@/lib/api";
 import { useUserStore } from "../store/useUserStore";
 import BottomBar from "../components/BottomBar";
