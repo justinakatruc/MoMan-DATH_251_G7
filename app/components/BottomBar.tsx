@@ -38,7 +38,7 @@ export default function BottomBar() {
   ];
 
   return (
-    <div className="bg-[#F1FFF3] w-[430px] fixed bottom-0 left-0 right-0 mx-auto z-40">
+    <div className="bg-[#F1FFF3] w-[428px] fixed bottom-0 left-0 right-0 mx-auto z-40">
       <div className="h-[85px] bg-[#DFF7E2] flex items-center justify-around px-2 rounded-t-[30px] shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
         {menuList.map((menu, index) => {
           const isMiddleButton = index === 2;

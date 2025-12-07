@@ -35,7 +35,6 @@ export default function SignupPage() {
       toast.success("Account created successfully");
       router.push("/login");
     } catch (err: any) {
-
       if (err.status === 400 && err.missing) {
         toast.error(`Missing fields: ${err.missing.join(", ")}`);
         return;
@@ -52,14 +51,11 @@ export default function SignupPage() {
     }
   };
 
-
-
   return (
     /* DESKTOP BACKGROUND */
-    <div className="min-h-screen flex items-center justify-center bg-black">
+    <div className="min-h-screen flex items-center justify-center">
       {/* MOBILE FRAME */}
-      <div className="w-[430px] h-[932px] bg-[#00D09E] rounded-[30px] overflow-hidden relative">
-
+      <div className="w-[430px] h-[932px] bg-[#00D09E] overflow-hidden relative">
         {/* HEADER */}
         <div className="h-[220px] flex items-center justify-center">
           <h1 className="text-[26px] font-semibold text-black">
@@ -69,10 +65,11 @@ export default function SignupPage() {
 
         {/* CARD */}
         <div className="absolute bottom-0 w-full h-[745px] bg-[#F1FFF3] rounded-t-[60px] px-6 pt-6">
-
           {/* Full Name */}
           <div className="mb-4">
-            <label className="text-sm font-semibold text-gray-700 ml-5">Full Name</label>
+            <label className="text-sm font-semibold text-gray-700 ml-5">
+              Full Name
+            </label>
             <input
               placeholder="Nguyen Van A"
               value={formData.fullName}
@@ -85,7 +82,9 @@ export default function SignupPage() {
 
           {/* Email */}
           <div className="mb-4">
-            <label className="text-sm font-semibold text-gray-700 ml-5">Email</label>
+            <label className="text-sm font-semibold text-gray-700 ml-5">
+              Email
+            </label>
             <input
               placeholder="example@example.com"
               value={formData.email}
@@ -98,7 +97,9 @@ export default function SignupPage() {
 
           {/* Mobile */}
           <div className="mb-4">
-            <label className="text-sm font-semibold text-gray-700 ml-5">Mobile Number</label>
+            <label className="text-sm font-semibold text-gray-700 ml-5">
+              Mobile Number
+            </label>
             <input
               placeholder="+ 123 456 789"
               value={formData.phone}
@@ -124,7 +125,9 @@ export default function SignupPage() {
 
           {/* Password */}
           <div className="mb-4">
-            <label className="text-sm font-semibold text-gray-700 ml-5">Password</label>
+            <label className="text-sm font-semibold text-gray-700 ml-5">
+              Password
+            </label>
             <div className="relative mt-2">
               <input
                 type={showPassword ? "text" : "password"}
@@ -147,7 +150,7 @@ export default function SignupPage() {
               />
               <button
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-5 top-1/2 -translate-y-1/2"
+                className="absolute right-5 top-1/2 -translate-y-1/2 cursor-pointer"
               >
                 <Image
                   src={showPassword ? "/eye-open.png" : "/eye-close.png"}
@@ -161,14 +164,16 @@ export default function SignupPage() {
 
           {/* Confirm Password */}
           <div className="mb-8">
-            <label className="text-sm font-semibold text-gray-700 ml-5">Confirm Password</label>
+            <label className="text-sm font-semibold text-gray-700 ml-5">
+              Confirm Password
+            </label>
             <div className="relative mt-2">
               <input
-                type={showPassword ? "text" : "password"}
+                type={showConfirmPassword ? "text" : "password"}
                 placeholder="••••••••"
-                value={formData.password}
+                value={formData.confirmPassword}
                 onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
+                  setFormData({ ...formData, confirmPassword: e.target.value })
                 }
                 className="
                   w-full
@@ -184,13 +189,11 @@ export default function SignupPage() {
               />
               <button
                 type="button"
-                onClick={() =>
-                  setShowConfirmPassword(!showConfirmPassword)
-                }
-                className="absolute right-5 top-1/2 -translate-y-1/2"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-5 top-1/2 -translate-y-1/2 cursor-pointer"
               >
                 <Image
-                  src={showPassword ? "/eye-open.png" : "/eye-close.png"}
+                  src={showConfirmPassword ? "/eye-open.png" : "/eye-close.png"}
                   alt="Toggle password visibility"
                   width={20}
                   height={20}
@@ -204,7 +207,7 @@ export default function SignupPage() {
             <button
               onClick={handleSignUp}
               disabled={isLoading}
-              className="w-[207px] h-[45px] rounded-full bg-[#00D09E] text-black font-medium font-semibold"
+              className="w-[207px] h-[45px] rounded-full bg-[#00D09E] text-black font-semibold cursor-pointer"
             >
               Sign Up
             </button>

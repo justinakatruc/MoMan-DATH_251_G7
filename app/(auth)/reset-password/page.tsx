@@ -58,22 +58,20 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black">
-      <div className="w-[430px] h-[932px] bg-[#00D09E] rounded-[30px] overflow-hidden relative">
-
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="w-[430px] h-[932px] bg-[#00D09E] overflow-hidden relative">
         {/* HEADER */}
         <div className="h-[240px] flex items-center justify-center">
-          <h1 className="text-[26px] font-semibold text-black">
-            New Password
-          </h1>
+          <h1 className="text-[26px] font-semibold text-black">New Password</h1>
         </div>
 
         {/* CARD */}
         <div className="absolute bottom-0 w-full h-[745px] bg-[#F1FFF3] rounded-t-[60px] px-6 pt-10">
-
           {/* NEW PASSWORD */}
           <div className="mb-6 mt-15">
-            <label className="text-sm font-semibold text-gray-700 ml-5">New Password</label>
+            <label className="text-sm font-semibold text-gray-700 ml-5">
+              New Password
+            </label>
             <div className="relative mt-2">
               <input
                 type={showPassword ? "text" : "password"}
@@ -113,7 +111,9 @@ export default function ResetPasswordPage() {
 
           {/* CONFIRM PASSWORD */}
           <div className="mb-10">
-            <label className="text-sm font-semibold text-gray-700 ml-5">Confirm New Password</label>
+            <label className="text-sm font-semibold text-gray-700 ml-5">
+              Confirm New Password
+            </label>
             <div className="relative mt-2">
               <input
                 type={showPassword ? "text" : "password"}
@@ -163,7 +163,6 @@ export default function ResetPasswordPage() {
               {isLoading ? "Changing..." : "Change Password"}
             </button>
           </div>
-
         </div>
       </div>
     </div>

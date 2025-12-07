@@ -134,9 +134,9 @@ export default function Home() {
   }, [selectedTab, transactions]);
 
   return (
-    <div className="flex flex-col gap-y-10 flex-1 items-center">
+    <div className="flex flex-col gap-y-10 flex-1">
       {/* Header */}
-      <div className="flex flex-col gap-y-1 mt-8 px-5 text-[#052224]">
+      <div className="flex flex-col items-center gap-y-1 mt-8 px-5 text-[#052224]">
         <div className="font-medium text-xl">Hi, Welcome Back</div>
         <div className="text-[14px] font-bold">
           {user?.firstName} {user?.lastName}
@@ -274,7 +274,7 @@ export default function Home() {
           </div>
 
           <div
-            className={`flex flex-col gap-y-4 overflow-y-auto pt-1.5 ${
+            className={`w-[380px] flex flex-col gap-y-4 overflow-y-auto pt-1.5 ${
               screenHeight > 950 ? "max-h-[200px]" : "max-h-[200px]"
             }`}
           >

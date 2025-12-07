@@ -5,11 +5,10 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import BottomBar from "@/app/components/BottomBar";
 import { userAPI } from "@/lib/api";
-import { useUserStore } from "@/app/store/useUserStore";
+import { ArrowLeft } from "lucide-react";
 
 export default function DeleteAccountPage() {
   const router = useRouter();
-  const { user } = useUserStore();
 
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -47,14 +46,16 @@ export default function DeleteAccountPage() {
   };
 
   return (
-    <div className="w-full min-h-screen flex justify-center items-center bg-neutral-900">
+    <div className="w-full min-h-screen flex justify-center items-center">
       {/* iPhone frame */}
       <div className="w-[430px] h-[932px] bg-[#00D09E] rounded-[30px] overflow-hidden relative">
-
         {/* Header */}
         <div className="w-full h-[115px] px-6 py-6 flex items-center relative">
-          <button onClick={() => router.back()}>
-            <Image src="/back.png" alt="Back" width={28} height={28} />
+          <button
+            className="text-white cursor-pointer"
+            onClick={() => router.back()}
+          >
+            <ArrowLeft />
           </button>
           <h2 className="absolute left-1/2 -translate-x-1/2 text-[22px] font-semibold text-black">
             Delete Account
@@ -63,7 +64,6 @@ export default function DeleteAccountPage() {
 
         {/* Body */}
         <div className="absolute bottom-0 w-full h-[817px] bg-[#F1FFF3] rounded-t-[60px] px-7 pt-10">
-
           {/* Title */}
           <h3 className="text-center text-lg font-bold text-black leading-6 mt-3">
             Are You Sure You Want To Delete <br />
@@ -77,14 +77,17 @@ export default function DeleteAccountPage() {
               before proceeding:
             </p>
             <ul className="list-disc ml-5 space-y-1">
-              <li>All your expenses, income and transactions will be deleted.</li>
+              <li>
+                All your expenses, income and transactions will be deleted.
+              </li>
               <li>You will not be able to access your account again.</li>
               <li>This action cannot be undone.</li>
             </ul>
           </div>
 
           <p className="mt-8 text-center text-sm font-semibold text-gray-700">
-            Please Enter Your Password To Confirm <br /> Deletion Of Your Account.
+            Please Enter Your Password To Confirm <br /> Deletion Of Your
+            Account.
           </p>
 
           <div className="relative mt-6">
@@ -112,7 +115,6 @@ export default function DeleteAccountPage() {
             </button>
           </div>
 
-          
           <button
             onClick={() => setShowConfirm(true)}
             className="w-full h-[50px] bg-[#00D09E] text-black font-semibold mt-10 rounded-full active:scale-95"
@@ -139,7 +141,6 @@ export default function DeleteAccountPage() {
       {showConfirm && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white w-[85%] rounded-3xl p-6 text-center">
-
             <h2 className="text-xl font-bold text-gray-800">Delete Account</h2>
 
             <p className="mt-3 text-sm font-semibold text-gray-700">
@@ -147,8 +148,8 @@ export default function DeleteAccountPage() {
             </p>
 
             <p className="mt-2 text-sm text-gray-600">
-              By deleting your account, you understand that all your data
-              will be permanently removed and cannot be recovered.
+              By deleting your account, you understand that all your data will
+              be permanently removed and cannot be recovered.
             </p>
 
             <button

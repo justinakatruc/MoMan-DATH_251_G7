@@ -61,7 +61,7 @@ export default function MainLayout({
           </div>
         ) : (
           <div className="w-full flex flex-col items-center min-h-screen relative z-0">
-            <div className="flex-1 bg-linear-to-b from-[#00D09E] to-[#F1FFF3] flex flex-col">
+            <div className="flex-1 grow bg-linear-to-b from-[#00D09E] to-[#F1FFF3] flex flex-col w-[428px]">
               {children}
             </div>
             <BottomBar />

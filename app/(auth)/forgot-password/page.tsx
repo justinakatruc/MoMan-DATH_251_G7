@@ -3,7 +3,6 @@
 import { authAPI } from "@/lib/api";
 import { useState } from "react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 type FormErrors = {
@@ -11,7 +10,6 @@ type FormErrors = {
 };
 
 export default function ForgotPasswordPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
@@ -43,12 +41,11 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black">
+    <div className="min-h-screen flex items-center justify-center">
       {/* MOBILE FRAME */}
-      <div className="w-[430px] h-[932px] bg-[#00D09E] rounded-[30px] overflow-hidden relative">
-
+      <div className="w-[430px] h-[932px] bg-[#00D09E] overflow-hidden relative">
         {/* HEADER */}
-        <div className="h-[240px] flex items-center justify-center">
+        <div className="h-60 flex items-center justify-center">
           <h1 className="text-[28px] font-semibold text-black">
             Forgot Password
           </h1>
@@ -56,14 +53,13 @@ export default function ForgotPasswordPage() {
 
         {/* CARD */}
         <div className="absolute bottom-0 w-full h-[745px] bg-[#F1FFF3] rounded-t-[60px] px-6 pt-10">
-
           <h2 className="text-lg font-semibold text-black mb-2 mt-10">
             Reset Password?
           </h2>
 
           <p className="text-sm text-gray-500 mb-6 leading-relaxed">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit,
-            sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+            eiusmod tempor incididunt ut labore et dolore magna aliqua.
           </p>
 
           {/* Email */}

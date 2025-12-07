@@ -107,7 +107,7 @@ export default function AddTransactionPage() {
   );
 
   return (
-    <div className="w-screen h-screen flex flex-col z-40 bg-[#F1FFF3]">
+    <div className="flex flex-col z-40 bg-[#F1FFF3] grow">
       {isLoading && (
         <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="flex flex-col items-center">
@@ -118,8 +118,11 @@ export default function AddTransactionPage() {
       )}
 
       {/* HEADER */}
-      <div className="pt-14 pb-8 px-6 flex items-center justify-between shrink-0 bg-[#00D09E]">
-        <button onClick={() => router.back()} className="text-white">
+      <div className="pt-12 pb-8 px-6 flex items-center justify-between shrink-0 bg-[#00D09E]">
+        <button
+          onClick={() => router.back()}
+          className="text-white cursor-pointer"
+        >
           <ArrowLeft className="w-6 h-6" />
         </button>
         <div className="flex flex-col items-center">
@@ -132,7 +135,7 @@ export default function AddTransactionPage() {
 
       {/* CONTENT */}
       <Content>
-        <div className="flex flex-col gap-y-6 w-full h-full overflow-y-auto pt-6 pb-32 px-1">
+        <div className="w-[380px] flex flex-col gap-y-6 h-full overflow-y-auto pt-6 px-1">
           <div className="flex flex-col gap-y-2">
             <label className="text-[#052224] text-xs font-bold ml-1">
               Date
@@ -235,7 +238,7 @@ export default function AddTransactionPage() {
           <button
             onClick={handleSubmit}
             disabled={isLoading}
-            className={`h-12 w-[180px] self-center text-white font-bold text-lg rounded-[20px] shadow-lg transition-all shrink-0 ${
+            className={`h-12 w-[180px] self-center text-white font-bold text-lg rounded-[20px] shadow-lg transition-all shrink-0 cursor-pointer ${
               isLoading ? "bg-[#00D09E]/70" : "bg-[#00D09E] hover:bg-[#00b58a]"
             }`}
           >
@@ -264,7 +267,7 @@ export default function AddTransactionPage() {
           </h3>
           <button
             onClick={() => setIsCategoryOpen(false)}
-            className="p-2 bg-[#DFF7E2] rounded-full"
+            className="p-2 bg-[#DFF7E2] rounded-full cursor-pointer"
           >
             <X className="w-5 h-5 text-[#052224]" />
           </button>
@@ -277,7 +280,7 @@ export default function AddTransactionPage() {
                 setCategoryId(cat.id);
                 setIsCategoryOpen(false);
               }}
-              className={`h-16 w-full rounded-2xl flex items-center justify-between px-4 transition-all shrink-0 border-2 active:scale-[0.98] ${
+              className={`h-16 w-full rounded-2xl flex items-center justify-between px-4 transition-all shrink-0 border-2 active:scale-[0.98] cursor-pointer ${
                 categoryId === cat.id
                   ? "bg-white border-[#00D09E]"
                   : "bg-white border-transparent"

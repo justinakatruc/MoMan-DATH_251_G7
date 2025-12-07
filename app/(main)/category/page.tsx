@@ -117,7 +117,7 @@ export function AddCustomCategoryModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-[2px] flex items-center justify-center z-50">
-      <div className="bg-white rounded-[20px] p-6 max-w-md w-full mx-4">
+      <div className="bg-white rounded-[20px] p-6 max-w-md mx-4">
         <div className="flex justify-between items-center mb-6 z-50">
           <h2 className="text-xl font-bold text-gray-700">
             Add {type} Category
@@ -230,22 +230,22 @@ export default function CategoriesPage() {
   const [errorState, setErrorState] = useState(false);
 
   return (
-    <div className="flex flex-col gap-y-10 flex-1 items-center">
+    <div className="flex flex-col gap-y-10 flex-1 grow">
       {/* Header */}
-      <div className="flex items-center h-[85px]">
+      <div className="flex items-center h-[85px] justify-center">
         <div className="font-semibold text-xl mt-8 px-5 text-[#052224]">
           Categories
         </div>
       </div>
 
       <Content>
-        <div className="flex flex-col items-center w-[358px] gap-y-10 max-h-[625px] overflow-y-auto">
+        <div className="flex flex-col items-center w-[358px] gap-y-10 pb-16">
           {/* Expense Categories */}
-          <div className="w-full flex flex-col gap-y-5">
-            <div className="flex items-center justify-center relative">
+          <div className="w-full flex flex-col gap-y-5 justify-center">
+            <div className="w-full flex justify-center relative">
               <h2 className="font-bold text-[15px] text-[#093030]">Expense</h2>
               <button
-                className="absolute right-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                className="absolute right-1 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
                 onClick={() => setIsEditExpenseMode(!isEditExpenseMode)}
               >
                 {isEditExpenseMode ? "Done" : "Edit"}
@@ -262,7 +262,7 @@ export default function CategoriesPage() {
               ))}
               <div className="flex flex-col items-center gap-y-3">
                 <div
-                  className={`w-full h-[97px] flex items-center justify-center ${"bg-[#3299FF]"} rounded-[20px]`}
+                  className={`w-full h-[97px] flex items-center justify-center ${"bg-[#3299FF]"} rounded-[20px] cursor-pointer`}
                   onClick={() => setShowAddModal({ type: "expense" })}
                 >
                   <Plus className="size-10" />
@@ -275,11 +275,11 @@ export default function CategoriesPage() {
           </div>
 
           {/* Income Categories */}
-          <div className="w-full flex flex-col gap-y-5">
-            <div className="flex items-center justify-center relative">
+          <div className="w-full flex flex-col gap-y-5 justify-center">
+            <div className="w-full flex justify-center relative">
               <h2 className="font-bold text-[15px] text-[#093030]">Income</h2>
               <button
-                className="absolute right-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                className="absolute right-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
                 onClick={() => setIsEditIncomeMode(!isEditIncomeMode)}
               >
                 {isEditIncomeMode ? "Done" : "Edit"}
@@ -296,7 +296,7 @@ export default function CategoriesPage() {
               ))}
               <div className="flex flex-col items-center gap-y-3">
                 <div
-                  className={`w-full h-[97px] flex items-center justify-center ${"bg-[#3299FF]"} rounded-[20px]`}
+                  className={`w-full h-[97px] flex items-center justify-center ${"bg-[#3299FF]"} rounded-[20px] cursor-pointer`}
                   onClick={() => setShowAddModal({ type: "income" })}
                 >
                   <Plus className="size-10" />

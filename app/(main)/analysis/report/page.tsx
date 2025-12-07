@@ -26,9 +26,9 @@ export default function Report() {
   };
 
   return (
-    <div className="flex flex-col gap-y-10 flex-1 items-center relative">
+    <div className="flex flex-col gap-y-10 flex-1 relative">
       {/*Header*/}
-      <div className="flex items-center h-[85px]">
+      <div className="flex items-center h-[85px] justify-center">
         <div className="font-semibold text-xl mt-8 px-5 text-[#052224]">
           WALL-E
         </div>
@@ -36,7 +36,7 @@ export default function Report() {
           onClick={() => {
             router.back();
           }}
-          className="absolute left-3 top-12"
+          className="absolute left-3 top-12 cursor-pointer"
         >
           <ArrowLeft className="text-white" />
         </div>

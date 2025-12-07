@@ -1,6 +1,6 @@
 "use client";
 
-import { Calendar, CircleUser, Eye, EyeOff, Mail, User2 } from "lucide-react";
+import { Calendar, CircleUser, Mail, User2 } from "lucide-react";
 import { useState } from "react";
 import { User } from "../model";
 import { userAPI } from "@/lib/api";
@@ -20,10 +20,6 @@ export function ProfileCard({ user, setIsOpen }: ProfileCardProps) {
   const [firstName, setFirstName] = useState(user.firstName);
   const [lastName, setLastName] = useState(user.lastName);
   const [email, setEmail] = useState(user.email);
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { user: currentUser, setUser } = useUserStore();
@@ -54,12 +50,6 @@ export function ProfileCard({ user, setIsOpen }: ProfileCardProps) {
       newErrors.email = "Email is invalid";
     }
 
-    if (user.id === currentUser?.id) {
-      if (newPassword !== confirmPassword) {
-        newErrors.confirmPassword = "Passwords do not match";
-      }
-    }
-
     setFormErrors(newErrors);
 
     return Object.keys(newErrors).length === 0;
@@ -71,12 +61,11 @@ export function ProfileCard({ user, setIsOpen }: ProfileCardProps) {
     }
 
     setIsLoading(true);
-    const result = await userAPI.updateUserProfile({
+    const result = await userAPI.updateProfile({
       id: user.id,
       firstName,
       lastName,
       email,
-      password: newPassword.length > 0 ? newPassword : undefined,
     });
 
     if (result.success) {
@@ -97,7 +86,7 @@ export function ProfileCard({ user, setIsOpen }: ProfileCardProps) {
       onClick={() => setIsOpen(false)}
     >
       <div
-        className="bg-[#DFF7E2] rounded-[20px] max-w-[800px] w-full mx-4 grid grid-cols-6"
+        className="bg-[#DFF7E2] rounded-[20px] max-w-[800px] w-full mx-4 grid grid-cols-6 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="col-span-2 flex flex-col gap-y-3 items-center border-r py-6">
@@ -215,63 +204,6 @@ export function ProfileCard({ user, setIsOpen }: ProfileCardProps) {
               <p className="text-sm text-red-500 mt-1">{formErrors.email}</p>
             )}
           </div>
-          {user.id === currentUser?.id && (
-            <>
-              <div className="w-full xl:w-1/2 flex flex-col gap-y-4 relative">
-                <label className="block text-sm font-medium text-[#000000]">
-                  New Password
-                </label>
-                <input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Your new password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  title="Password must contain at least one uppercase letter, one lowercase letter, and one number."
-                  className="w-full h-12 px-4 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-[#F4F7FD]"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-13 text-gray-500 cursor-pointer"
-                >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-                {formErrors.password && (
-                  <p className="text-sm text-red-500 mt-1">
-                    {formErrors.password}
-                  </p>
-                )}
-              </div>
-              <div className="w-full xl:w-1/2 flex flex-col gap-y-4 relative">
-                <label className="block text-sm font-medium text-[#000000]">
-                  Confirm New Password
-                </label>
-                <input
-                  type={showConfirmPassword ? "text" : "password"}
-                  placeholder="Confirm your password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full h-12 px-4 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-[#F4F7FD]"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-13 text-gray-500 cursor-pointer"
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff size={20} />
-                  ) : (
-                    <Eye size={20} />
-                  )}
-                </button>
-                {formErrors.confirmPassword && (
-                  <p className="text-sm text-red-500 mt-1">
-                    {formErrors.confirmPassword}
-                  </p>
-                )}
-              </div>
-            </>
-          )}
           <button
             className="mt-2 w-full h-12 bg-[#07B681] rounded-[10px] text-white font-semibold hover:bg-[#06a56c] transition-colors cursor-pointer"
             disabled={isLoading}

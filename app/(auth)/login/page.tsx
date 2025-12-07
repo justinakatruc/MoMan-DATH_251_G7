@@ -8,7 +8,6 @@ import { toast } from "sonner";
 import Link from "next/link";
 import Image from "next/image";
 
-
 export default function LoginPage() {
   const [formData, setFormData] = useState({
     email: "",
@@ -25,6 +24,7 @@ export default function LoginPage() {
       setIsLoading(true);
 
       const result = await authAPI.login(formData);
+      console.log(result);
 
       if (result.success && result.user) {
         localStorage.setItem("token", result.token);
@@ -46,23 +46,18 @@ export default function LoginPage() {
     }
   };
 
-
   return (
     /* DESKTOP BACKGROUND */
-    <div className="min-h-screen flex items-center justify-center bg-black">
+    <div className="min-h-screen flex items-center justify-center">
       {/* MOBILE FRAME */}
-      <div className="w-[430px] h-[932px] bg-[#00D09E] rounded-[30px] overflow-hidden relative">
-
+      <div className="w-[430px] h-[932px] bg-[#00D09E] overflow-hidden relative">
         {/* WELCOME */}
-        <div className="h-[240px] flex items-center justify-center">
-          <h1 className="text-[28px] font-semibold text-black">
-            Welcome
-          </h1>
+        <div className="h-60 flex items-center justify-center">
+          <h1 className="text-[28px] font-semibold text-black">Welcome</h1>
         </div>
 
         {/* CARD */}
         <div className="absolute bottom-0 w-full h-[745px] bg-[#F1FFF3] rounded-t-[60px] px-6 pt-10">
-
           {/* EMAIL */}
           <div className="mb-5 mt-15">
             <label className="text-sm font-semibold text-gray-700 ml-5">
@@ -117,7 +112,7 @@ export default function LoginPage() {
               />
               <button
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-5 top-1/2 -translate-y-1/2"
+                className="absolute right-5 top-1/2 -translate-y-1/2 cursor-pointer"
               >
                 <Image
                   src={showPassword ? "/eye-open.png" : "/eye-close.png"}
@@ -126,7 +121,6 @@ export default function LoginPage() {
                   height={20}
                 />
               </button>
-
             </div>
           </div>
           {/* LOGIN */}
@@ -140,15 +134,15 @@ export default function LoginPage() {
                 rounded-full
                 bg-[#00D09E]
                 text-black
-                text-base
                 text-xl
                 font-bold
+                cursor-pointer
               "
             >
               Log in
             </button>
           </div>
-          
+
           {/* FORGOT */}
           <div className="mt-4 text-center">
             <Link
@@ -161,7 +155,7 @@ export default function LoginPage() {
 
           {/* FOOTER */}
           <p className="absolute bottom-8 left-0 right-0 text-center text-sm text-gray-600">
-            Don’t have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link href="/signup" className="font-medium text-[#6DB6FE]">
               Sign Up
             </Link>

@@ -51,7 +51,7 @@ export default function TransactionPage() {
     if (selectedMonth !== "all") {
       filtered = filtered.filter((t) => {
         const date = new Date(t.date);
-        const month = date.toLocaleString("default", { month: "long" });
+        const month = date.toLocaleString("en-US", { month: "long" });
         return month === selectedMonth;
       });
     }
@@ -67,7 +67,7 @@ export default function TransactionPage() {
 
     sorted.forEach((transaction) => {
       const date = new Date(transaction.date);
-      const month = date.toLocaleString("default", { month: "long" });
+      const month = date.toLocaleString("en-US", { month: "long" });
       if (!groups[month]) groups[month] = [];
       groups[month].push(transaction);
     });
@@ -78,7 +78,7 @@ export default function TransactionPage() {
     const months = new Set<string>();
     transactions.forEach((t) => {
       const date = new Date(t.date);
-      const month = date.toLocaleString("default", { month: "long" });
+      const month = date.toLocaleString("en-US", { month: "long" });
       months.add(month);
     });
     return Array.from(months);
@@ -86,8 +86,16 @@ export default function TransactionPage() {
 
   const hasTransactions = Object.keys(groupedTransactions).length > 0;
 
+  function formatMoneyShort(value: number) {
+    const abs = Math.abs(value);
+    if (abs >= 1_000_000_000) return (value / 1_000_000_000).toFixed(1) + "B";
+    if (abs >= 1_000_000) return (value / 1_000_000).toFixed(1) + "M";
+    if (abs >= 1_000) return (value / 1_000).toFixed(1) + "K";
+    return value.toFixed(2);
+  }
+
   return (
-    <div className="flex flex-col h-full w-screen items-center relative">
+    <div className="flex flex-col grow relative">
       {/* LOADING SCREEN */}
       {isLoading && (
         <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -110,7 +118,7 @@ export default function TransactionPage() {
             setFilterType("all");
             setSelectedMonth("all");
           }}
-          className="flex flex-col w-full h-20 rounded-lg bg-[#F1FFF3] text-[#093030] items-center justify-center gap-y-1 cursor-pointer active:scale-[0.98] transition-transform"
+          className="flex flex-col w-[358px] h-20 rounded-lg bg-[#F1FFF3] text-[#093030] items-center justify-center gap-y-1 cursor-pointer active:scale-[0.98] transition-transform"
         >
           <span className="text-sm font-medium">Total Balance</span>
           <h2 className="text-3xl font-bold">
@@ -123,7 +131,7 @@ export default function TransactionPage() {
         </div>
 
         {/* Income / Expense Blocks */}
-        <div className="flex gap-x-5 w-full">
+        <div className="w-[358px] flex gap-x-5">
           <button
             onClick={() => setFilterType("income")}
             className={`flex-1 h-20 rounded-lg p-3 flex items-center justify-between transition-all shadow-sm active:scale-[0.98] ${
@@ -182,7 +190,7 @@ export default function TransactionPage() {
 
       {/* CONTENT */}
       <Content>
-        <div className="flex flex-col gap-y-6 grow pb-[55px] pt-4">
+        <div className="w-[358px] flex flex-col gap-y-6 grow pb-[55px] pt-4 flex-1">
           {!hasTransactions && (
             <div className="text-center text-[#093030] mt-10 opacity-60">
               {selectedMonth === "all"
@@ -198,7 +206,7 @@ export default function TransactionPage() {
                 {index === 0 && (
                   <button
                     onClick={() => setIsMonthPickerOpen(true)}
-                    className={`p-2 rounded-full transition-colors active:scale-95 ${
+                    className={`p-2 cursor-pointer rounded-full transition-colors active:scale-95 ${
                       selectedMonth !== "all"
                         ? "bg-[#00D09E] text-white shadow-md"
                         : "text-[#00D09E] hover:bg-[#DFF7E2]"
@@ -208,14 +216,16 @@ export default function TransactionPage() {
                   </button>
                 )}
               </div>
-
-              {groupedTransactions[month].map((transaction) => (
+              {(selectedMonth === "all"
+                ? groupedTransactions[month].slice(0, 7)
+                : groupedTransactions[month]
+              ).map((transaction) => (
                 <div
                   key={transaction.id}
                   className="w-full h-[53px] flex items-center gap-x-4"
                 >
                   <div
-                    className={`size-14 rounded-[22px] flex items-center justify-center shrink-0 ${
+                    className={`size-12 rounded-[22px] flex items-center justify-center shrink-0 ${
                       transaction.type === "income"
                         ? "bg-[#6DB6FE]"
                         : "bg-[#3299FF]"
@@ -224,11 +234,11 @@ export default function TransactionPage() {
                     <Image
                       src={transaction.categoryIcon}
                       alt={transaction.categoryName}
-                      width={24}
-                      height={24}
+                      width={20}
+                      height={20}
                     />
                   </div>
-                  <div className="w-[88px] shrink-0">
+                  <div className="w-[68px] shrink-0">
                     <div className="font-medium text-[#093030] text-sm truncate">
                       {transaction.name}
                     </div>
@@ -236,13 +246,13 @@ export default function TransactionPage() {
                       {new Date(transaction.date).toLocaleDateString()}
                     </div>
                   </div>
-                  <hr className="bg-[#00D09E] w-[1.5px] h-full" />
-                  <div className="flex items-center justify-center w-20 shrink-0">
+                  <hr className="bg-[#00D09E] w-0.5 h-full" />
+                  <div className="flex items-center justify-center w-22 shrink-0">
                     <div className="font-light text-[13px] text-[#093030] truncate">
                       {transaction.categoryName}
                     </div>
                   </div>
-                  <hr className="bg-[#00D09E] w-[1.5px] h-full" />
+                  <hr className="bg-[#00D09E] w-0.5 h-full" />
                   <div className="flex items-center justify-end flex-1">
                     <div
                       className={`font-medium text-[15px] ${
@@ -252,7 +262,7 @@ export default function TransactionPage() {
                       }`}
                     >
                       {transaction.type === "expense" ? "-" : ""}$
-                      {transaction.amount.toFixed(2)}
+                      {formatMoneyShort(transaction.amount)}
                     </div>
                   </div>
                 </div>
@@ -281,7 +291,7 @@ export default function TransactionPage() {
           <h3 className="text-xl font-bold text-[#052224]">Filter by Month</h3>
           <button
             onClick={() => setIsMonthPickerOpen(false)}
-            className="p-2 bg-[#DFF7E2] rounded-full hover:bg-[#00D09E]/20 transition-colors"
+            className="p-2 bg-[#DFF7E2] rounded-full hover:bg-[#00D09E]/20 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5 text-[#052224]" />
           </button>
@@ -320,7 +330,7 @@ export default function TransactionPage() {
                 setSelectedMonth(month);
                 setIsMonthPickerOpen(false);
               }}
-              className={`h-14 w-full rounded-2xl flex items-center justify-between px-4 transition-all shrink-0 border-2 active:scale-[0.98] ${
+              className={`h-14 w-full rounded-2xl flex items-center justify-between px-4 transition-all shrink-0 border-2 active:scale-[0.98] cursor-pointer ${
                 selectedMonth === month
                   ? "bg-white border-[#00D09E] shadow-sm"
                   : "bg-white border-transparent hover:border-[#00D09E]/30"

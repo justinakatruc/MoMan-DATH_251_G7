@@ -6,7 +6,7 @@ import { useUserStore } from "@/app/store/useUserStore";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { userAPI } from "@/lib/api";
-import { authAPI } from "@/lib/api";
+import { ArrowLeft } from "lucide-react";
 
 export default function EditProfilePage() {
   const { user, setUser } = useUserStore();
@@ -19,59 +19,64 @@ export default function EditProfilePage() {
   const [pushNoti, setPushNoti] = useState(true);
 
   const handleUpdate = async () => {
-  try {
-    // Tách fullname → first & last
-    const parts = fullName.trim().split(" ");
-    const firstName = parts[0] || "";
-    const lastName = parts.slice(1).join(" ") || "";
+    try {
+      // Tách fullname → first & last
+      const parts = fullName.trim().split(" ");
+      const firstName = parts[0] || "";
+      const lastName = parts.slice(1).join(" ") || "";
 
-    const response = await userAPI.updateProfile({
-      id: user?.id,
-      firstName,
-      lastName,
-      email,
-    });
+      const response = await userAPI.updateProfile({
+        id: user?.id,
+        firstName,
+        lastName,
+        email,
+      });
 
-    if (!response.success) {
-      alert(response.message || "Update failed!");
-      return;
+      if (!response.success) {
+        alert(response.message || "Update failed!");
+        return;
+      }
+
+      const updatedUser = response.user;
+
+      setUser({
+        id: updatedUser._id?.$oid || "",
+        firstName: updatedUser.firstName,
+        lastName: updatedUser.lastName,
+        email: updatedUser.email,
+        memberSince: updatedUser.memberSince ?? "",
+        accountType: updatedUser.accountType ?? "",
+      });
+
+      router.push("/profile");
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong!");
     }
-
-    const updatedUser = response.user;
-
-    setUser({
-      id: updatedUser._id?.$oid || "",
-      firstName: updatedUser.firstName,
-      lastName: updatedUser.lastName,
-      email: updatedUser.email,
-      memberSince: updatedUser.memberSince ?? "",
-      accountType: updatedUser.accountType ?? "",
-    });
-
-    router.push("/profile");
-  } catch (err) {
-    console.error(err);
-    alert("Something went wrong!");
-  }
-};
-
-
+  };
 
   return (
-    <div className="w-full min-h-screen flex justify-center items-center bg-neutral-900">
+    <div className="w-full min-h-screen flex justify-center items-center">
       {/* iPhone Frame */}
       <div className="w-[430px] h-[932px] bg-[#00D09E] rounded-[30px] overflow-hidden relative">
-
         {/* Header xanh */}
-        <div className="w-full h-[210px] flex flex-col items-center py-16">
-          <h2 className="text-[28px] font-semibold text-black">Edit My Profile</h2>
+        <div className="w-full h-[170px] flex flex-col px-6 pt-10">
+          {/* Back Button */}
+          <button
+            className="w-10 h-10 flex items-center justify-center active:scale-95 text-white cursor-pointer"
+            onClick={() => router.back()}
+          >
+            <ArrowLeft />
+          </button>
+
+          <h2 className="text-center text-[26px] font-semibold text-black mt-2">
+            Settings
+          </h2>
         </div>
 
         {/* BODY trắng */}
-        <div className="absolute bottom-0 w-full h-[745px] bg-[#F1FFF3] rounded-t-[60px] px-6 pt-28">
-
+        <div className="absolute bottom-0 w-full h-[735px] bg-[#F1FFF3] rounded-t-[60px] px-6 pt-28">
           <div className="px-4 space-y-6">
-
             {/* NAME + EMAIL */}
             <div className="text-center">
               <p className="text-lg font-semibold text-black">{fullName}</p>
@@ -111,8 +116,8 @@ export default function EditProfilePage() {
 
               <button
                 onClick={() => setPushNoti(!pushNoti)}
-                className={`w-12 h-6 rounded-full transition ${
-                  pushNoti ? "bg-green-500" : "bg-gray-400"
+                className={`w-12 h-6 rounded-full transition cursor-pointer ${
+                  pushNoti ? "bg-[#00D09E]" : "bg-gray-400"
                 } relative`}
               >
                 <span
@@ -126,11 +131,10 @@ export default function EditProfilePage() {
             {/* Update Button */}
             <button
               onClick={handleUpdate}
-              className="w-full h-[48px] bg-[#00D09E] text-white rounded-2xl mt-2 active:scale-95"
+              className="cursor-pointer w-full h-12 bg-[#00D09E] text-white rounded-2xl mt-2 active:scale-95"
             >
               Update Profile
             </button>
-
           </div>
 
           {/* Bottom Bar */}
@@ -140,7 +144,7 @@ export default function EditProfilePage() {
         </div>
 
         {/* Avatar đè lên */}
-        <div className="absolute top-[125px] left-1/2 -translate-x-1/2">
+        <div className="absolute top-[135px] left-1/2 -translate-x-1/2">
           <div className="relative">
             <Image
               src="/avatar.png"
@@ -150,11 +154,15 @@ export default function EditProfilePage() {
               className="rounded-full"
             />
             <div className="absolute bottom-2 right-2 bg-[#00D09E] w-8 h-8 rounded-full flex items-center justify-center">
-              <Image src="/camera.png" width={20} height={20} alt="edit avatar" />
+              <Image
+                src="/camera.png"
+                width={20}
+                height={20}
+                alt="edit avatar"
+              />
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );

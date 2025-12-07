@@ -91,16 +91,16 @@ export default function Analysis() {
   }, []);
 
   return (
-    <div className="flex flex-col gap-y-10 flex-1 items-center">
+    <div className="flex flex-col gap-y-10 flex-1">
       {/* Header */}
-      <div className="flex items-center h-[85px]">
+      <div className="flex items-center h-[85px] justify-center">
         <div className="font-semibold text-xl mt-8 px-5 text-[#052224]">
           Analysis
         </div>
       </div>
 
       {/* Overview */}
-      <div className="flex flex-col items-center gap-y-1.5">
+      <div className="flex flex-col items-center gap-y-1.5 justify-center">
         <div className="flex gap-x-4">
           <div>
             <div className="flex items-center">

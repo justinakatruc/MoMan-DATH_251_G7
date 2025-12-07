@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import BottomBar from "@/app/components/BottomBar";
+import { ArrowLeft } from "lucide-react";
 
 export default function HelpPage() {
   const router = useRouter();
@@ -20,14 +20,16 @@ export default function HelpPage() {
   };
 
   return (
-    <div className="w-full min-h-screen flex justify-center items-center bg-neutral-900">
+    <div className="w-full min-h-screen flex justify-center items-center">
       {/* iPhone Frame */}
       <div className="w-[430px] h-[932px] bg-[#00D09E] rounded-[30px] overflow-hidden relative">
-
         {/* Header */}
         <div className="w-full h-[115px] px-6 py-6 flex items-center relative">
-          <button onClick={() => router.back()}>
-            <Image src="/back.png" alt="Back" width={28} height={28} />
+          <button
+            className="text-white cursor-pointer"
+            onClick={() => router.back()}
+          >
+            <ArrowLeft />
           </button>
           <h2 className="absolute left-1/2 -translate-x-1/2 text-[22px] font-semibold text-white">
             Contact Support
@@ -36,21 +38,26 @@ export default function HelpPage() {
 
         {/* Body */}
         <div className="absolute bottom-0 w-full h-[817px] bg-[#F1FFF3] rounded-t-[60px] px-7 pt-10 overflow-y-auto">
-
           {/* Contact Email */}
-          <label className="text-sm font-semibold text-gray-700">Contact Email</label>
+          <label className="text-sm font-semibold text-gray-700">
+            Contact Email
+          </label>
           <div className="w-full h-[50px] bg-[#DFF7E2] rounded-full px-5 flex items-center mt-2 mb-6 font-medium text-gray-700">
             abc@hcmut.edu.vn
           </div>
 
           {/* Contact Phone */}
-          <label className="text-sm font-semibold text-gray-700">Contact Phone</label>
+          <label className="text-sm font-semibold text-gray-700">
+            Contact Phone
+          </label>
           <div className="w-full h-[50px] bg-[#DFF7E2] rounded-full px-5 flex items-center mt-2 mb-6 font-medium text-gray-700">
             0123123123
           </div>
 
           {/* Contact Address */}
-          <label className="text-sm font-semibold text-gray-700">Contact Address</label>
+          <label className="text-sm font-semibold text-gray-700">
+            Contact Address
+          </label>
           <div className="w-full h-[50px] bg-[#DFF7E2] rounded-full px-5 flex items-center mt-2 mb-6 font-medium text-gray-700">
             268 Ly Thuong Kiet
           </div>
