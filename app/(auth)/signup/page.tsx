@@ -7,6 +7,12 @@ import { useRouter } from "next/navigation";
 import { authAPI } from "@/lib/api";
 import Link from "next/link";
 
+type SignupError = {
+  status?: number;
+  missing?: string[];
+  message?: string;
+};
+
 export default function SignupPage() {
   const router = useRouter();
 
@@ -34,18 +40,20 @@ export default function SignupPage() {
 
       toast.success("Account created successfully");
       router.push("/login");
-    } catch (err: any) {
-      if (err.status === 400 && err.missing) {
-        toast.error(`Missing fields: ${err.missing.join(", ")}`);
+    } catch (err: unknown) {
+      const error = err as SignupError;
+
+      if (error.status === 400 && error.missing) {
+        toast.error(`Missing fields: ${error.missing.join(", ")}`);
         return;
       }
 
-      if (err.status === 409) {
+      if (error.status === 409) {
         toast.error("User already exists");
         return;
       }
 
-      toast.error(err.message || "Signup failed");
+      toast.error(error.message || "Signup failed");
     } finally {
       setIsLoading(false);
     }

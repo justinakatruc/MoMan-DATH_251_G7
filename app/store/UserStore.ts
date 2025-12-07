@@ -2,7 +2,7 @@ import { User } from "@/app/model";
 
 export const usersList: User[] = [
   {
-    id: 1,
+    id: "1",
     firstName: "John",
     lastName: "Doe",
     email: "john@example.com",
@@ -10,7 +10,7 @@ export const usersList: User[] = [
     accountType: "Admin",
   },
   {
-    id: 2,
+    id: "2",
     firstName: "Jane",
     lastName: "Smith",
     email: "jane@example.com",
@@ -18,7 +18,7 @@ export const usersList: User[] = [
     accountType: "Student",
   },
   {
-    id: 3,
+    id: "3",
     firstName: "Bob",
     lastName: "Johnson",
     email: "bob@example.com",
@@ -26,7 +26,7 @@ export const usersList: User[] = [
     accountType: "Student",
   },
   {
-    id: 4,
+    id: "4",
     firstName: "Alice",
     lastName: "Williams",
     email: "alice@example.com",
@@ -34,7 +34,7 @@ export const usersList: User[] = [
     accountType: "Worker",
   },
   {
-    id: 5,
+    id: "5",
     firstName: "Michael",
     lastName: "Brown",
     email: "michael@example.com",
@@ -42,7 +42,7 @@ export const usersList: User[] = [
     accountType: "Worker",
   },
   {
-    id: 6,
+    id: "6",
     firstName: "Emily",
     lastName: "Davis",
     email: "emily@example.com",
@@ -50,7 +50,7 @@ export const usersList: User[] = [
     accountType: "Worker",
   },
   {
-    id: 7,
+    id: "7",
     firstName: "David",
     lastName: "Wilson",
     email: "david@example.com",

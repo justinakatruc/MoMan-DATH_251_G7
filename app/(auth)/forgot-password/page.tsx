@@ -58,8 +58,8 @@ export default function ForgotPasswordPage() {
           </h2>
 
           <p className="text-sm text-gray-500 mb-6 leading-relaxed">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            Enter your email address below and we&apos;ll send you a link to
+            reset your password.
           </p>
 
           {/* Email */}
@@ -100,8 +100,10 @@ export default function ForgotPasswordPage() {
                 bg-[#00D09E]
                 text-black
                 text-base
-                text-xl
-                font-bold"
+                font-bold
+                cursor-pointer
+                hover:bg-[#00b887]
+                "
             >
               Next Step
             </button>
@@ -109,7 +111,7 @@ export default function ForgotPasswordPage() {
 
           {/* FOOTER */}
           <p className="absolute bottom-8 left-0 right-0 text-center text-xs text-gray-600">
-            Don’t have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link href="/signup" className="text-blue-500">
               Sign Up
             </Link>

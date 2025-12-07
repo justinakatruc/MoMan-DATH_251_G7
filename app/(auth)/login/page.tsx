@@ -24,7 +24,6 @@ export default function LoginPage() {
       setIsLoading(true);
 
       const result = await authAPI.login(formData);
-      console.log(result);
 
       if (result.success && result.user) {
         localStorage.setItem("token", result.token);
@@ -39,8 +38,10 @@ export default function LoginPage() {
       }
 
       toast.error(result.message || "Invalid email or password");
-    } catch (err: any) {
-      toast.error(err.message || "Login failed");
+    } catch (error: unknown) {
+      const errMsg =
+        error instanceof Error ? error.message : "Unexpected error occurred";
+      toast.error(errMsg);
     } finally {
       setIsLoading(false);
     }

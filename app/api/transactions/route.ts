@@ -54,11 +54,11 @@ async function handleAddTransaction(
 }
 
 async function handleGetAllTransactions(userId: string) {
-  const now = new Date();
-  const currentYear = now.getFullYear();
-  const currentMonthIndex = now.getMonth();
-  const startOfMonth = new Date(currentYear, currentMonthIndex, 1);
-  const startOfNextMonth = new Date(currentYear, currentMonthIndex + 1, 1);
+  // const now = new Date();
+  // const currentYear = now.getFullYear();
+  // const currentMonthIndex = now.getMonth();
+  // const startOfMonth = new Date(currentYear, currentMonthIndex, 1);
+  // const startOfNextMonth = new Date(currentYear, currentMonthIndex + 1, 1);
 
   try {
     const transactions = await prisma.transaction.findMany({

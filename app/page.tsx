@@ -1,32 +1,36 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 export default function LaunchPage() {
   const router = useRouter();
 
   return (
-    <div className="w-[430px] h-[932px] bg-[#F5FFFA] mx-auto flex items-center justify-center 
-                    rounded-4xl shadow-xl overflow-hidden">
-
+    <div
+      className="w-[430px] h-[932px] bg-[#F5FFFA] mx-auto flex items-center justify-center 
+                    rounded-4xl shadow-xl overflow-hidden"
+    >
       <div className="w-full max-w-sm flex flex-col items-center text-center space-y-6 px-6">
-
         {/* Logo + title */}
         <div className="space-y-2 mt-10">
-          <img
+          <Image
             src="/Vector.png"
             alt="MoMan Logo"
-            className="w-32 h-32 mx-auto"
+            width={128}
+            height={128}
+            className="mx-auto"
           />
           <h1 className="text-6xl font-extrabold text-[#0DBF8B]">MoMan</h1>
           <p className="text-xs text-gray-500 px-6">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+            eiusmod tempor.
           </p>
         </div>
 
         {/* Login button */}
         <button
-          className="w-55 bg-[#0DBF8B] text-black py-3 rounded-4xl font-semibold hover:bg-[#07B681] transition mt-4 text-2xl"
+          className="w-55 bg-[#0DBF8B] text-black py-3 rounded-4xl font-semibold hover:bg-[#07B681] transition mt-4 text-2xl cursor-pointer"
           onClick={() => router.push("/login")}
         >
           Log In
@@ -34,7 +38,7 @@ export default function LaunchPage() {
 
         {/* Sign Up button */}
         <button
-          className="w-55 bg-[#DCFFDB] text-black py-3 rounded-4xl font-semibold hover:bg-[#D7FDEA] transition text-2xl"
+          className="w-55 bg-[#DCFFDB] text-black py-3 rounded-4xl font-semibold hover:bg-[#D7FDEA] transition text-2xl cursor-pointer"
           onClick={() => router.push("/signup")}
         >
           Sign Up
@@ -43,7 +47,7 @@ export default function LaunchPage() {
         {/* Forgot password */}
         <button
           onClick={() => router.push("/forgot-password")}
-          className="text-xs font-semibold text-gray-400 hover:text-gray-600 mt-2"
+          className="text-xs font-semibold text-gray-400 hover:text-gray-600 mt-2 cursor-pointer"
         >
           Forgot Password?
         </button>

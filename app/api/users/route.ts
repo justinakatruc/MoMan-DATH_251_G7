@@ -14,7 +14,11 @@ async function handleUpdateUserProfile(updatedData: {
   try {
     const { id, firstName, lastName, email } = updatedData;
 
-    const dataToUpdate: any = {};
+    const dataToUpdate: {
+      firstName?: string;
+      lastName?: string;
+      email?: string;
+    } = {};
     if (firstName !== undefined) dataToUpdate.firstName = firstName;
     if (lastName !== undefined) dataToUpdate.lastName = lastName;
     if (email !== undefined) dataToUpdate.email = email;
@@ -145,7 +149,6 @@ async function handleDeleteAccount(updatedData: {
       { success: true, message: "Account deleted successfully" },
       { status: 200 }
     );
-
   } catch (error) {
     console.error("Delete account error:", error);
     return NextResponse.json(
@@ -194,7 +197,7 @@ export async function PUT(request: Request) {
           currentPassword: body.currentPassword,
           newPassword: body.newPassword,
         });
-      case "deleteAccount": 
+      case "deleteAccount":
         return await handleDeleteAccount({
           token: body.token,
           password: body.password,

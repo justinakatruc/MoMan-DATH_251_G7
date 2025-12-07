@@ -1,179 +1,187 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import prisma from "@/lib/prisma";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import nodemailer from "nodemailer";
 import crypto from "crypto";
 
 const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret";
-  async function handleSignUp(data: {
-    fullName: string;
-    email: string;
-    password: string;
-  }) {
-    const { fullName, email, password } = data;
 
-    const missingFields: string[] = [];
-    if (!fullName) missingFields.push("fullName");
-    if (!email) missingFields.push("email");
-    if (!password) missingFields.push("password");
+interface AuthPayload extends JwtPayload {
+  id: string;
+  email: string;
+  role: string;
+}
 
-    if (missingFields.length > 0) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Missing required fields",
-          missing: missingFields,
-        },
-        { status: 400 }
-      );
-    }
+async function handleSignUp(data: {
+  fullName: string;
+  email: string;
+  password: string;
+}) {
+  const { fullName, email, password } = data;
 
-    const nameParts = fullName.trim().split(/\s+/);
-    const lastName = nameParts.length > 1 ? nameParts.pop()! : "";
-    const firstName = nameParts.join(" ");
+  const missingFields: string[] = [];
+  if (!fullName) missingFields.push("fullName");
+  if (!email) missingFields.push("email");
+  if (!password) missingFields.push("password");
 
-    const existingUser = await prisma.user.findUnique({ where: { email } });
+  if (missingFields.length > 0) {
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Missing required fields",
+        missing: missingFields,
+      },
+      { status: 400 }
+    );
+  }
 
-    // CASE: user exists but not verified
-    if (existingUser && !existingUser.isActive) {
-      const hashedPassword = await bcrypt.hash(password, 10);
+  const nameParts = fullName.trim().split(/\s+/);
+  const lastName = nameParts.length > 1 ? nameParts.pop()! : "";
+  const firstName = nameParts.join(" ");
 
-      // update info
-      const updatedUser = await prisma.user.update({
-        where: { id: existingUser.id },
-        data: {
-          firstName,
-          lastName,
-          password: hashedPassword,
-        },
-      });
+  const existingUser = await prisma.user.findUnique({ where: { email } });
 
-      const token = await generateVerifyToken(updatedUser.id);
-
-      await sendVerificationEmail(email, token);
-
-      return NextResponse.json(
-        {
-          success: true,
-          message: "Unverified account exists. New verification email sent.",
-        },
-        { status: 200 }
-      );
-    }
-
-    if (existingUser) {
-      return NextResponse.json(
-        { success: false, message: "User already exists." },
-        { status: 409 }
-      );
-    }
-
+  // CASE: user exists but not verified
+  if (existingUser && !existingUser.isActive) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = await prisma.user.create({
+    // update info
+    const updatedUser = await prisma.user.update({
+      where: { id: existingUser.id },
       data: {
         firstName,
         lastName,
-        email,
-        memberSince: new Date(),
         password: hashedPassword,
-        accountType: "User",
-        isActive: false,
       },
     });
 
-    const token = await generateVerifyToken(newUser.id);
+    const token = await generateVerifyToken(updatedUser.id);
 
     await sendVerificationEmail(email, token);
 
     return NextResponse.json(
       {
         success: true,
-        message: "User created. Verification email sent.",
+        message: "Unverified account exists. New verification email sent.",
       },
-      { status: 201 }
+      { status: 200 }
     );
   }
 
-  async function generateVerifyToken(userId: string) {
-  
-    await prisma.verify.deleteMany({
-      where: { userId },
-    });
-
-    const token = crypto.randomUUID();
-    const expiresAt = new Date(Date.now() + 1000 * 60 * 30);
-
-    await prisma.verify.create({
-      data: { userId, token, expiresAt },
-    });
-
-    return token;
+  if (existingUser) {
+    return NextResponse.json(
+      { success: false, message: "User already exists." },
+      { status: 409 }
+    );
   }
 
-  async function sendVerificationEmail(email: string, token: string) {
-    const transporter = nodemailer.createTransport({
-      service: "Gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
+  const hashedPassword = await bcrypt.hash(password, 10);
 
-    const verifyLink = `${process.env.BASE_URL}/verify?token=${token}&email=${encodeURIComponent(email)}`;
+  const newUser = await prisma.user.create({
+    data: {
+      firstName,
+      lastName,
+      email,
+      memberSince: new Date(),
+      password: hashedPassword,
+      accountType: "User",
+      isActive: false,
+    },
+  });
 
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "Verify Your Email",
-      html: `
+  const token = await generateVerifyToken(newUser.id);
+
+  await sendVerificationEmail(email, token);
+
+  return NextResponse.json(
+    {
+      success: true,
+      message: "User created. Verification email sent.",
+    },
+    { status: 201 }
+  );
+}
+
+async function generateVerifyToken(userId: string) {
+  await prisma.verify.deleteMany({
+    where: { userId },
+  });
+
+  const token = crypto.randomUUID();
+  const expiresAt = new Date(Date.now() + 1000 * 60 * 30);
+
+  await prisma.verify.create({
+    data: { userId, token, expiresAt },
+  });
+
+  return token;
+}
+
+async function sendVerificationEmail(email: string, token: string) {
+  const transporter = nodemailer.createTransport({
+    service: "Gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
+  const verifyLink = `${
+    process.env.BASE_URL
+  }/verify?token=${token}&email=${encodeURIComponent(email)}`;
+
+  await transporter.sendMail({
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: "Verify Your Email",
+    html: `
         <h2>Verify Your Email</h2>
         <p>Click the link below to verify your account:</p>
         <a href="${verifyLink}" target="_blank">Verify Email</a>
         <p>This link expires in <b>30 minutes</b>.</p>
       `,
-    });
-  }
+  });
+}
 
-  async function handleVerifyEmail(token: string) {
-    if (!token) {
-      return NextResponse.json(
-        { success: false, message: "Token is required" },
-        { status: 400 }
-      );
-    }
-
-    const verifyRecord = await prisma.verify.findUnique({
-      where: { token },
-    });
-
-    if (!verifyRecord) {
-      return NextResponse.json(
-        { success: false, message: "Invalid token" },
-        { status: 400 }
-      );
-    }
-
-    if (verifyRecord.expiresAt < new Date()) {
-      return NextResponse.json(
-        { success: false, message: "Token expired" },
-        { status: 400 }
-      );
-    }
-
-    await prisma.user.update({
-      where: { id: verifyRecord.userId },
-      data: { isActive: true },
-    });
-
-    await prisma.verify.delete({ where: { token } });
-
+async function handleVerifyEmail(token: string) {
+  if (!token) {
     return NextResponse.json(
-      { success: true, message: "Email verified successfully" },
-      { status: 200 }
+      { success: false, message: "Token is required" },
+      { status: 400 }
     );
   }
+
+  const verifyRecord = await prisma.verify.findUnique({
+    where: { token },
+  });
+
+  if (!verifyRecord) {
+    return NextResponse.json(
+      { success: false, message: "Invalid token" },
+      { status: 400 }
+    );
+  }
+
+  if (verifyRecord.expiresAt < new Date()) {
+    return NextResponse.json(
+      { success: false, message: "Token expired" },
+      { status: 400 }
+    );
+  }
+
+  await prisma.user.update({
+    where: { id: verifyRecord.userId },
+    data: { isActive: true },
+  });
+
+  await prisma.verify.delete({ where: { token } });
+
+  return NextResponse.json(
+    { success: true, message: "Email verified successfully" },
+    { status: 200 }
+  );
+}
 
 async function handleResendVerify(email: string) {
   const user = await prisma.user.findUnique({ where: { email } });
@@ -209,7 +217,9 @@ async function handleResendVerify(email: string) {
   const now = Date.now();
 
   if (now - record.lastSentAt.getTime() < cooldown) {
-    const sec = Math.ceil((cooldown - (now - record.lastSentAt.getTime())) / 1000);
+    const sec = Math.ceil(
+      (cooldown - (now - record.lastSentAt.getTime())) / 1000
+    );
     return NextResponse.json(
       { success: false, message: `Please wait ${sec}s before resending.` },
       { status: 429 }
@@ -251,7 +261,6 @@ async function handleResendVerify(email: string) {
     { status: 200 }
   );
 }
-
 
 // =====================================================
 // LOGIN
@@ -336,9 +345,9 @@ async function handleLogout(token: string) {
     );
   }
 
-  let decoded: any;
+  let decoded: AuthPayload | null = null;
   try {
-    decoded = jwt.verify(token, JWT_SECRET);
+    decoded = jwt.verify(token, JWT_SECRET) as AuthPayload;
   } catch {
     return NextResponse.json(
       { success: false, message: "Invalid or expired token." },
@@ -417,17 +426,15 @@ async function handleResetPassword(token: string, password: string) {
     );
   }
 
-  let decoded: any;
+  let decoded: AuthPayload | null = null;
   try {
-    decoded = jwt.verify(token, JWT_SECRET);
+    decoded = jwt.verify(token, JWT_SECRET) as AuthPayload;
   } catch {
     return NextResponse.json(
       { success: false, message: "Invalid or expired token." },
       { status: 401 }
     );
   }
-
-  const userId = decoded.id;
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -454,9 +461,9 @@ async function handleAuthorize(token: string) {
     );
   }
 
-  let decoded: any;
+  let decoded: AuthPayload | null = null;
   try {
-    decoded = jwt.verify(token, JWT_SECRET);
+    decoded = jwt.verify(token, JWT_SECRET) as AuthPayload;
   } catch {
     return NextResponse.json(
       { success: false, message: "Invalid or expired token" },
@@ -527,7 +534,7 @@ export async function POST(request: Request) {
         return handleResetPassword(token, userData.password);
       case "authorize":
         return handleAuthorize(token);
-      
+
       default:
         return NextResponse.json(
           { success: false, message: "Invalid action." },
