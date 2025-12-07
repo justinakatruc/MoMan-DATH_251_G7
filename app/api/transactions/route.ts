@@ -64,10 +64,10 @@ async function handleGetAllTransactions(userId: string) {
     const transactions = await prisma.transaction.findMany({
       where: {
         userId: userId,
-        AND: [
-          { date: { gte: startOfMonth } },
-          { date: { lt: startOfNextMonth } },
-        ],
+        // AND: [
+        //   { date: { gte: startOfMonth } },
+        //   { date: { lt: startOfNextMonth } },
+        // ],
       },
       select: {
         id: true,

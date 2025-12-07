@@ -360,7 +360,7 @@ export default function Sidebar() {
           </div>
         </ul>
       </div>
-      <div className="hidden lg:flex lg:w-[260px] h-screen md:bg-[#FBFDFF] flex-col items-center sticky left-0 top-0 z-50">
+      <div className="hidden lg:flex lg:w-[260px] h-screen md:bg-[#DFF7E2] flex-col items-center sticky left-0 top-0 z-50">
         <Link href={"/home"} className="w-full h-[70px] flex items-center">
           <Image
             src="/logo.png"
@@ -523,10 +523,10 @@ export default function Sidebar() {
             <ul className="w-full flex flex-col gap-y-2.5 2xl:gap-y-5 px-4 overflow-y-auto">
               <Link
                 href={"/admin/dashboard"}
-                className={`w-full pl-2 pr-1 py-1 flex items-center cursor-pointer hover:bg-[#CFF0E7] hover:rounded-[10px] ${
+                className={`w-full pl-2 pr-1 py-1 flex items-center cursor-pointer hover:rounded-[10px] ${
                   pathname === "/admin/dashboard"
-                    ? "bg-[#CFF0E7] rounded-[10px]"
-                    : ""
+                    ? "bg-[#00D09E] text-white rounded-[10px]"
+                    : "hover:bg-[#CFF0E7]"
                 }`}
               >
                 <LayoutDashboardIcon className="size-5 2xl:size-7 mr-2" />
@@ -536,10 +536,10 @@ export default function Sidebar() {
               </Link>
               <Link
                 href={"/admin/users"}
-                className={`w-full pl-2 pr-1 py-1 flex items-center cursor-pointer hover:bg-[#CFF0E7] hover:rounded-[10px] ${
+                className={`w-full pl-2 pr-1 py-1 flex items-center cursor-pointer hover:rounded-[10px] ${
                   pathname === "/admin/users"
-                    ? "bg-[#CFF0E7] rounded-[10px]"
-                    : ""
+                    ? "bg-[#00D09E] text-white rounded-[10px]"
+                    : "hover:bg-[#CFF0E7]"
                 }`}
               >
                 <Users className="size-5 2xl:size-7 mr-2" />
@@ -549,10 +549,10 @@ export default function Sidebar() {
               </Link>
               <Link
                 href={"/admin/categories"}
-                className={`w-full pl-2 pr-1 py-1 flex items-center cursor-pointer hover:bg-[#CFF0E7] hover:rounded-[10px] ${
+                className={`w-full pl-2 pr-1 py-1 flex items-center cursor-pointer  hover:rounded-[10px] ${
                   pathname === "/admin/categories"
-                    ? "bg-[#CFF0E7] rounded-[10px]"
-                    : ""
+                    ? "bg-[#00D09E] text-white rounded-[10px]"
+                    : "hover:bg-[#CFF0E7]"
                 }`}
               >
                 <Layers2 className="size-5 2xl:size-7 mr-2" />
@@ -562,10 +562,10 @@ export default function Sidebar() {
               </Link>
               <Link
                 href={"/admin/transactions"}
-                className={`w-full pl-2 pr-1 py-1 flex items-center cursor-pointer hover:bg-[#CFF0E7] hover:rounded-[10px] ${
+                className={`w-full pl-2 pr-1 py-1 flex items-center cursor-pointer  hover:rounded-[10px] ${
                   pathname === "/admin/transactions"
-                    ? "bg-[#CFF0E7] rounded-[10px]"
-                    : ""
+                    ? "bg-[#00D09E] text-white rounded-[10px]"
+                    : "hover:bg-[#CFF0E7]"
                 }`}
               >
                 <BadgeDollarSign className="size-5 2xl:size-7 mr-2" />
@@ -580,26 +580,6 @@ export default function Sidebar() {
           <div className="w-full flex flex-col gap-y-4">
             {user?.accountType === "Admin" && (
               <>
-                <div className="h-[50px] bg-[#F4F7FD] rounded-[20px] px-4 flex gap-x-3 items-center">
-                  <Profile
-                    id={user!.id}
-                    firstName={user!.firstName}
-                    lastName={user!.lastName}
-                    email={user!.email}
-                    memberSince={user!.memberSince}
-                    accountType={user!.accountType}
-                    size1={"size-10"}
-                    size2={"size-5"}
-                  />
-                  <div>
-                    <div className="text-[14px] font-semibold">
-                      {user!.firstName} {user!.lastName}
-                    </div>
-                    <div className="text-[12px] font-medium text-[rgba(0,0,0,0.6)]">
-                      {user!.email}
-                    </div>
-                  </div>
-                </div>
                 <Link
                   href={
                     pathname.includes("admin") ? "/home" : "/admin/dashboard"
@@ -619,6 +599,26 @@ export default function Sidebar() {
             >
               Log Out
             </button>
+            <div className="h-[50px] rounded-[20px] px-4 flex gap-x-3 items-center">
+              <Profile
+                id={user!.id}
+                firstName={user!.firstName}
+                lastName={user!.lastName}
+                email={user!.email}
+                memberSince={user!.memberSince}
+                accountType={user!.accountType}
+                size1={"size-10"}
+                size2={"size-5"}
+              />
+              <div>
+                <div className="text-[14px] font-semibold">
+                  {user!.firstName} {user!.lastName}
+                </div>
+                <div className="text-[12px] font-medium text-[rgba(0,0,0,0.6)]">
+                  {user!.email}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

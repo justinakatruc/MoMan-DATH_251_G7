@@ -143,7 +143,7 @@ export default function UserPage() {
           {itemsList.map((item, index) => (
             <div
               key={index}
-              className="bg-white h-[188px] px-8 pt-6 rounded-[20px] flex flex-col gap-y-6"
+              className="bg-white h-[188px] px-8 pt-6 rounded-[20px] flex flex-col gap-y-6 shadow-md"
             >
               <p className="font-medium text-[#000000] text-[16px] h-6">
                 {item.title}
@@ -158,7 +158,7 @@ export default function UserPage() {
             </div>
           ))}
         </div>
-        <div className="h-[567px] bg-white rounded-[20px] py-6 px-8 flex flex-col gap-y-[30px]">
+        <div className="h-[567px] bg-white rounded-[20px] py-6 px-8 flex flex-col gap-y-[30px] shadow-md">
           <div className="flex items-center border rounded-[10px] px-4 bg-[#F4F7FD]">
             <Search className="size-5 text-[rgba(0,0,0,0.5)]" />
             <input
@@ -184,7 +184,7 @@ export default function UserPage() {
                   className="grid grid-cols-2 xl:grid-cols-6 gap-x-4 xl:gap-x-10 items-center py-3 border-t border-gray-200"
                 >
                   <div className="flex items-center gap-x-2">
-                    <div className="flex size-10 rounded-full bg-[#CFF0E7] items-center justify-center font-semibold text-[14px]">
+                    <div className="flex size-8 px-2 rounded-full bg-[#CFF0E7] items-center justify-center font-semibold text-[14px]">
                       {(user.firstName + " " + user.lastName)
                         .split(" ")
                         .map((n) => n[0])
