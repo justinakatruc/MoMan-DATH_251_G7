@@ -230,10 +230,6 @@ async function handleGetAllTransactions() {
 
     const returnTransactions = await Promise.all(
       transactions.map(async (transaction) => {
-        const user = await prisma.user.findUnique({
-          where: { id: transaction.userId },
-          select: { firstName: true, lastName: true, email: true },
-        });
         let category = null;
         if (transaction.type === "expense") {
           category = await prisma.expenseCategory.findUnique({
@@ -248,9 +244,7 @@ async function handleGetAllTransactions() {
         }
         return {
           ...transaction,
-          firstName: user?.firstName,
-          lastName: user?.lastName,
-          email: user?.email,
+          userId: transaction.userId,
           category: category?.name,
         };
       })

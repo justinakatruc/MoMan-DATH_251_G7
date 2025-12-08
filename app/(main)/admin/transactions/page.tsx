@@ -22,9 +22,6 @@ type Transaction = {
   name: string;
   amount: number;
   userId: string;
-  firstName: string;
-  lastName: string;
-  email: string;
   categoryId: string;
   category: string;
 };
@@ -69,9 +66,7 @@ function TransactionInformation({ transaction, setOpen }: TransactionProps) {
         </div>
         <div className="space-y-4">
           <p>
-            <span className="font-semibold">User:</span> {transaction.firstName}{" "}
-            {transaction.lastName} (ID: {transaction.userId} |{" "}
-            {transaction.email})
+            <span className="font-semibold">User ID:</span> {transaction.userId}
           </p>
           <p>
             <span className="font-semibold">Category:</span>{" "}
@@ -103,18 +98,10 @@ export default function TransactionsPage() {
     useState(transactionsList);
 
   const convertToCSV = (data: Transaction[]) => {
-    const headers = [
-      "Transaction ID",
-      "User",
-      "Category",
-      "Date",
-      "Type",
-      "Amount",
-    ];
+    const headers = ["Transaction ID", "Category", "Date", "Type", "Amount"];
 
     const rows = data.map((transaction) => [
       transaction.id,
-      `${transaction.firstName} ${transaction.lastName} (${transaction.email})`,
       transaction.category,
       new Date(transaction.date).toISOString().split("T")[0],
       transaction.type,
@@ -181,6 +168,11 @@ export default function TransactionsPage() {
     }
   };
 
+  const maskId = (id: string) => {
+    if (!id) return "";
+    return `${id.slice(0, 4)}...${id.slice(-4)}`;
+  };
+
   useEffect(() => {
     fetchTransactions();
   }, []);
@@ -226,9 +218,7 @@ export default function TransactionsPage() {
           tx.id.toLowerCase().includes(inputValue.toLowerCase()) ||
           tx.category.toLowerCase().includes(inputValue.toLowerCase()) ||
           tx.date.toLowerCase().includes(inputValue.toLowerCase()) ||
-          tx.firstName.toLowerCase().includes(inputValue.toLowerCase()) ||
-          tx.lastName.toLowerCase().includes(inputValue.toLowerCase()) ||
-          tx.email.toLowerCase().includes(inputValue.toLowerCase())
+          tx.userId.toLowerCase().includes(inputValue.toLowerCase())
       );
     }
     setFilteredTransactions(filteredList);
@@ -330,9 +320,8 @@ export default function TransactionsPage() {
             </div>
           </div>
           <div className="w-full">
-            <div className="grid grid-cols-4 xl:grid-cols-7 gap-x-10 font-bold text-[16px]">
+            <div className="grid grid-cols-4 xl:grid-cols-6 gap-x-10 font-bold text-[16px]">
               <p className="">Transaction ID</p>
-              <p className="hidden xl:flex">User</p>
               <p className="hidden xl:flex">Category</p>
               <p className="hidden xl:flex">Date & Time</p>
               <p className="">Type</p>
@@ -344,7 +333,7 @@ export default function TransactionsPage() {
                 filteredTransactions.map((tx: Transaction, index) => (
                   <div
                     key={index}
-                    className="grid grid-cols-4 xl:grid-cols-7 gap-x-10 items-center py-3 border-t border-gray-200"
+                    className="grid grid-cols-4 xl:grid-cols-6 gap-x-10 items-center py-3 border-t border-gray-200"
                   >
                     <div
                       className="hidden xl:flex cursor-pointer font-medium text-[16px] hover:underline"
@@ -353,7 +342,7 @@ export default function TransactionsPage() {
                         setIsOpenTransactionInfo(true);
                       }}
                     >
-                      {tx.id}
+                      {maskId(tx.id)}
                     </div>
                     <div
                       className="flex xl:hidden cursor-pointer font-medium text-[16px] hover:underline"
@@ -362,15 +351,7 @@ export default function TransactionsPage() {
                         setIsOpenTransactionInfo(true);
                       }}
                     >
-                      {tx.id.length > 10 ? tx.id.slice(0, 10) + "..." : tx.id}
-                    </div>
-                    <div className="hidden xl:flex flex-col gap-y-1">
-                      <div className="font-medium text-[16px]">
-                        {tx.firstName} {tx.lastName}
-                      </div>
-                      <div className="text-[14px] text-[rgba(0,0,0,0.5)]">
-                        ID: {tx.userId} | {tx.email}
-                      </div>
+                      {maskId(tx.id)}
                     </div>
                     <div className="hidden xl:flex text-[16px]">
                       {tx.category}
@@ -379,7 +360,7 @@ export default function TransactionsPage() {
                       {new Date(tx.date).toLocaleString()}
                     </div>
                     <div
-                      className={`flex w-[100px] h-[35px] rounded-[15px] items-center justify-center ${
+                      className={`flex w-[100px] h-[35px] rounded-[15px] items-center justify-center capitalize ${
                         tx.type === "income"
                           ? "bg-[#CFF0E7] text-[#07B681]"
                           : "bg-[#FFCCCB] text-[#ED7771]"
