@@ -282,7 +282,7 @@ export const transactionAPI = {
     amount: number;
     categoryId: string;
     description?: string;
-  }) => {
+  }, authToken?: string) => {
     const response = await fetch(`${BASE_API}/transactions`, {
       method: "POST",
       headers: {
@@ -290,7 +290,7 @@ export const transactionAPI = {
       },
       body: JSON.stringify({
         action: "addTransaction",
-        token: localStorage.getItem("token"),
+        token: authToken || localStorage.getItem("token"),
         transaction: transaction,
       }),
     });
@@ -363,7 +363,7 @@ export const eventAPI = {
     title: string;
     time: string;
     recurring: boolean;
-  }) => {
+  }, authToken?: string) => {
     const response = await fetch(`${BASE_API}/events`, {
       method: "POST",
       headers: {
@@ -371,7 +371,7 @@ export const eventAPI = {
       },
       body: JSON.stringify({
         action: "addEvent",
-        token: localStorage.getItem("token"),
+        token: authToken || localStorage.getItem("token"),
         event,
       }),
     });
