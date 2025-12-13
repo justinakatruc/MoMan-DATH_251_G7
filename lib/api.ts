@@ -228,7 +228,7 @@ export const categoryAPI = {
 };
 
 export const transactionAPI = {
-  getAllTransactions: async () => {
+  getAllTransactions: async (authToken?: string) => {
     const response = await fetch(`${BASE_API}/transactions`, {
       method: "POST",
       headers: {
@@ -236,7 +236,7 @@ export const transactionAPI = {
       },
       body: JSON.stringify({
         action: "getAllTransactions",
-        token: localStorage.getItem("token"),
+        token: authToken || localStorage.getItem("token"),
       }),
     });
     return response.json();

@@ -107,6 +107,8 @@ async function handleGetStatistics(userId: string, timeFrame: string) {
       },
     });
 
+    console.log("Fetched transactions:", transactions);
+
     let result = null;
     let totalIncome = 0;
     let totalExpense = 0;

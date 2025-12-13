@@ -22,6 +22,28 @@ export default function Report() {
       ...chatHistory,
       { text: messages, sender: "user", time: currentTime },
     ]);
+
+    const token = localStorage.getItem("token");
+    fetch("/api/chatbot", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: messages,
+        // TRUYỀN TOKEN XÁC THỰC TỪ CLIENT VÀO ĐÂY
+        authToken: token, 
+      }),
+    })
+    .then((res) => res.json())
+    .then((data) => {
+      setChatHistory((prevHistory) => [
+        ...prevHistory,
+        { text: data.reply, sender: "bot", time: currentTime },
+      ]);
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+    });
+
     setMessages("");
   };
 
