@@ -1,4 +1,5 @@
 import Groq from "groq-sdk";
+import { ChatCompletionMessageParam, ChatCompletionMessageToolCall } from "groq-sdk/resources/chat/completions"
 import { transactionAPI } from "@/lib/api";
 
 const groq = new Groq({
@@ -22,8 +23,9 @@ const tools = [
 
 
 // Đây là hàm giả lập việc gọi API/DB để lấy dữ liệu thống kê
-async function executeTool(toolCall: any, authToken: string) {
+async function executeTool(toolCall: ChatCompletionMessageToolCall, authToken: string) {
   const { name, arguments: args } = toolCall.function;
+  console.log(`Tool requested: ${name} with arguments:`, args);
 
   if (name === "getAllTransactions") {
     console.log(`Executing getAllTransactions`);
@@ -48,7 +50,7 @@ export async function POST(req: Request) {
 		return new Response(JSON.stringify({ error: "Authentication token is missing." }), { status: 401 });
   }
 
-  const messages: any[] = [
+  const messages: ChatCompletionMessageParam[] = [
 		{ role: "system", content: "You are a helpful assistant. ONLY use the provided tools if the user is asking for financial statistics or data analysis (Dollar). Respond in Vietnamese. Now is " + new Date().toLocaleString("vi-VN") },    
 		{ role: "user", content: message },
   ];
@@ -78,7 +80,6 @@ export async function POST(req: Request) {
       messages.push({
         tool_call_id: toolCall.id,
         role: "tool",
-        name: toolCall.function.name,
         content: toolResult, // Nội dung là kết quả từ hàm executeTool
       });
     }
