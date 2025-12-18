@@ -13,15 +13,9 @@ export type Transaction = {
   name: string;
   amount: number;
   date: Date;
-  description?: string;
-};
-
-export type EventType = {
-  id: string;
-  date: Date;
-  title: string;
-  time: string;
   isRecurring: boolean;
+  recurringPeriod?: "daily" | "weekly" | "monthly" | "yearly";
+  time?: string;
 };
 
 export type User = {
@@ -39,7 +33,9 @@ export type TransactionAPIResponse = {
   name: string;
   amount: number;
   date: string;
-  description: string;
+  categoryId: string;
   categoryName: string;
   categoryIcon: string;
+  isRecurring: boolean;
+  recurringPeriod?: string;
 };

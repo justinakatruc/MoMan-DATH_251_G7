@@ -10,39 +10,32 @@ async function handleAddTransaction(
     type: "expense" | "income";
     name: string;
     amount: number;
-    date: string;
-    description: string;
     categoryId: string;
+    // New Attributes
+    isRecurring?: boolean;
+    recurringPeriod?: string;
+    time?: string;
   },
   userId: string
 ) {
   try {
-    const now = new Date();
-    if (transaction.date === now.toISOString().split("T")[0]) {
-      transaction.date = now.toISOString();
-    }
-
-    const result = await prisma.transaction.create({
+    await prisma.transaction.create({
       data: {
         type: transaction.type,
         name: transaction.name,
         amount: transaction.amount,
-        date: new Date(transaction.date),
-        description: transaction.description,
         categoryId: transaction.categoryId,
         userId: userId,
+        // Save recurring attributes
+        isRecurring: transaction.isRecurring || false,
+        recurringPeriod: transaction.recurringPeriod || null,
+        time: transaction.time || null,
       },
     });
 
-    if (result) {
-      return NextResponse.json(
-        { success: true, message: "Transaction added successfully." },
-        { status: 201 }
-      );
-    }
     return NextResponse.json(
-      { success: false, message: "Failed to add transaction." },
-      { status: 500 }
+      { success: true, message: "Transaction added successfully." },
+      { status: 201 }
     );
   } catch (error) {
     console.error("Error adding transaction:", error);
@@ -54,29 +47,20 @@ async function handleAddTransaction(
 }
 
 async function handleGetAllTransactions(userId: string) {
-  // const now = new Date();
-  // const currentYear = now.getFullYear();
-  // const currentMonthIndex = now.getMonth();
-  // const startOfMonth = new Date(currentYear, currentMonthIndex, 1);
-  // const startOfNextMonth = new Date(currentYear, currentMonthIndex + 1, 1);
-
   try {
     const transactions = await prisma.transaction.findMany({
-      where: {
-        userId: userId,
-        // AND: [
-        //   { date: { gte: startOfMonth } },
-        //   { date: { lt: startOfNextMonth } },
-        // ],
-      },
+      where: { userId: userId },
       select: {
         id: true,
         type: true,
         name: true,
         amount: true,
         date: true,
-        description: true,
         categoryId: true,
+        // ADD THESE NEW FIELDS
+        isRecurring: true,
+        recurringPeriod: true,
+        time: true,
       },
       orderBy: [{ date: "desc" }, { id: "desc" }],
     });
@@ -85,13 +69,9 @@ async function handleGetAllTransactions(userId: string) {
       transactions.map(async (tx) => {
         let category = null;
         if (tx.type === "expense") {
-          category = await prisma.expenseCategory.findUnique({
-            where: { id: tx.categoryId },
-          });
+          category = await prisma.expenseCategory.findUnique({ where: { id: tx.categoryId } });
         } else {
-          category = await prisma.incomeCategory.findUnique({
-            where: { id: tx.categoryId },
-          });
+          category = await prisma.incomeCategory.findUnique({ where: { id: tx.categoryId } });
         }
         return {
           ...tx,
@@ -101,10 +81,7 @@ async function handleGetAllTransactions(userId: string) {
       })
     );
 
-    return NextResponse.json(
-      { success: true, transactions: returnTransactions },
-      { status: 200 }
-    );
+    return NextResponse.json({ success: true, transactions: returnTransactions }, { status: 200 });
   } catch (error) {
     console.error("Error fetching transactions:", error);
     return NextResponse.json(
@@ -128,7 +105,6 @@ async function handleGetCategoryTransactions(
         id: true,
         name: true,
         amount: true,
-        description: true,
         date: true,
       },
       orderBy: [{ date: "desc" }, { id: "desc" }],
@@ -164,7 +140,6 @@ async function handleSearchTransactions(
         type: true,
         name: true,
         amount: true,
-        description: true,
         date: true,
         categoryId: true,
       },
@@ -195,6 +170,7 @@ async function handleSearchTransactions(
         }
         return {
           ...tx,
+          categoryId: tx.categoryId,
           categoryName: categoryData?.name,
           categoryIcon: categoryData?.icon,
         };

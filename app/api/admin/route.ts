@@ -59,7 +59,6 @@ async function handleGetTransactionsDashboard() {
         type: true,
         categoryId: true,
         amount: true,
-        description: true,
       },
       orderBy: { date: "desc" },
     });
@@ -313,10 +312,6 @@ async function handleDeleteUser(userId: string) {
     });
 
     await prisma.transaction.deleteMany({
-      where: { userId: userId },
-    });
-
-    await prisma.event.deleteMany({
       where: { userId: userId },
     });
 

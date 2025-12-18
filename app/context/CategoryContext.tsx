@@ -124,8 +124,10 @@ export function CategoryProvider({ children }: { children: ReactNode }) {
         date: new Date(transaction.date).toISOString(),
         name: transaction.name,
         amount: transaction.amount,
-        description: transaction.description,
         categoryId: transaction.categoryId,
+        isRecurring: transaction.isRecurring,
+        recurringPeriod: transaction.recurringPeriod,
+        time: transaction.time,
       });
 
       if (result.success) {

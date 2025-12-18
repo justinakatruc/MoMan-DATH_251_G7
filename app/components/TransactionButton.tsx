@@ -32,7 +32,7 @@ export default function TransactionButton() {
         name: formData.name.trim(),
         amount: parseFloat(formData.amount),
         date: new Date(formData.date),
-        description: formData.description.trim() || undefined,
+        isRecurring: false,
       };
 
       addTransaction(newTransaction);

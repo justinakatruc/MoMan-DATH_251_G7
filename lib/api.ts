@@ -1,6 +1,7 @@
+import { RecurringType } from "@/app/(main)/transactions/add/page";
 import { Transaction } from "@/app/model";
 
-const BASE_API = "http://localhost:3000/api";
+const BASE_API = `${process.env.NEXT_PUBLIC_BASE_URL}/api`;
 
 export const authAPI = {
   signup: async (userData: {
@@ -281,8 +282,11 @@ export const transactionAPI = {
     name: string;
     amount: number;
     categoryId: string;
-    description?: string;
-  }, authToken?: string) => {
+    // Add these attributes to the transaction object
+    isRecurring: boolean;
+    recurringPeriod?: string;
+    time?: string;
+  }) => {
     const response = await fetch(`${BASE_API}/transactions`, {
       method: "POST",
       headers: {
@@ -290,7 +294,7 @@ export const transactionAPI = {
       },
       body: JSON.stringify({
         action: "addTransaction",
-        token: authToken || localStorage.getItem("token"),
+        token: localStorage.getItem("token"),
         transaction: transaction,
       }),
     });
@@ -362,8 +366,8 @@ export const eventAPI = {
     date: Date;
     title: string;
     time: string;
-    recurring: boolean;
-  }, authToken?: string) => {
+    recurringPeriod: RecurringType;
+  }) => {
     const response = await fetch(`${BASE_API}/events`, {
       method: "POST",
       headers: {
@@ -371,7 +375,7 @@ export const eventAPI = {
       },
       body: JSON.stringify({
         action: "addEvent",
-        token: authToken || localStorage.getItem("token"),
+        token: localStorage.getItem("token"),
         event,
       }),
     });

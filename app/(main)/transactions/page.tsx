@@ -2,18 +2,19 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useTransactionStore } from "@/app/store/useTransactionStore";
-import { ArrowUpRight, ArrowDownLeft, Calendar, X, Check } from "lucide-react";
+import { ArrowUpRight, ArrowDownLeft, Calendar, X, Check, Repeat, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Content from "@/app/components/Content";
+import { useRouter } from "next/navigation";
 
 type FilterType = "all" | "income" | "expense";
 
 export default function TransactionPage() {
+  const router = useRouter();
   const { transactions, fetchTransactions } = useTransactionStore();
   const [filterType, setFilterType] = useState<FilterType>("all");
   const [selectedMonth, setSelectedMonth] = useState<string>("all");
   const [isLoading, setIsLoading] = useState(true);
-
   const [isMonthPickerOpen, setIsMonthPickerOpen] = useState(false);
 
   useEffect(() => {
@@ -134,20 +135,18 @@ export default function TransactionPage() {
         <div className="w-[358px] flex gap-x-5">
           <button
             onClick={() => setFilterType("income")}
-            className={`flex-1 h-20 rounded-lg p-3 flex items-center justify-between transition-all shadow-sm active:scale-[0.98] ${
-              filterType === "income"
-                ? "bg-[#0055FF] text-white"
-                : "bg-[#F1FFF3] text-[#093030]"
-            }`}
+            className={`flex-1 h-20 rounded-lg p-3 flex items-center justify-between transition-all shadow-sm active:scale-[0.98] ${filterType === "income"
+              ? "bg-[#0055FF] text-white"
+              : "bg-[#F1FFF3] text-[#093030]"
+              }`}
           >
             <div className="flex flex-col items-start gap-1">
               <div className="flex items-center gap-1">
                 <div
-                  className={`border p-0.5 rounded-md ${
-                    filterType === "income"
-                      ? "border-white"
-                      : "border-[#00D09E] text-[#00D09E]"
-                  }`}
+                  className={`border p-0.5 rounded-md ${filterType === "income"
+                    ? "border-white"
+                    : "border-[#00D09E] text-[#00D09E]"
+                    }`}
                 >
                   <ArrowUpRight className="w-3 h-3" />
                 </div>
@@ -161,20 +160,18 @@ export default function TransactionPage() {
 
           <button
             onClick={() => setFilterType("expense")}
-            className={`flex-1 h-20 rounded-lg p-3 flex items-center justify-between transition-all shadow-sm active:scale-[0.98] ${
-              filterType === "expense"
-                ? "bg-[#0055FF] text-white"
-                : "bg-[#F1FFF3] text-[#093030]"
-            }`}
+            className={`flex-1 h-20 rounded-lg p-3 flex items-center justify-between transition-all shadow-sm active:scale-[0.98] ${filterType === "expense"
+              ? "bg-[#0055FF] text-white"
+              : "bg-[#F1FFF3] text-[#093030]"
+              }`}
           >
             <div className="flex flex-col items-start gap-1">
               <div className="flex items-center gap-1">
                 <div
-                  className={`border p-0.5 rounded-md ${
-                    filterType === "expense"
-                      ? "border-white"
-                      : "border-[#006BFF] text-[#006BFF]"
-                  }`}
+                  className={`border p-0.5 rounded-md ${filterType === "expense"
+                    ? "border-white"
+                    : "border-[#006BFF] text-[#006BFF]"
+                    }`}
                 >
                   <ArrowDownLeft className="w-3 h-3" />
                 </div>
@@ -206,11 +203,10 @@ export default function TransactionPage() {
                 {index === 0 && (
                   <button
                     onClick={() => setIsMonthPickerOpen(true)}
-                    className={`p-2 cursor-pointer rounded-full transition-colors active:scale-95 ${
-                      selectedMonth !== "all"
-                        ? "bg-[#00D09E] text-white shadow-md"
-                        : "text-[#00D09E] hover:bg-[#DFF7E2]"
-                    }`}
+                    className={`p-2 cursor-pointer rounded-full transition-colors active:scale-95 ${selectedMonth !== "all"
+                      ? "bg-[#00D09E] text-white shadow-md"
+                      : "text-[#00D09E] hover:bg-[#DFF7E2]"
+                      }`}
                   >
                     <Calendar className="w-5 h-5" />
                   </button>
@@ -222,14 +218,13 @@ export default function TransactionPage() {
               ).map((transaction) => (
                 <div
                   key={transaction.id}
-                  className="w-full h-[53px] flex items-center gap-x-4"
+                  className="w-full min-h-[60px] flex items-center gap-x-4 border-b border-gray-50 pb-2 cursor-pointer group"
+                  onClick={() => router.push(`/transactions/edit/${transaction.id}`)}
                 >
+                  {/* Category Icon */}
                   <div
-                    className={`size-12 rounded-[22px] flex items-center justify-center shrink-0 ${
-                      transaction.type === "income"
-                        ? "bg-[#6DB6FE]"
-                        : "bg-[#3299FF]"
-                    }`}
+                    className={`size-12 rounded-[22px] flex items-center justify-center shrink-0 ${transaction.type === "income" ? "bg-[#6DB6FE]" : "bg-[#3299FF]"
+                      }`}
                   >
                     <Image
                       src={transaction.categoryIcon}
@@ -238,32 +233,43 @@ export default function TransactionPage() {
                       height={20}
                     />
                   </div>
-                  <div className="w-[68px] shrink-0">
-                    <div className="font-medium text-[#093030] text-sm truncate">
+
+                  {/* Name & Recurring Info */}
+                  <div className="flex flex-col gap-0.5 flex-1">
+                    <div className="font-medium text-[#093030] text-sm truncate flex items-center gap-1">
                       {transaction.name}
+                      {transaction.isRecurring && (
+                        <Repeat className="w-3 h-3 text-[#00D09E] shrink-0" />
+                      )}
                     </div>
-                    <div className="text-[11px] text-[#093030] opacity-70">
-                      {new Date(transaction.date).toLocaleDateString()}
+                    <div className="text-[10px] text-[#093030] opacity-70 flex flex-col gap-0.5">
+                      <span>{new Date(transaction.date).toLocaleDateString("vi-VN")}</span>
                     </div>
                   </div>
-                  <hr className="bg-[#00D09E] w-0.5 h-full" />
-                  <div className="flex items-center justify-center w-22 shrink-0">
-                    <div className="font-light text-[13px] text-[#093030] truncate">
+
+                  {/* Category Info */}
+                  <div className="flex flex-col items-center justify-center w-20 shrink-0">
+                    <div className="font-light text-[12px] text-[#093030] truncate">
                       {transaction.categoryName}
                     </div>
+                    {transaction.isRecurring && (
+                      <span className="text-[8px] font-bold text-[#00D09E] uppercase">
+                        {transaction.recurringPeriod}
+                      </span>
+                    )}
                   </div>
-                  <hr className="bg-[#00D09E] w-0.5 h-full" />
+
+                  {/* Amount */}
                   <div className="flex items-center justify-end flex-1">
                     <div
-                      className={`font-medium text-[15px] ${
-                        transaction.type === "income"
-                          ? "text-[#093030]"
-                          : "text-[#3299FF]"
-                      }`}
+                      className={`font-medium text-[15px] ${transaction.type === "income" ? "text-[#093030]" : "text-[#3299FF]"
+                        }`}
                     >
                       {transaction.type === "expense" ? "-" : ""}$
                       {formatMoneyShort(transaction.amount)}
                     </div>
+
+                    <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-[#00D09E] transition-colors" />
                   </div>
                 </div>
               ))}
@@ -274,18 +280,16 @@ export default function TransactionPage() {
 
       {/* MONTH PICKER */}
       <div
-        className={`fixed inset-0 bg-black/40 z-50 transition-opacity duration-300 ${
-          isMonthPickerOpen
-            ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none"
-        }`}
+        className={`fixed inset-0 bg-black/40 z-50 transition-opacity duration-300 ${isMonthPickerOpen
+          ? "opacity-100 pointer-events-auto"
+          : "opacity-0 pointer-events-none"
+          }`}
         onClick={() => setIsMonthPickerOpen(false)}
       />
 
       <div
-        className={`fixed inset-x-0 bottom-0 z-50 bg-[#F1FFF3] rounded-t-[30px] shadow-[0_-5px_40px_rgba(0,0,0,0.2)] transition-transform duration-300 ease-out h-[50vh] flex flex-col max-w-[430px] mx-auto ${
-          isMonthPickerOpen ? "translate-y-0" : "translate-y-full"
-        }`}
+        className={`fixed inset-x-0 bottom-0 z-50 bg-[#F1FFF3] rounded-t-[30px] shadow-[0_-5px_40px_rgba(0,0,0,0.2)] transition-transform duration-300 ease-out h-[50vh] flex flex-col max-w-[430px] mx-auto ${isMonthPickerOpen ? "translate-y-0" : "translate-y-full"
+          }`}
       >
         <div className="flex justify-between items-center p-6 border-b border-[#00D09E]/10 shrink-0">
           <h3 className="text-xl font-bold text-[#052224]">Filter by Month</h3>
@@ -303,16 +307,14 @@ export default function TransactionPage() {
               setSelectedMonth("all");
               setIsMonthPickerOpen(false);
             }}
-            className={`h-14 w-full rounded-2xl flex items-center justify-between px-4 transition-all shrink-0 border-2 active:scale-[0.98] ${
-              selectedMonth === "all"
-                ? "bg-white border-[#00D09E] shadow-sm"
-                : "bg-white border-transparent hover:border-[#00D09E]/30"
-            }`}
+            className={`h-14 w-full rounded-2xl flex items-center justify-between px-4 transition-all shrink-0 border-2 active:scale-[0.98] ${selectedMonth === "all"
+              ? "bg-white border-[#00D09E] shadow-sm"
+              : "bg-white border-transparent hover:border-[#00D09E]/30"
+              }`}
           >
             <span
-              className={`font-bold text-sm ${
-                selectedMonth === "all" ? "text-[#00D09E]" : "text-[#052224]"
-              }`}
+              className={`font-bold text-sm ${selectedMonth === "all" ? "text-[#00D09E]" : "text-[#052224]"
+                }`}
             >
               All Months
             </span>
@@ -330,16 +332,14 @@ export default function TransactionPage() {
                 setSelectedMonth(month);
                 setIsMonthPickerOpen(false);
               }}
-              className={`h-14 w-full rounded-2xl flex items-center justify-between px-4 transition-all shrink-0 border-2 active:scale-[0.98] cursor-pointer ${
-                selectedMonth === month
-                  ? "bg-white border-[#00D09E] shadow-sm"
-                  : "bg-white border-transparent hover:border-[#00D09E]/30"
-              }`}
+              className={`h-14 w-full rounded-2xl flex items-center justify-between px-4 transition-all shrink-0 border-2 active:scale-[0.98] cursor-pointer ${selectedMonth === month
+                ? "bg-white border-[#00D09E] shadow-sm"
+                : "bg-white border-transparent hover:border-[#00D09E]/30"
+                }`}
             >
               <span
-                className={`font-bold text-sm ${
-                  selectedMonth === month ? "text-[#00D09E]" : "text-[#052224]"
-                }`}
+                className={`font-bold text-sm ${selectedMonth === month ? "text-[#00D09E]" : "text-[#052224]"
+                  }`}
               >
                 {month}
               </span>

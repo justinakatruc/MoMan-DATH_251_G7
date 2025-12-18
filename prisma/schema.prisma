@@ -14,58 +14,52 @@ datasource db {
 }
 
 model User {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  firstName   String
-  lastName    String
-  email       String   @unique
-  memberSince DateTime @default(now())
-  accountType String
-  password    String
-  isActive  Boolean  @default(false)
+  id                  String   @id @default(auto()) @map("_id") @db.ObjectId
+  firstName           String
+  lastName            String
+  email               String   @unique
+  memberSince         DateTime @default(now())
+  accountType         String
+  password            String
+  isActive            Boolean  @default(false)
 }
 
 model ExpenseCategory {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  name        String
-  icon        String
-  isDefault   Boolean  @default(false)
-  userId     String?  @db.ObjectId
+  id                  String   @id @default(auto()) @map("_id") @db.ObjectId
+  name                String
+  icon                String
+  isDefault           Boolean  @default(false)
+  userId              String?  @db.ObjectId
 }
 
 model IncomeCategory {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  name        String
-  icon        String
-  isDefault   Boolean  @default(false)
-  userId     String?  @db.ObjectId
+  id                  String   @id @default(auto()) @map("_id") @db.ObjectId
+  name                String
+  icon                String
+  isDefault           Boolean  @default(false)
+  userId              String?  @db.ObjectId
 }
 
 model Transaction {
-  id              String   @id @default(auto()) @map("_id") @db.ObjectId
-  type            String
-  date            DateTime @default(now())
-  name           String
-  amount          Float
-  userId         String   @db.ObjectId
-  categoryId     String   @db.ObjectId
-  description     String?
-}
-
-model Event {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  date        DateTime
-  time        String
-  name       String
-  isRecurring Boolean  @default(false)
-  userId     String   @db.ObjectId
+  id                  String   @id @default(auto()) @map("_id") @db.ObjectId
+  type                String
+  name                String
+  date                DateTime @default(now())
+  amount              Float
+  userId              String   @db.ObjectId
+  categoryId          String   @db.ObjectId
+  // Recurring Transaction
+  isRecurring         Boolean  @default(false)
+  recurringPeriod     String?  // "daily", "weekly", etc.
+  time                String?  // "HH:mm"
 }
 
 model Verify {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String   @db.ObjectId
-  token     String   @unique
-  expiresAt DateTime
-  createdAt   DateTime @default(now())
-  lastSentAt  DateTime @default(now())
-  resendCount Int      @default(0)
+  id                  String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId              String   @db.ObjectId
+  token               String   @unique
+  expiresAt           DateTime
+  createdAt           DateTime @default(now())
+  lastSentAt          DateTime @default(now())
+  resendCount         Int      @default(0)
 }

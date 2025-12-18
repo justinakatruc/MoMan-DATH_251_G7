@@ -70,7 +70,7 @@ export default function HelpPage() {
           <textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder={`Enter Message:\n• Repeated Event?\n• Cycle?\n• Time?\n• Recurring?\n• AI Generated`}
+            placeholder={`I need help with...`}
             className="
               w-full h-[150px] bg-[#DFF7E2] rounded-2xl px-5 py-4 mt-2 mb-6
               text-sm text-gray-700 focus:outline-none resize-none
@@ -80,7 +80,7 @@ export default function HelpPage() {
           {/* Submit Button */}
           <button
             onClick={handleSubmit}
-            className="w-full h-[50px] bg-[#00D09E] text-white font-semibold rounded-full active:scale-95"
+            className="w-full h-[50px] bg-[#00D09E] text-white font-semibold rounded-full active:scale-95 cursor-pointer"
           >
             Submit
           </button>
