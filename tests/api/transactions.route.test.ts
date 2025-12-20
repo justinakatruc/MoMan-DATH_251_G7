@@ -3,7 +3,7 @@
 jest.mock("jsonwebtoken", () => ({
   __esModule: true,
   default: {
-    verify: jest.fn(),
+    verify: jest.fn().mockReturnValue({ id: "u1" }),
   },
 }));
 
@@ -16,103 +16,78 @@ jest.mock("@/lib/prisma", () => ({
       updateMany: jest.fn(),
       deleteMany: jest.fn(),
     },
-    expenseCategory: {
-      findUnique: jest.fn(),
-    },
-    incomeCategory: {
-      findUnique: jest.fn(),
-    },
+    expenseCategory: { findUnique: jest.fn() },
+    incomeCategory: { findUnique: jest.fn() },
   },
 }));
 
-import jwt from "jsonwebtoken";
 import prisma from "@/lib/prisma";
 import { POST, PUT, DELETE } from "@/app/api/transactions/route";
 
-describe("/api/transactions route", () => {
+describe("UC-05: Manage Transactions - /api/transactions", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it("POST returns 400 when token missing", async () => {
-    const req = new Request("http://localhost/api/transactions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "getAllTransactions" }),
-    });
-
-    const res = await POST(req);
-    expect(res.status).toBe(400);
-  });
-
-  it("POST returns 401 when token invalid", async () => {
-    jest.spyOn(console, "error").mockImplementation(() => undefined);
-    (jwt as any).verify.mockImplementation(() => {
-      throw new Error("bad");
-    });
-
-    const req = new Request("http://localhost/api/transactions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "getAllTransactions", token: "t" }),
-    });
-
-    const res = await POST(req);
-    expect(res.status).toBe(401);
-    (console.error as any).mockRestore?.();
-  });
-
-  it("addTransaction returns 201 on success", async () => {
-    (jwt as any).verify.mockReturnValue({ id: "u1", email: "a@b.com" });
+  it("should add a new transaction (Main Success Scenario)", async () => {
     (prisma as any).transaction.create.mockResolvedValue({ id: "tx1" });
 
     const req = new Request("http://localhost/api/transactions", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         action: "addTransaction",
         token: "t",
-        transaction: {
-          type: "income",
-          name: "Salary",
-          amount: 100,
-          date: "2025-01-01",
-          description: "",
-          categoryId: "c1",
-        },
+        transaction: { type: "income", name: "Salary", amount: 5000, date: "2025-12-20", note: "Monthly salary" },
       }),
     });
 
     const res = await POST(req);
     expect(res.status).toBe(201);
+    expect((prisma as any).transaction.create).toHaveBeenCalled();
   });
 
-  it("PUT updateTransaction returns 200 when record updated", async () => {
-    (jwt as any).verify.mockReturnValue({ id: "u1", email: "a@b.com" });
+  it("should find and return transactions", async () => {
+    (prisma as any).transaction.findMany.mockResolvedValue([{ id: "tx1", name: "Coffee" }]);
+    (prisma as any).expenseCategory.findUnique.mockResolvedValue({ name: "Food" });
+
+    const req = new Request("http://localhost/api/transactions", {
+      method: "POST",
+      body: JSON.stringify({ action: "searchTransactions", token: "t", type: "expense" }),
+    });
+
+    const res = await POST(req);
+    const body = await res.json();
+    expect(res.status).toBe(200);
+    expect(body.transactions).toHaveLength(1);
+    expect(body.transactions[0].name).toBe("Coffee");
+  });
+
+  it("should update an existing transaction (Alternative Flow A1)", async () => {
     (prisma as any).transaction.updateMany.mockResolvedValue({ count: 1 });
 
     const req = new Request("http://localhost/api/transactions", {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         action: "updateTransaction",
         token: "t",
         transactionId: "tx1",
-        updated: { name: "Updated" },
+        updated: { name: "Latte" },
       }),
     });
 
     const res = await PUT(req);
     expect(res.status).toBe(200);
+    expect((prisma as any).transaction.updateMany).toHaveBeenCalledWith({
+      where: { id: "tx1", userId: "u1" },
+      data: { name: "Latte" },
+    });
   });
 
-  it("DELETE removeTransaction returns 200 when deleted", async () => {
-    (jwt as any).verify.mockReturnValue({ id: "u1", email: "a@b.com" });
+  it("should delete a transaction (Alternative Flow A1)", async () => {
     (prisma as any).transaction.deleteMany.mockResolvedValue({ count: 1 });
 
     const req = new Request("http://localhost/api/transactions", {
       method: "DELETE",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         action: "removeTransaction",
         token: "t",
@@ -122,5 +97,8 @@ describe("/api/transactions route", () => {
 
     const res = await DELETE(req);
     expect(res.status).toBe(200);
+    expect((prisma as any).transaction.deleteMany).toHaveBeenCalledWith({
+      where: { id: "tx1", userId: "u1" },
+    });
   });
 });

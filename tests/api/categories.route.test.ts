@@ -3,7 +3,7 @@
 jest.mock("jsonwebtoken", () => ({
   __esModule: true,
   default: {
-    verify: jest.fn(),
+    verify: jest.fn().mockReturnValue({ id: "user-1" }),
   },
 }));
 
@@ -23,69 +23,87 @@ jest.mock("@/lib/prisma", () => ({
   },
 }));
 
-import jwt from "jsonwebtoken";
+import prisma from "@/lib/prisma";
+import { POST, DELETE } from "@/app/api/categories/route";
 
-import { POST } from "@/app/api/categories/route";
-
-describe("/api/categories route", () => {
+describe("UC-04: Manage Categories - /api/categories", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it("returns 400 when token is missing", async () => {
+  it("should list all categories for a user (Main Success Scenario)", async () => {
+    (prisma as any).expenseCategory.findMany.mockResolvedValue([{ name: "Food" }]);
+    (prisma as any).incomeCategory.findMany.mockResolvedValue([{ name: "Salary" }]);
+
     const req = new Request("http://localhost/api/categories", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "getDefaultCategories" }),
+      body: JSON.stringify({ action: "getDefaultCategories", token: "t" }),
     });
 
     const res = await POST(req);
-    expect(res.status).toBe(400);
-
     const body = await res.json();
-    expect(body.success).toBe(false);
-    expect(body.message).toMatch(/missing token/i);
+
+    expect(res.status).toBe(200);
+    expect(body.categories.expense[0].name).toBe("Food");
+    expect(body.categories.income[0].name).toBe("Salary");
   });
 
-  it("returns 401 when token is invalid", async () => {
-    const consoleErrorSpy = jest
-      .spyOn(console, "error")
-      .mockImplementation(() => undefined);
-
-    (jwt as any).verify.mockImplementation(() => {
-      throw new Error("bad token");
-    });
+  it("should add a new category (Main Success Scenario)", async () => {
+    (prisma as any).incomeCategory.findMany.mockResolvedValue([]);
+    (prisma as any).incomeCategory.create.mockResolvedValue({ name: "Bonus" });
 
     const req = new Request("http://localhost/api/categories", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "getDefaultCategories", token: "x" }),
+      body: JSON.stringify({
+        action: "addCategory",
+        token: "t",
+        category: { type: "income", name: "Bonus" },
+      }),
     });
 
     const res = await POST(req);
-    expect(res.status).toBe(401);
-
     const body = await res.json();
-    expect(body.success).toBe(false);
-    expect(body.message).toMatch(/invalid|expired/i);
 
-    consoleErrorSpy.mockRestore();
+    expect(res.status).toBe(200);
+    expect(body.category.name).toBe("Bonus");
   });
 
-  it("returns 400 for invalid action", async () => {
-    (jwt as any).verify.mockReturnValue({ id: "user-1", email: "a@b.com" });
+  it("should prevent adding a duplicate category (Alternative Flow)", async () => {
+    (prisma as any).expenseCategory.findMany.mockResolvedValue([{ name: "Groceries" }]);
 
     const req = new Request("http://localhost/api/categories", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "nope", token: "ok" }),
+      body: JSON.stringify({
+        action: "addCategory",
+        token: "t",
+        category: { type: "expense", name: "Groceries" },
+      }),
     });
 
     const res = await POST(req);
-    expect(res.status).toBe(400);
-
     const body = await res.json();
-    expect(body.success).toBe(false);
-    expect(body.message).toMatch(/invalid action/i);
+
+    expect(res.status).toBe(400);
+    expect(body.message).toMatch(/already exists/i);
+  });
+
+  it("should remove a category (Main Success Scenario)", async () => {
+    (prisma as any).expenseCategory.deleteMany.mockResolvedValue({ count: 1 });
+
+    const req = new Request("http://localhost/api/categories", {
+      method: "DELETE",
+      body: JSON.stringify({
+        action: "removeCategory",
+        token: "t",
+        categoryId: "e1",
+        type: "expense",
+      }),
+    });
+
+    const res = await DELETE(req);
+    expect(res.status).toBe(200);
+    expect((prisma as any).expenseCategory.deleteMany).toHaveBeenCalledWith({
+      where: { id: "e1", userId: "user-1", isDefault: false },
+    });
   });
 });

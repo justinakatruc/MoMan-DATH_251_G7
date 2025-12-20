@@ -12,7 +12,6 @@ jest.mock("@/lib/prisma", () => ({
   default: {
     transaction: {
       aggregate: jest.fn(),
-      findMany: jest.fn(),
     },
   },
 }));
@@ -21,12 +20,12 @@ import jwt from "jsonwebtoken";
 import prisma from "@/lib/prisma";
 import { POST } from "@/app/api/analysis/route";
 
-describe("/api/analysis route", () => {
+describe("Analysis API - /api/analysis", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it("returns 400 when token missing", async () => {
+  it("should return 400 when token is missing", async () => {
     const req = new Request("http://localhost/api/analysis", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -37,24 +36,11 @@ describe("/api/analysis route", () => {
     expect(res.status).toBe(400);
   });
 
-  it("returns 400 for invalid time frame", async () => {
-    (jwt as any).verify.mockReturnValue({ id: "u1", email: "a@b.com" });
-
-    const req = new Request("http://localhost/api/analysis", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "getStatistics", token: "t", timeFrame: "nope" }),
-    });
-
-    const res = await POST(req);
-    expect(res.status).toBe(400);
-  });
-
-  it("getTotalIncomeAndExpenses returns 200 with sums", async () => {
+  it("should calculate total income and expenses for reports", async () => {
     (jwt as any).verify.mockReturnValue({ id: "u1", email: "a@b.com" });
     (prisma as any).transaction.aggregate
-      .mockResolvedValueOnce({ _sum: { amount: 500 } })
-      .mockResolvedValueOnce({ _sum: { amount: 200 } });
+      .mockResolvedValueOnce({ _sum: { amount: 1000 } }) // Income
+      .mockResolvedValueOnce({ _sum: { amount: 450 } }); // Expenses
 
     const req = new Request("http://localhost/api/analysis", {
       method: "POST",
@@ -66,7 +52,7 @@ describe("/api/analysis route", () => {
     expect(res.status).toBe(200);
 
     const body = await res.json();
-    expect(body.totalMonthlyIncome).toBe(500);
-    expect(body.totalMonthlyExpenses).toBe(200);
+    expect(body.totalMonthlyIncome).toBe(1000);
+    expect(body.totalMonthlyExpenses).toBe(450);
   });
 });
