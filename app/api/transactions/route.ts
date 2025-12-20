@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import prisma from "@/lib/prisma";
 import { Transaction } from "@/app/model";
+import nodemailer from "nodemailer";
+import { calculateNextDate } from "@/lib/utils";
+import { RecurringType } from "@/app/(main)/transactions/add/page";
+import { formatInTimeZone } from 'date-fns-tz';
 
 const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret";
 
@@ -15,6 +19,7 @@ async function handleAddTransaction(
     isRecurring?: boolean;
     recurringPeriod?: string;
     time?: string;
+    nextExecutionDate?: string;
   },
   userId: string
 ) {
@@ -30,6 +35,9 @@ async function handleAddTransaction(
         isRecurring: transaction.isRecurring || false,
         recurringPeriod: transaction.recurringPeriod || null,
         time: transaction.time || null,
+        nextExecutionDate: transaction.nextExecutionDate
+          ? new Date(transaction.nextExecutionDate)
+          : null,
       },
     });
 
@@ -192,6 +200,7 @@ async function handleUpdateTransaction(
   userId: string
 ) {
   try {
+    console.log("Updating transaction:", transactionId, updated);
     const result = await prisma.transaction.updateMany({
       where: {
         id: transactionId,
@@ -278,6 +287,174 @@ async function handleRemoveTransactionBasedOnCategory(
     );
   }
 }
+
+
+/**
+ * Gửi email thông báo khi một giao dịch định kỳ được tự động khởi tạo thành công
+ * @param email - Địa chỉ người dùng
+ * @param transactionData - Thông tin về giao dịch vừa được tạo
+ */
+async function sendRecurringTransactionEmail(
+  email: string, 
+  transactionData: { name: string; amount: number; type: string; categoryName: string }
+) {
+  const transporter = nodemailer.createTransport({
+    service: "Gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
+  const { name, amount, type, categoryName } = transactionData;
+  const currencySymbol = "$"; // Bạn có thể thay đổi tùy theo locale
+  const typeText = type === "income" ? "Income" : "Expense";
+  const statusColor = type === "income" ? "#00D09E" : "#FF565E";
+
+  await transporter.sendMail({
+    from: `"MoMan" <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: `Recurring Transaction Processed: ${name}`,
+    html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: auto; border: 1px solid #e1f7e2; border-radius: 20px; overflow: hidden;">
+          <div style="background-color: #00D09E; padding: 20px; text-align: center;">
+            <h1 style="color: white; margin: 0; font-size: 20px; text-transform: uppercase;">Recurring Transaction</h1>
+          </div>
+          
+          <div style="padding: 30px; background-color: #F1FFF3;">
+            <p style="color: #052224; font-size: 16px;">Hello,</p>
+            <p style="color: #052224; font-size: 14px; line-height: 1.5;">
+              This is a notification that your scheduled recurring transaction has been successfully added to your records.
+            </p>
+            
+            <div style="background-color: white; border-radius: 15px; padding: 20px; margin: 20px 0; border: 1px solid #00D09E50;">
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px 0; color: #052224; font-size: 13px;"><b>Title:</b></td>
+                  <td style="padding: 8px 0; text-align: right; color: #052224; font-size: 13px;">${name}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #052224; font-size: 13px;"><b>Category:</b></td>
+                  <td style="padding: 8px 0; text-align: right; color: #052224; font-size: 13px;">${categoryName}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #052224; font-size: 13px;"><b>Type:</b></td>
+                  <td style="padding: 8px 0; text-align: right; color: ${statusColor}; font-size: 13px; font-weight: bold;">${typeText}</td>
+                </tr>
+                <tr style="border-top: 1px solid #eee;">
+                  <td style="padding: 15px 0 0 0; color: #052224; font-size: 16px;"><b>Amount:</b></td>
+                  <td style="padding: 15px 0 0 0; text-align: right; color: #052224; font-size: 18px; font-weight: bold;">
+                    ${type === "income" ? "+" : "-"}${currencySymbol}${amount.toLocaleString()}
+                  </td>
+                </tr>
+              </table>
+            </div>
+
+            <p style="color: #052224; font-size: 12px; font-style: italic;">
+              If you wish to modify or stop this recurring event, please visit the Scheduler settings in the app.
+            </p>
+          </div>
+          
+          <div style="background-color: #DFF7E2; padding: 15px; text-align: center; color: #05222480; font-size: 11px;">
+            © ${new Date().getFullYear()} Finance Tracker App. All rights reserved.
+          </div>
+        </div>
+      `,
+  });
+}
+
+
+async function handleProcessRecurring() {
+  try {
+    const TIMEZONE = 'Asia/Ho_Chi_Minh';
+    const now = new Date();
+    
+    // 1. Lấy giờ hiện tại của Việt Nam định dạng "HH:mm" (ví dụ: "14:30")
+    const currentTimeVN = formatInTimeZone(now, TIMEZONE, 'HH:mm');
+
+    // 2. Query lấy các giao dịch đến hạn (chỉ so ngày bằng nextExecutionDate)
+    const recurringTrans = await prisma.transaction.findMany({
+      where: {
+        isRecurring: true,
+        nextExecutionDate: { lte: now }, // Đến ngày thực hiện
+        time: currentTimeVN,            // Khớp chính xác phút hiện tại của VN
+      },
+      include: {
+        user: true, 
+      },
+    });
+
+    for (const trans of recurringTrans) {
+      try {
+        // 3. Lấy tên Category (để gửi email)
+        let categoryData = null;
+        if (trans.type === "expense") {
+          categoryData = await prisma.expenseCategory.findUnique({ where: { id: trans.categoryId } });
+        } else {
+          categoryData = await prisma.incomeCategory.findUnique({ where: { id: trans.categoryId } });
+        }
+
+        // 4. Tạo bản sao giao dịch thực tế vào lịch sử
+        await prisma.transaction.create({
+          data: {
+            type: trans.type,
+            name: trans.name,
+            amount: trans.amount,
+            categoryId: trans.categoryId,
+            userId: trans.userId,
+            date: new Date(), 
+            isRecurring: false, 
+          },
+        });
+
+        // 5. Cập nhật ngày thực hiện tiếp theo (Chỉ cộng ngày, không cần gộp giờ)
+        // Lưu ý: trans.nextExecutionDate lúc này là 00:00, calculateNextDate sẽ trả về 00:00 ngày tiếp theo
+        const nextDate = calculateNextDate(new Date(trans.nextExecutionDate!), trans.recurringPeriod as RecurringType);
+        
+        await prisma.transaction.update({
+          where: { id: trans.id },
+          data: { nextExecutionDate: nextDate },
+        });
+
+        // 6. Gửi email
+        if (trans.user?.email) {
+          await sendRecurringTransactionEmail(trans.user.email, {
+            name: trans.name,
+            amount: trans.amount,
+            type: trans.type,
+            categoryName: categoryData?.name || "Uncategorized",
+          });
+        }
+      } catch (innerError) {
+        console.error(`Error processing transaction ${trans.id}:`, innerError);
+      }
+    }
+
+    return NextResponse.json({ success: true, processedCount: recurringTrans.length });
+  } catch (error) {
+    console.error("Cron Job Error:", error);
+    return NextResponse.json({ success: false }, { status: 500 });
+  }
+}
+
+
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const action = searchParams.get("action");
+
+  // Kiểm tra Header bảo mật từ Vercel
+  const authHeader = request.headers.get('authorization');
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    return new Response('Unauthorized', { status: 401 });
+  }
+
+  if (action === "processRecurring") {
+    return await handleProcessRecurring();
+  }
+
+  return NextResponse.json({ message: "Invalid action" }, { status: 400 });
+}
+
 
 export async function POST(request: Request) {
   try {

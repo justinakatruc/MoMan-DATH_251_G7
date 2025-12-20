@@ -9,6 +9,7 @@ import { Category } from "@/app/model";
 import { ArrowLeft, ChevronDown, Calendar, X, Repeat } from "lucide-react";
 import Content from "@/app/components/Content";
 import { toast } from "sonner";
+import { calculateNextDate } from "@/lib/utils";
 
 // Định nghĩa các kiểu định kỳ
 const RECURRING_OPTIONS = [
@@ -80,6 +81,7 @@ export default function AddTransactionPage() {
         isRecurring: addToCalendar,
         recurringPeriod: addToCalendar ? recurringType : undefined,
         time: addToCalendar ? eventTime : undefined,
+        nextExecutionDate: addToCalendar ? calculateNextDate(new Date(date), recurringType).toISOString() : undefined,
       });
 
       await fetchTransactions();

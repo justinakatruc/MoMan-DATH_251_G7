@@ -22,6 +22,7 @@ model User {
   accountType         String
   password            String
   isActive            Boolean  @default(false)
+  transactions        Transaction[]
 }
 
 model ExpenseCategory {
@@ -46,12 +47,15 @@ model Transaction {
   name                String
   date                DateTime @default(now())
   amount              Float
-  userId              String   @db.ObjectId
+  userId            String    @db.ObjectId
+  user              User      @relation(fields: [userId], references: [id])
   categoryId          String   @db.ObjectId
+
   // Recurring Transaction
   isRecurring         Boolean  @default(false)
   recurringPeriod     String?  // "daily", "weekly", etc.
   time                String?  // "HH:mm"
+  nextExecutionDate   DateTime?
 }
 
 model Verify {

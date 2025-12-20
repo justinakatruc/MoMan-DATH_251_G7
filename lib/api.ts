@@ -286,6 +286,7 @@ export const transactionAPI = {
     isRecurring: boolean;
     recurringPeriod?: string;
     time?: string;
+    nextExecutionDate?: string;
   }) => {
     const response = await fetch(`${BASE_API}/transactions`, {
       method: "POST",

@@ -9,6 +9,7 @@ import { Category } from "@/app/model";
 import { ArrowLeft, ChevronDown, Calendar, X, Repeat, Trash2 } from "lucide-react";
 import Content from "@/app/components/Content";
 import { toast } from "sonner";
+import { calculateNextDate } from "@/lib/utils";
 
 const RECURRING_OPTIONS = [
   { label: "Daily", value: "daily" },
@@ -81,6 +82,8 @@ export default function EditTransactionPage() {
       setCategoryId(target.categoryId);
       setDate(new Date(target.date).toISOString().split("T")[0]);
       setAddToCalendar(target.isRecurring || false);
+      setEventTime(target.time || "12:00");
+      setRecurringType(target.recurringPeriod as RecurringType || "daily");
       if (target.recurringPeriod) setRecurringType(target.recurringPeriod as RecurringType);
       // If your API provides 'time', set it here
     }
@@ -100,6 +103,7 @@ export default function EditTransactionPage() {
         isRecurring: addToCalendar,
         recurringPeriod: addToCalendar ? recurringType : undefined,
         time: addToCalendar ? eventTime : undefined,
+        nextExecutionDate: addToCalendar ? calculateNextDate(new Date(date), recurringType).toISOString() : undefined,
       });
 
       await fetchTransactions();

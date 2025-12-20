@@ -16,6 +16,7 @@ export type Transaction = {
   isRecurring: boolean;
   recurringPeriod?: "daily" | "weekly" | "monthly" | "yearly";
   time?: string;
+  nextExecutionDate?: string;
 };
 
 export type User = {
@@ -38,4 +39,6 @@ export type TransactionAPIResponse = {
   categoryIcon: string;
   isRecurring: boolean;
   recurringPeriod?: string;
+  time?: string;
+  nextExecutionDate?: string;
 };
