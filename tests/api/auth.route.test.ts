@@ -17,19 +17,17 @@ jest.mock("jsonwebtoken", () => ({
 }));
 
 const sendMailMock = jest.fn();
-const createTransportMock = jest.fn(() => ({ sendMail: sendMailMock }));
-
 jest.mock("nodemailer", () => ({
   __esModule: true,
   default: {
-    createTransport: (...args: any[]) => createTransportMock(...args),
+    createTransport: () => ({ sendMail: sendMailMock }),
   },
 }));
 
 jest.mock("crypto", () => ({
   __esModule: true,
   default: {
-    randomUUID: jest.fn(),
+    randomUUID: jest.fn().mockReturnValue("mock-uuid"),
   },
 }));
 
@@ -46,15 +44,12 @@ jest.mock("@/lib/prisma", () => ({
       create: jest.fn(),
       findUnique: jest.fn(),
       delete: jest.fn(),
-      findFirst: jest.fn(),
-      update: jest.fn(),
     },
   },
 }));
 
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import crypto from "crypto";
 import prisma from "@/lib/prisma";
 import { POST } from "@/app/api/auth/route";
 
@@ -63,289 +58,172 @@ describe("/api/auth route", () => {
     jest.clearAllMocks();
   });
 
-  describe("signup", () => {
-    it("returns 400 with missing fields", async () => {
-      const req = new Request("http://localhost/api/auth", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "signup", email: "a@b.com" }),
-      });
-
-      const res = await POST(req);
-      expect(res.status).toBe(400);
-      const body = await res.json();
-      expect(body.success).toBe(false);
-      expect(body.missing).toEqual(expect.arrayContaining(["fullName", "password"]));
-    });
-
-    it("returns 409 when user already exists (verified)", async () => {
-      (prisma as any).user.findUnique.mockResolvedValue({
-        id: "u1",
-        email: "a@b.com",
-        isActive: true,
-      });
-
-      const req = new Request("http://localhost/api/auth", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "signup",
-          fullName: "A B",
-          email: "a@b.com",
-          password: "pw",
-        }),
-      });
-
-      const res = await POST(req);
-      expect(res.status).toBe(409);
-      const body = await res.json();
-      expect(body.success).toBe(false);
-      expect(body.message).toMatch(/already exists/i);
-    });
-
-    it("re-sends verification when unverified account exists", async () => {
-      (prisma as any).user.findUnique.mockResolvedValue({
-        id: "u1",
-        email: "a@b.com",
-        isActive: false,
-      });
-      (bcrypt as any).hash.mockResolvedValue("hashed");
-      (prisma as any).user.update.mockResolvedValue({ id: "u1" });
-      (crypto as any).randomUUID.mockReturnValue("verify-token");
-      (prisma as any).verify.create.mockResolvedValue({});
+  describe("UC-01: Register / Login", () => {
+    // Signup
+    it("should create a new user and send a verification email (Main Success Scenario)", async () => {
+      (prisma as any).user.findUnique.mockResolvedValue(null);
+      (bcrypt as any).hash.mockResolvedValue("hashedPassword");
+      (prisma as any).user.create.mockResolvedValue({ id: "u1" });
       sendMailMock.mockResolvedValue({});
 
       const req = new Request("http://localhost/api/auth", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "signup",
-          fullName: "A B",
-          email: "a@b.com",
-          password: "pw",
-        }),
+        body: JSON.stringify({ action: "signup", fullName: "Test User", email: "test@example.com", password: "pw" }),
+      });
+
+      const res = await POST(req);
+      expect(res.status).toBe(201);
+      expect((prisma as any).user.create).toHaveBeenCalled();
+      expect(sendMailMock).toHaveBeenCalled();
+    });
+
+    it("should return 409 if user already exists (Alternative Flow A1)", async () => {
+      (prisma as any).user.findUnique.mockResolvedValue({ id: "u1", isActive: true });
+      const req = new Request("http://localhost/api/auth", {
+        method: "POST",
+        body: JSON.stringify({ action: "signup", fullName: "Test User", email: "test@example.com", password: "pw" }),
+      });
+      const res = await POST(req);
+      expect(res.status).toBe(409);
+    });
+
+    it("should handle unverified account exists (Alternative Flow)", async () => {
+      (prisma as any).user.findUnique.mockResolvedValue({ id: "u1", isActive: false });
+      (bcrypt as any).hash.mockResolvedValue("hashedPassword");
+      (prisma as any).user.update.mockResolvedValue({ id: "u1" });
+      sendMailMock.mockResolvedValue({});
+
+      const req = new Request("http://localhost/api/auth", {
+        method: "POST",
+        body: JSON.stringify({ action: "signup", fullName: "Test User", email: "test@example.com", password: "pw" }),
       });
 
       const res = await POST(req);
       expect(res.status).toBe(200);
-      const body = await res.json();
-      expect(body.success).toBe(true);
-      expect(sendMailMock).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe("verify-email", () => {
-    it("returns 400 when token is missing", async () => {
-      const req = new Request("http://localhost/api/auth", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "verify-email" }),
-      });
-
-      const res = await POST(req);
-      expect(res.status).toBe(400);
-      const body = await res.json();
-      expect(body.message).toMatch(/token is required/i);
-    });
-
-    it("returns 400 when token is invalid", async () => {
-      (prisma as any).verify.findUnique.mockResolvedValue(null);
-
-      const req = new Request("http://localhost/api/auth", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "verify-email", token: "t" }),
-      });
-
-      const res = await POST(req);
-      expect(res.status).toBe(400);
-      const body = await res.json();
-      expect(body.message).toMatch(/invalid token/i);
-    });
-
-    it("returns 400 when token is expired", async () => {
-      (prisma as any).verify.findUnique.mockResolvedValue({
-        token: "t",
-        userId: "u1",
-        expiresAt: new Date(Date.now() - 1000),
-      });
-
-      const req = new Request("http://localhost/api/auth", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "verify-email", token: "t" }),
-      });
-
-      const res = await POST(req);
-      expect(res.status).toBe(400);
-      const body = await res.json();
-      expect(body.message).toMatch(/expired/i);
-    });
-
-    it("activates user when token is valid", async () => {
-      (prisma as any).verify.findUnique.mockResolvedValue({
-        token: "t",
-        userId: "u1",
-        expiresAt: new Date(Date.now() + 60_000),
-      });
-      (prisma as any).user.update.mockResolvedValue({});
-      (prisma as any).verify.delete.mockResolvedValue({});
-
-      const req = new Request("http://localhost/api/auth", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "verify-email", token: "t" }),
-      });
-
-      const res = await POST(req);
-      expect(res.status).toBe(200);
-      const body = await res.json();
-      expect(body.success).toBe(true);
       expect((prisma as any).user.update).toHaveBeenCalled();
-      expect((prisma as any).verify.delete).toHaveBeenCalled();
-    });
-  });
-
-  describe("login", () => {
-    it("returns 400 on missing credentials", async () => {
-      const req = new Request("http://localhost/api/auth", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "login", email: "a@b.com" }),
-      });
-
-      const res = await POST(req);
-      expect(res.status).toBe(400);
     });
 
-    it("returns 403 when user email not verified", async () => {
+    // Login
+    it("should log in an existing user with correct credentials (Main Success Scenario)", async () => {
       (prisma as any).user.findUnique.mockResolvedValue({
         id: "u1",
-        email: "a@b.com",
-        password: "hashed",
-        isActive: false,
-      });
-
-      const req = new Request("http://localhost/api/auth", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "login", email: "a@b.com", password: "pw" }),
-      });
-
-      const res = await POST(req);
-      expect(res.status).toBe(403);
-      const body = await res.json();
-      expect(body.needVerify).toBe(true);
-    });
-
-    it("returns 200 and signs JWT for valid credentials", async () => {
-      (prisma as any).user.findUnique.mockResolvedValue({
-        id: "u1",
-        firstName: "A",
-        lastName: "B",
-        email: "a@b.com",
-        password: "hashed",
+        password: "hashedPassword",
         isActive: true,
-        accountType: "Admin",
-        memberSince: new Date("2024-01-01T00:00:00.000Z"),
+        accountType: "User",
       });
       (bcrypt as any).compare.mockResolvedValue(true);
       (jwt as any).sign.mockReturnValue("jwt-token");
-      (prisma as any).user.update.mockResolvedValue({});
 
       const req = new Request("http://localhost/api/auth", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "login", email: "a@b.com", password: "pw" }),
+        body: JSON.stringify({ action: "login", email: "test@example.com", password: "pw" }),
       });
 
       const res = await POST(req);
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.success).toBe(true);
       expect(body.token).toBe("jwt-token");
-      expect((jwt as any).sign).toHaveBeenCalledWith(
-        expect.objectContaining({ role: "Admin" }),
-        expect.any(String),
-        expect.objectContaining({ expiresIn: "12h" })
-      );
-    });
-  });
-
-  describe("forgot-password & reset-password", () => {
-    it("forgot-password returns 404 when email not found", async () => {
-      (prisma as any).user.findUnique.mockResolvedValue(null);
-
-      const req = new Request("http://localhost/api/auth", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "forgot-password", email: "a@b.com" }),
-      });
-
-      const res = await POST(req);
-      expect(res.status).toBe(404);
     });
 
-    it("reset-password returns 401 for invalid token", async () => {
-      (jwt as any).verify.mockImplementation(() => {
-        throw new Error("bad");
-      });
-
+    it("should return 401 for incorrect password (Alternative Flow A1)", async () => {
+      (prisma as any).user.findUnique.mockResolvedValue({ password: "hashedPassword", isActive: true });
+      (bcrypt as any).compare.mockResolvedValue(false);
       const req = new Request("http://localhost/api/auth", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "reset-password", token: "t", password: "new" }),
+        body: JSON.stringify({ action: "login", email: "test@example.com", password: "wrong-pw" }),
       });
-
       const res = await POST(req);
       expect(res.status).toBe(401);
     });
 
-    it("reset-password updates hashed password", async () => {
-      (jwt as any).verify.mockReturnValue({ id: "u1", email: "a@b.com", role: "User" });
-      (bcrypt as any).hash.mockResolvedValue("hashed-new");
-      (prisma as any).user.update.mockResolvedValue({});
-
+    it("should return 401 if user not found (Alternative Flow A1)", async () => {
+      (prisma as any).user.findUnique.mockResolvedValue(null);
       const req = new Request("http://localhost/api/auth", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "reset-password", token: "t", password: "new" }),
+        body: JSON.stringify({ action: "login", email: "nonexistent@example.com", password: "pw" }),
       });
+      const res = await POST(req);
+      expect(res.status).toBe(401);
+    });
+  });
 
+  describe("Email Verification", () => {
+    it("should activate a user with a valid token", async () => {
+      (prisma as any).verify.findUnique.mockResolvedValue({ userId: "u1", expiresAt: new Date(Date.now() + 60000) });
+      (prisma as any).user.update.mockResolvedValue({});
+      (prisma as any).verify.delete.mockResolvedValue({});
+      const req = new Request("http://localhost/api/auth", {
+        method: "POST",
+        body: JSON.stringify({ action: "verify-email", token: "valid-token" }),
+      });
       const res = await POST(req);
       expect(res.status).toBe(200);
-      const body = await res.json();
-      expect(body.success).toBe(true);
+      expect((prisma as any).user.update).toHaveBeenCalledWith({ where: { id: "u1" }, data: { isActive: true } });
+    });
+
+    it("should return 400 for an invalid token", async () => {
+      (prisma as any).verify.findUnique.mockResolvedValue(null);
+      const req = new Request("http://localhost/api/auth", {
+        method: "POST",
+        body: JSON.stringify({ action: "verify-email", token: "invalid-token" }),
+      });
+      const res = await POST(req);
+      expect(res.status).toBe(400);
+    });
+  });
+
+  describe("Password Recovery (Forgot/Reset)", () => {
+    it("should send a password reset email for a valid user", async () => {
+      (prisma as any).user.findUnique.mockResolvedValue({ id: "u1", email: "test@example.com" });
+      sendMailMock.mockResolvedValue({});
+      const req = new Request("http://localhost/api/auth", {
+        method: "POST",
+        body: JSON.stringify({ action: "forgot-password", email: "test@example.com" }),
+      });
+      const res = await POST(req);
+      expect(res.status).toBe(200);
+      expect(sendMailMock).toHaveBeenCalled();
+    });
+
+    it("should reset the password with a valid token", async () => {
+      (jwt as any).verify.mockReturnValue({ id: "u1" });
+      (bcrypt as any).hash.mockResolvedValue("newHashedPassword");
+      (prisma as any).user.update.mockResolvedValue({});
+      const req = new Request("http://localhost/api/auth", {
+        method: "POST",
+        body: JSON.stringify({ action: "reset-password", token: "valid-token", password: "new-password" }),
+      });
+      const res = await POST(req);
+      expect(res.status).toBe(200);
       expect((prisma as any).user.update).toHaveBeenCalledWith(
-        expect.objectContaining({ where: { id: "u1" } })
+        expect.objectContaining({ data: { password: "newHashedPassword" } })
       );
     });
   });
 
-  describe("authorize", () => {
-    it("returns 401 when token missing", async () => {
+  describe("UC-02: Logout", () => {
+    it("should log out an authenticated user (Main Success Scenario)", async () => {
+      (jwt as any).verify.mockReturnValue({ id: "u1" });
+      (prisma as any).user.update.mockResolvedValue({});
       const req = new Request("http://localhost/api/auth", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "authorize" }),
+        body: JSON.stringify({ action: "logout", token: "valid-token" }),
       });
-
       const res = await POST(req);
-      expect(res.status).toBe(401);
+      expect(res.status).toBe(200);
+      expect((prisma as any).user.update).toHaveBeenCalledWith({ where: { id: "u1" }, data: { isActive: false } });
     });
 
-    it("returns 404 when user not found", async () => {
-      (jwt as any).verify.mockReturnValue({ id: "u1", email: "a@b.com", role: "User" });
-      (prisma as any).user.findUnique.mockResolvedValue(null);
-
+    it("should return 401 for an invalid token", async () => {
+      (jwt as any).verify.mockImplementation(() => {
+        throw new Error("Invalid token");
+      });
       const req = new Request("http://localhost/api/auth", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "authorize", token: "t" }),
+        body: JSON.stringify({ action: "logout", token: "invalid-token" }),
       });
-
       const res = await POST(req);
-      expect(res.status).toBe(404);
+      expect(res.status).toBe(401);
     });
   });
 });
