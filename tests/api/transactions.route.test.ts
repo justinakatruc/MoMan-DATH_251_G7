@@ -62,7 +62,7 @@ describe("UC-05: Manage Transactions - /api/transactions", () => {
     expect(body.transactions[0].name).toBe("Coffee");
   });
 
-  it("should update an existing transaction (Alternative Flow A1)", async () => {
+  it("should update an existing transaction (UC-05: Update Transaction Success Scenario)", async () => {
     (prisma as any).transaction.updateMany.mockResolvedValue({ count: 1 });
 
     const req = new Request("http://localhost/api/transactions", {
@@ -83,7 +83,7 @@ describe("UC-05: Manage Transactions - /api/transactions", () => {
     });
   });
 
-  it("should delete a transaction (Alternative Flow A1)", async () => {
+  it("should delete a transaction (UC-05: Delete Transaction Success Scenario)", async () => {
     (prisma as any).transaction.deleteMany.mockResolvedValue({ count: 1 });
 
     const req = new Request("http://localhost/api/transactions", {
@@ -100,5 +100,90 @@ describe("UC-05: Manage Transactions - /api/transactions", () => {
     expect((prisma as any).transaction.deleteMany).toHaveBeenCalledWith({
       where: { id: "tx1", userId: "u1" },
     });
+  });
+}); 
+
+describe("UC-06: Recurring Transactions", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should add a recurring transaction (Main Success Scenario)", async () => {
+    (prisma as any).transaction.create.mockResolvedValue({ id: "tx-rec1" });
+
+    const req = new Request("http://localhost/api/transactions", {
+      method: "POST",
+      body: JSON.stringify({
+        action: "addTransaction",
+        token: "t",
+        transaction: {
+          type: "expense",
+          name: "Gym Membership",
+          amount: 50,
+          categoryId: "cat1",
+          isRecurring: true,
+          recurringPeriod: "monthly",
+          time: "08:00",
+          nextExecutionDate: "2025-12-25"
+        },
+      }),
+    });
+
+    const res = await POST(req);
+    expect(res.status).toBe(201);
+    expect((prisma as any).transaction.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          isRecurring: true,
+          recurringPeriod: "monthly",
+          time: "08:00",
+          nextExecutionDate: expect.any(Date),
+        })
+      })
+    );
+  });
+
+  it("should update a recurring transaction (Alternative Flow: Edit)", async () => {
+    (prisma as any).transaction.updateMany.mockResolvedValue({ count: 1 });
+
+    const req = new Request("http://localhost/api/transactions", {
+      method: "PUT",
+      body: JSON.stringify({
+        action: "updateTransaction",
+        token: "t",
+        transactionId: "tx-rec1",
+        updated: { amount: 60, recurringPeriod: "weekly" },
+      }),
+    });
+
+    const res = await PUT(req);
+    expect(res.status).toBe(200);
+    expect((prisma as any).transaction.updateMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          amount: 60,
+          recurringPeriod: "weekly",
+        })
+      })
+    );
+  });
+
+  it("should list recurring transactions (Postcondition)", async () => {
+    (prisma as any).transaction.findMany.mockResolvedValue([
+      { id: "tx-rec1", type: "expense", name: "Gym Membership", isRecurring: true, recurringPeriod: "monthly", time: "08:00", categoryId: "cat1", amount: 50, date: "2025-12-25" }
+    ]);
+    (prisma as any).expenseCategory.findUnique.mockResolvedValue({ name: "Health", icon: "🏋️" });
+
+    const req = new Request("http://localhost/api/transactions", {
+      method: "POST",
+      body: JSON.stringify({ action: "getAllTransactions", token: "t" }),
+    });
+
+    const res = await POST(req);
+    const body = await res.json();
+    expect(res.status).toBe(200);
+    expect(body.transactions[0].isRecurring).toBe(true);
+    expect(body.transactions[0].recurringPeriod).toBe("monthly");
+    expect(body.transactions[0].name).toBe("Gym Membership");
   });
 });
