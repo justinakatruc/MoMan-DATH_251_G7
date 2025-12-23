@@ -356,7 +356,7 @@ async function sendRecurringTransactionEmail(
           </div>
           
           <div style="background-color: #DFF7E2; padding: 15px; text-align: center; color: #05222480; font-size: 11px;">
-            © ${new Date().getFullYear()} Finance Tracker App. All rights reserved.
+            © ${new Date().getFullYear()} MoMan. All rights reserved.
           </div>
         </div>
       `,
