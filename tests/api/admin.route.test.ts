@@ -49,7 +49,7 @@ import jwt from "jsonwebtoken";
 import prisma from "@/lib/prisma";
 import { POST, DELETE } from "@/app/api/admin/route";
 
-describe("UC-06: Admin Management - /api/admin", () => {
+describe("UC-08: Admin Management - /api/admin", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -69,7 +69,7 @@ describe("UC-06: Admin Management - /api/admin", () => {
     expect(body.message).toMatch(/admins only/i);
   });
 
-  it("should allow admin to view users (Main Success Scenario)", async () => {
+  it("should allow admin to view users (UC-06: Main Success Scenario)", async () => {
     (jwt as any).verify.mockReturnValue({ id: "admin", email: "a@b.com", role: "Admin" });
     (prisma as any).user.count.mockResolvedValue(1);
     (prisma as any).user.findMany.mockResolvedValue([
@@ -90,7 +90,7 @@ describe("UC-06: Admin Management - /api/admin", () => {
     expect(body.totalUsers).toBe(1);
   });
 
-  it("should allow admin to delete a user (Main Success Scenario)", async () => {
+  it("should allow admin to delete a user (UC-06: Delete User Success Scenario)", async () => {
     (jwt as any).verify.mockReturnValue({ id: "admin", email: "a@b.com", role: "Admin" });
     (prisma as any).user.delete.mockResolvedValue({});
     (prisma as any).transaction.deleteMany.mockResolvedValue({});
@@ -107,7 +107,7 @@ describe("UC-06: Admin Management - /api/admin", () => {
     expect((prisma as any).user.delete).toHaveBeenCalledWith({ where: { id: "u1" } });
   });
 
-  it("should allow admin to delete a transaction (Main Success Scenario)", async () => {
+  it("should allow admin to delete a transaction (UC-06: Delete Transaction Success Scenario)", async () => {
     (jwt as any).verify.mockReturnValue({ id: "admin", email: "a@b.com", role: "Admin" });
     (prisma as any).transaction.findUnique.mockResolvedValue({ id: "tx1", userId: "u1" });
     (prisma as any).transaction.delete.mockResolvedValue({});
@@ -123,7 +123,7 @@ describe("UC-06: Admin Management - /api/admin", () => {
     expect((prisma as any).transaction.delete).toHaveBeenCalledWith({ where: { id: "tx1" } });
   });
 
-  it("should allow admin to view all transactions (Main Success Scenario)", async () => {
+  it("should allow admin to view all transactions (UC-06: View All Transactions Success Scenario)", async () => {
     (jwt as any).verify.mockReturnValue({ id: "admin", email: "a@b.com", role: "Admin" });
     (prisma as any).transaction.findMany.mockResolvedValue([{ id: "tx1", amount: 100, type: "expense" }]);
 
@@ -140,7 +140,7 @@ describe("UC-06: Admin Management - /api/admin", () => {
     expect(body.transactions).toHaveLength(1);
   });
 
-  it("should allow admin to view all default categories (Main Success Scenario)", async () => {
+  it("should allow admin to view all default categories (UC-06: View All Default Categories Success Scenario)", async () => {
     (jwt as any).verify.mockReturnValue({ id: "admin", email: "a@b.com", role: "Admin" });
     (prisma as any).expenseCategory.findMany.mockResolvedValue([{ id: "e1", name: "Food", isDefault: true }]);
     (prisma as any).incomeCategory.findMany.mockResolvedValue([{ id: "i1", name: "Salary", isDefault: true }]);
