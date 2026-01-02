@@ -22,10 +22,7 @@ export default function LaunchPage() {
             className="mx-auto"
           />
           <h1 className="text-6xl font-extrabold text-[#0DBF8B]">MoMan</h1>
-          <p className="text-xs text-gray-500 px-6">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-            eiusmod tempor.
-          </p>
+          <p className="text-xs text-gray-500 px-6">Your Finance Tracker</p>
         </div>
 
         {/* Login button */}
