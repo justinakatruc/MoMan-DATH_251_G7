@@ -110,24 +110,6 @@ export default function EditProfilePage() {
               />
             </div>
 
-            {/* Push Notification Toggle */}
-            <div className="flex items-center justify-between mt-3">
-              <p className="text-gray-700 text-sm">Push Notifications</p>
-
-              <button
-                onClick={() => setPushNoti(!pushNoti)}
-                className={`w-12 h-6 rounded-full transition cursor-pointer ${
-                  pushNoti ? "bg-[#00D09E]" : "bg-gray-400"
-                } relative`}
-              >
-                <span
-                  className={`absolute w-5 h-5 bg-white rounded-full top-0.5 transition ${
-                    pushNoti ? "left-6" : "left-1"
-                  }`}
-                />
-              </button>
-            </div>
-
             {/* Update Button */}
             <button
               onClick={handleUpdate}

@@ -65,15 +65,6 @@ export default function ProfilePage() {
               </span>
             </div>
 
-            {/* Help */}
-            <div
-              className="flex items-center gap-4 active:scale-95 cursor-pointer"
-              onClick={() => router.push("/profile/help")}
-            >
-              <Image src={"/help.png"} alt="Help" width={57} height={53} />
-              <span className="text-base font-medium text-gray-700">Help</span>
-            </div>
-
             {/* Change View */}
             {user?.accountType === "Admin" && (
               <div className="flex items-center gap-x-4">
