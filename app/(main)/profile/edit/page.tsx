@@ -142,27 +142,6 @@ export default function EditProfilePage() {
             <BottomBar />
           </div>
         </div>
-
-        {/* Avatar đè lên */}
-        <div className="absolute top-[135px] left-1/2 -translate-x-1/2">
-          <div className="relative">
-            <Image
-              src="/avatar.png"
-              alt="avatar"
-              width={120}
-              height={120}
-              className="rounded-full"
-            />
-            <div className="absolute bottom-2 right-2 bg-[#00D09E] w-8 h-8 rounded-full flex items-center justify-center">
-              <Image
-                src="/camera.png"
-                width={20}
-                height={20}
-                alt="edit avatar"
-              />
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

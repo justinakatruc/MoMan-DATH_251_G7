@@ -109,11 +109,6 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
-
-        {/* Avatar */}
-        <div className="absolute top-[130px] left-1/2 -translate-x-1/2">
-          <Image src="/avatar.png" alt="avatar" width={120} height={120} />
-        </div>
       </div>
 
       {/* Popup Logout — NHÚNG TRONG FILE */}

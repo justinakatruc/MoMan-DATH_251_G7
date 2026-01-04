@@ -43,15 +43,7 @@ export default function HelpPage() {
             Contact Email
           </label>
           <div className="w-full h-[50px] bg-[#DFF7E2] rounded-full px-5 flex items-center mt-2 mb-6 font-medium text-gray-700">
-            abc@hcmut.edu.vn
-          </div>
-
-          {/* Contact Phone */}
-          <label className="text-sm font-semibold text-gray-700">
-            Contact Phone
-          </label>
-          <div className="w-full h-[50px] bg-[#DFF7E2] rounded-full px-5 flex items-center mt-2 mb-6 font-medium text-gray-700">
-            0123123123
+            truc.nguyenminh@hcmut.edu.vn
           </div>
 
           {/* Contact Address */}
